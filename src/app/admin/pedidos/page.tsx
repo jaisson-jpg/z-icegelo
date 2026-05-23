@@ -102,15 +102,29 @@ export default async function AdminPedidosPage() {
 
               <div className="flex flex-wrap gap-4 items-start">
                 {order.pixReceiptUrl && (
-                  <a href={order.pixReceiptUrl} target="_blank" rel="noopener noreferrer" className="block">
-                    <Image
-                      src={order.pixReceiptUrl}
-                      alt="Comprovante PIX"
-                      width={100}
-                      height={100}
-                      className="rounded-lg border object-cover"
-                    />
-                  </a>
+                  <div className="space-y-2">
+                    <p className="text-xs font-bold text-gray-500 uppercase">Comprovante:</p>
+                    <a href={order.pixReceiptUrl} target="_blank" rel="noopener noreferrer" className="block group">
+                      <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-lg border-2 border-dashed border-gray-200 overflow-hidden flex items-center justify-center bg-gray-50 group-hover:border-[var(--zice-medium)] transition-colors">
+                        <Image
+                          src={order.pixReceiptUrl}
+                          alt="Comprovante PIX"
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 flex items-center justify-center transition-colors">
+                          <span className="text-white opacity-0 group-hover:opacity-100 text-xs font-bold">Ver Foto</span>
+                        </div>
+                      </div>
+                    </a>
+                    <a 
+                      href={order.pixReceiptUrl} 
+                      target="_blank" 
+                      className="text-xs text-[var(--zice-medium)] hover:underline block text-center"
+                    >
+                      Abrir original
+                    </a>
+                  </div>
                 )}
                 <div className="flex flex-col gap-2">
                   <ConfirmOrderButton

@@ -53,23 +53,7 @@ export default async function MinhaContaPage() {
         <LogoutButton />
       </div>
 
-      <div className="ice-card rounded-2xl p-6 sm:p-8 mb-8 text-center ice-gradient text-white">
-        <Award className="mx-auto mb-3" size={40} />
-        <p className="text-[var(--zice-light)] text-sm">Seus pontos Z-ice</p>
-        <p className="text-4xl sm:text-5xl font-bold">{user.points}</p>
-        {nextReward && (
-          <div className="mt-6 text-left">
-            <p className="text-sm text-white/90 mb-2">
-              Próximo prêmio: <strong>{nextReward.rewardLabel}</strong>
-            </p>
-            <ProgressBar
-              value={user.points}
-              max={nextReward.targetValue}
-              sublabel={`${Math.max(0, nextReward.targetValue - user.points)} pontos faltando`}
-            />
-          </div>
-        )}
-      </div>
+      {/* Card removido por estar duplicado com a lista de prêmios abaixo */}
 
       {rewards.length > 0 && (
         <section className="mb-8">
