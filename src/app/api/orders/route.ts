@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     }
 
     const session = await getSession();
-    let userId = session?.id ?? null;
+    const userId = session?.id ?? null;
 
     if (!userId) {
       return NextResponse.json({ error: "Você precisa estar logado para fazer um pedido" }, { status: 401 });
@@ -106,10 +106,10 @@ export async function POST(req: NextRequest) {
       id: order.id,
       linkedToAccount: !!userId,
     });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("ERRO NO POST /api/orders:", e);
     // Retorna mensagem mais específica se for erro do Prisma
-    const message = e.message || "Erro desconhecido";
+    const message = e instanceof Error ? e.message : "Erro desconhecido";
     return NextResponse.json({ 
       error: "Erro ao criar pedido no banco de dados", 
       details: process.env.NODE_ENV === "development" ? message : undefined 
