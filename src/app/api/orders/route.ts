@@ -52,13 +52,7 @@ export async function POST(req: NextRequest) {
 
     let pixReceiptUrl: string | null = null;
     if (receipt && receipt.size > 0) {
-      try {
-        pixReceiptUrl = await saveUpload(receipt);
-      } catch (uploadError) {
-        console.error("Erro ao salvar comprovante:", uploadError);
-        // No Netlify o sistema de arquivos é somente leitura. 
-        // O pedido será criado sem a imagem para não travar o cliente.
-      }
+      pixReceiptUrl = await saveUpload(receipt);
     }
 
     const session = await getSession();

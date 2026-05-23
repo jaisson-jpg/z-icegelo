@@ -25,9 +25,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Nome, preço e categoria são obrigatórios" }, { status: 400 });
   }
 
-  let imageUrl: string | null = null;
+  let imageUrl = (formData.get("imageUrl") as string) || null;
   if (image && image.size > 0) {
-    imageUrl = await saveUpload(image, "products");
+    try {
+      imageUrl = await saveUpload(image, "products");
+    } catch (e) {
+      console.error("Erro no upload da imagem:", e);
+    }
   }
 
   const product = await prisma.product.create({

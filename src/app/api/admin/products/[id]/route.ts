@@ -20,9 +20,14 @@ export async function PATCH(
   if (contentType.includes("multipart/form-data")) {
     const formData = await req.formData();
     const image = formData.get("image") as File | null;
-    let imageUrl = product.imageUrl;
+    let imageUrl = (formData.get("imageUrl") as string) || product.imageUrl;
+    
     if (image && image.size > 0) {
-      imageUrl = await saveUpload(image, "products");
+      try {
+        imageUrl = await saveUpload(image, "products");
+      } catch (e) {
+        console.error("Erro no upload da imagem:", e);
+      }
     }
 
     await prisma.product.update({

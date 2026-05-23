@@ -35,6 +35,7 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
     stock: product?.stock ?? 0,
     sacosPerUnit: product?.sacosPerUnit ?? 1,
     active: product?.active ?? true,
+    imageUrl: product?.imageUrl ?? "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,8 +43,11 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
     setLoading(true);
 
     const fd = new FormData();
-    Object.entries(form).forEach(([k, v]) => fd.append(k, String(v)));
+    Object.entries(form).forEach(([k, v]) => {
+      if (k !== "imageUrl") fd.append(k, String(v));
+    });
     fd.append("active", String(form.active));
+    fd.append("imageUrl", form.imageUrl);
     if (imageFile) fd.append("image", imageFile);
 
     const url = product
@@ -66,7 +70,7 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
 
   const preview = imageFile
     ? URL.createObjectURL(imageFile)
-    : product?.imageUrl;
+    : form.imageUrl;
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-xl border p-4 sm:p-6 space-y-4 max-w-xl">
@@ -86,16 +90,28 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
               🧊
             </div>
           )}
-          <label className="flex items-center gap-2 btn-outline cursor-pointer text-sm">
-            <Upload size={18} />
-            Escolher imagem
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-            />
-          </label>
+          <div className="flex-1 space-y-3">
+            <label className="flex items-center gap-2 btn-outline cursor-pointer text-sm w-fit">
+              <Upload size={18} />
+              Escolher arquivo
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+              />
+            </label>
+            <div>
+              <p className="text-[10px] text-gray-500 mb-1 uppercase font-bold">Ou cole um link de imagem:</p>
+              <input
+                type="text"
+                placeholder="https://exemplo.com/imagem.jpg"
+                className="input-field text-xs py-2"
+                value={form.imageUrl}
+                onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
