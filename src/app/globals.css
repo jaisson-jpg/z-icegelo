@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+:root {
+  --zice-dark: #004a80;
+  --zice-medium: #00a0e3;
+  --zice-light: #a0e0ff;
+  --zice-ice: #e8f7ff;
+  --zice-white: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: linear-gradient(180deg, var(--zice-ice) 0%, #f0f9ff 40%, #ffffff 100%);
+  color: #0a2540;
+  min-height: 100vh;
+}
+
+.ice-gradient {
+  background: linear-gradient(135deg, var(--zice-dark) 0%, var(--zice-medium) 50%, var(--zice-light) 100%);
+}
+
+.ice-card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 160, 227, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 74, 128, 0.12);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--zice-dark), var(--zice-medium));
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 74, 128, 0.35);
+}
+
+.btn-outline {
+  border: 2px solid var(--zice-medium);
+  color: var(--zice-dark);
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-outline:hover {
+  background: var(--zice-light);
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid rgba(0, 160, 227, 0.3);
+  border-radius: 0.75rem;
+  background: white;
+  transition: border-color 0.2s;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--zice-medium);
+}
+
+@media (max-width: 640px) {
+  .btn-primary,
+  .btn-outline {
+    padding: 0.65rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media print {
+  body {
+    background: white;
+  }
+  .print\\:hidden {
+    display: none !important;
+  }
+  .invoice-page {
+    box-shadow: none !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+}

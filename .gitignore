@@ -1,0 +1,12 @@
+node_modules
+.next
+.env
+.env.local
+*.db
+*.db-journal
+public/uploads/*
+!public/uploads/.gitkeep
+.DS_Store
+
+# Local Netlify folder
+.netlify

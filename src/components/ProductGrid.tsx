@@ -1,0 +1,91 @@
+"use client";
+
+import Image from "next/image";
+import { formatCurrency } from "@/lib/utils";
+import { Plus, ShoppingCart } from "lucide-react";
+import { useCart } from "./CartProvider";
+import { useState } from "react";
+
+type Product = {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  unit: string;
+  category: "VAREJO" | "ATACADO";
+  pointsEarn: number;
+  stock: number;
+  imageUrl: string | null;
+};
+
+export function ProductGrid({ products }: { products: Product[] }) {
+  const { addItem } = useCart();
+  const [added, setAdded] = useState<string | null>(null);
+
+  const handleAdd = (p: Product) => {
+    if (p.stock <= 0) {
+      alert("Produto sem estoque no momento.");
+      return;
+    }
+    addItem({
+      productId: p.id,
+      name: p.name,
+      price: p.price,
+      category: p.category,
+    });
+    setAdded(p.id);
+    setTimeout(() => setAdded(null), 1500);
+  };
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      {products.map((p) => (
+        <article key={p.id} className="ice-card rounded-2xl p-4 sm:p-6 flex flex-col">
+          <div className="w-full h-36 sm:h-40 rounded-xl overflow-hidden mb-4 bg-[var(--zice-ice)] relative">
+            {p.imageUrl ? (
+              <Image
+                src={p.imageUrl}
+                alt={p.name}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 100vw, 33vw"
+              />
+            ) : (
+              <div className="w-full h-full ice-gradient flex items-center justify-center text-5xl">
+                🧊
+              </div>
+            )}
+          </div>
+          <h3 className="font-bold text-[var(--zice-dark)] text-base sm:text-lg">{p.name}</h3>
+          {p.description && (
+            <p className="text-sm text-gray-600 mt-2 flex-1 line-clamp-3">{p.description}</p>
+          )}
+          <p className={`text-xs mt-2 font-medium ${p.stock > 0 ? "text-green-600" : "text-red-600"}`}>
+            {p.stock > 0 ? `${p.stock} em estoque` : "Sem estoque"}
+          </p>
+          <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-3">
+            <div>
+              <p className="text-xl sm:text-2xl font-bold text-[var(--zice-medium)]">
+                {formatCurrency(p.price)}
+              </p>
+              <p className="text-xs text-gray-500">/{p.unit}</p>
+              <p className="text-xs text-[var(--zice-dark)] mt-1">+{p.pointsEarn} pontos</p>
+            </div>
+            <button
+              onClick={() => handleAdd(p)}
+              disabled={p.stock <= 0}
+              className="btn-primary py-2 px-4 text-sm justify-center disabled:opacity-50"
+            >
+              {added === p.id ? "Adicionado!" : (
+                <>
+                  <Plus size={16} />
+                  <ShoppingCart size={16} />
+                </>
+              )}
+            </button>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}

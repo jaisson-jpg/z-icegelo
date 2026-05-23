@@ -1,0 +1,202 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  CUSTOMER
+  LOJISTA
+}
+
+enum OrderStatus {
+  PENDING_PIX
+  AWAITING_CONFIRMATION
+  CONFIRMED
+  CANCELLED
+}
+
+enum ProductCategory {
+  VAREJO
+  ATACADO
+}
+
+enum RewardTargetType {
+  POINTS
+  SACOS
+}
+
+enum RewardAudience {
+  VAREJO
+  ATACADO
+  TODOS
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         UserRole @default(CUSTOMER)
+  points       Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  orders       Order[]
+  lojista      Lojista?
+  pointHistory PointTransaction[]
+}
+
+model Lojista {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessName    String
+  cnpj            String?
+  address         String
+  city            String   @default("Guaramirim")
+  state           String   @default("SC")
+  latitude        Float?
+  longitude       Float?
+  weeklyTarget    Int      @default(50)
+  sacosGratisMeta Int      @default(100)
+  sacosComprados       Int @default(0)
+  sacosGratis          Int @default(0)
+  totalSacosHistorico  Int @default(0)
+  active          Boolean  @default(true)
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  freezers        Freezer[]
+  weeklyPurchases WeeklyPurchase[]
+}
+
+model Freezer {
+  id          String   @id @default(cuid())
+  lojistaId   String
+  lojista     Lojista  @relation(fields: [lojistaId], references: [id], onDelete: Cascade)
+  code        String   @unique
+  brand       String?
+  location    String
+  address     String?
+  allocatedAt DateTime @default(now())
+  active      Boolean  @default(true)
+  notes       String?
+}
+
+model WeeklyPurchase {
+  id         String   @id @default(cuid())
+  lojistaId  String
+  lojista    Lojista  @relation(fields: [lojistaId], references: [id], onDelete: Cascade)
+  weekStart  DateTime
+  sacosCount Int      @default(0)
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  @@unique([lojistaId, weekStart])
+}
+
+model Product {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  unit        String          @default("un")
+  category    ProductCategory
+  imageUrl    String?
+  stock         Int             @default(0)
+  sacosPerUnit  Int             @default(1)
+  pointsEarn    Int             @default(1)
+  active      Boolean         @default(true)
+  sortOrder   Int             @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  orderItems OrderItem[]
+}
+
+model Order {
+  id              String          @id @default(cuid())
+  orderNumber     String          @unique
+  userId          String?
+  user            User?           @relation(fields: [userId], references: [id])
+  customerName    String
+  customerPhone   String
+  customerEmail   String?
+  customerCpfCnpj String?
+  address         String?
+  category        ProductCategory
+  total           Float
+  status          OrderStatus     @default(PENDING_PIX)
+  pixReceiptUrl   String?
+  adminNotes      String?
+  pointsAwarded   Int             @default(0)
+  loyaltyApplied  Boolean         @default(false)
+  sacosCredited   Int             @default(0)
+  needsInvoice    Boolean         @default(false)
+  invoiceNumber   String?         @unique
+  invoiceIssuedAt DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  confirmedAt     DateTime?
+
+  items OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Float
+  subtotal  Float
+}
+
+model PointTransaction {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount      Int
+  description String
+  orderId     String?
+  createdAt   DateTime @default(now())
+}
+
+model LoyaltyReward {
+  id          String           @id @default(cuid())
+  name        String
+  description String?
+  imageUrl    String?
+  targetType  RewardTargetType
+  targetValue Int
+  rewardLabel String           @default("Recompensa")
+  audience    RewardAudience   @default(TODOS)
+  active      Boolean          @default(true)
+  sortOrder   Int              @default(0)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model SiteConfig {
+  id                String @id @default("main")
+  pixKey            String @default("47996471803")
+  pixHolder         String @default("Z-ice Gelo")
+  pointsPerReal     Float  @default(1)
+  whatsapp          String @default("5547996471803")
+  sacosGratisMeta   Int    @default(100)
+  sacosGratisReward Int    @default(5)
+  companyName       String @default("Z-ice Gelo")
+  companyCnpj       String @default("")
+  companyAddress    String @default("Guaramirim - SC")
+  companyPhone      String @default("47996471803")
+  companyEmail      String @default("")
+}
