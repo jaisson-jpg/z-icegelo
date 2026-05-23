@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, Suspense } from "react";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") || "";
   const [email, setEmail] = useState("");
+  // ... (no changes to state)
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,9 +29,16 @@ export default function LoginPage() {
       setError(data.error || "Erro no login");
       return;
     }
-    if (data.user?.role === "ADMIN") router.push("/admin");
-    else if (data.user?.role === "LOJISTA") router.push("/lojista");
-    else router.push("/minha-conta");
+
+    if (redirect) {
+      router.push(redirect);
+    } else if (data.user?.role === "ADMIN") {
+      router.push("/admin");
+    } else if (data.user?.role === "LOJISTA") {
+      router.push("/lojista");
+    } else {
+      router.push("/minha-conta");
+    }
     router.refresh();
   };
 
@@ -62,11 +72,19 @@ export default function LoginPage() {
         </button>
         <p className="text-center text-sm text-gray-600">
           Não tem conta?{" "}
-          <Link href="/cadastro" className="text-[var(--zice-medium)] font-semibold hover:underline">
+          <Link href={redirect ? `/cadastro?redirect=${redirect}` : "/cadastro"} className="text-[var(--zice-medium)] font-semibold hover:underline">
             Cadastre-se
           </Link>
         </p>
       </form>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="py-20 text-center">Carregando...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

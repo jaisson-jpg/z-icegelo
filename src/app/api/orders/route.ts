@@ -52,16 +52,20 @@ export async function POST(req: NextRequest) {
 
     let pixReceiptUrl: string | null = null;
     if (receipt && receipt.size > 0) {
-      pixReceiptUrl = await saveUpload(receipt);
+      try {
+        pixReceiptUrl = await saveUpload(receipt);
+      } catch (uploadError) {
+        console.error("Erro ao salvar comprovante:", uploadError);
+        // No Netlify o sistema de arquivos é somente leitura. 
+        // O pedido será criado sem a imagem para não travar o cliente.
+      }
     }
 
     const session = await getSession();
     let userId = session?.id ?? null;
 
-    // Vincula ao lojista pelo telefone se comprou sem estar logado
     if (!userId) {
-      const lojista = await findLojistaForOrder(prisma, null, customerPhone);
-      if (lojista) userId = lojista.userId;
+      return NextResponse.json({ error: "Você precisa estar logado para fazer um pedido" }, { status: 401 });
     }
 
     const category = items.some((i) => i.category === "ATACADO") ? "ATACADO" : "VAREJO";
@@ -102,8 +106,13 @@ export async function POST(req: NextRequest) {
       id: order.id,
       linkedToAccount: !!userId,
     });
-  } catch (e) {
-    console.error(e);
-    return NextResponse.json({ error: "Erro ao criar pedido" }, { status: 500 });
+  } catch (e: any) {
+    console.error("ERRO NO POST /api/orders:", e);
+    // Retorna mensagem mais específica se for erro do Prisma
+    const message = e.message || "Erro desconhecido";
+    return NextResponse.json({ 
+      error: "Erro ao criar pedido no banco de dados", 
+      details: process.env.NODE_ENV === "development" ? message : undefined 
+    }, { status: 500 });
   }
 }

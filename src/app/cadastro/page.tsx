@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, Suspense } from "react";
 
-export default function CadastroPage() {
+function CadastroForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") || "";
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,7 +27,12 @@ export default function CadastroPage() {
       setError(data.error || "Erro no cadastro");
       return;
     }
-    router.push("/minha-conta");
+    
+    if (redirect) {
+      router.push(redirect);
+    } else {
+      router.push("/minha-conta");
+    }
     router.refresh();
   };
 
@@ -56,11 +63,19 @@ export default function CadastroPage() {
         </button>
         <p className="text-center text-sm text-gray-600">
           Já tem conta?{" "}
-          <Link href="/login" className="text-[var(--zice-medium)] font-semibold hover:underline">
+          <Link href={redirect ? `/login?redirect=${redirect}` : "/login"} className="text-[var(--zice-medium)] font-semibold hover:underline">
             Entrar
           </Link>
         </p>
       </form>
     </div>
+  );
+}
+
+export default function CadastroPage() {
+  return (
+    <Suspense fallback={<div className="py-20 text-center">Carregando...</div>}>
+      <CadastroForm />
+    </Suspense>
   );
 }

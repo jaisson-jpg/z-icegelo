@@ -57,6 +57,37 @@ export default function CheckoutPage() {
       .catch(() => setProfileLoaded(true));
   }, []);
 
+  if (!profileLoaded) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-20 text-center">
+        <div className="animate-pulse text-gray-500">Carregando checkout...</div>
+      </div>
+    );
+  }
+
+  if (!userRole && !orderId) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-20 text-center">
+        <div className="ice-card rounded-2xl p-8 border-2 border-[var(--zice-light)]">
+          <h1 className="text-2xl font-bold text-[var(--zice-dark)] mb-4">
+            Identificação Necessária
+          </h1>
+          <p className="text-gray-600 mb-8">
+            Para finalizar sua compra e garantir seus pontos de fidelidade, você precisa estar logado em sua conta.
+          </p>
+          <div className="flex flex-col gap-3">
+            <Link href={`/login?redirect=/checkout`} className="btn-primary">
+              Entrar na minha conta
+            </Link>
+            <Link href={`/cadastro?redirect=/checkout`} className="btn-outline">
+              Criar uma conta nova
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (items.length === 0 && !orderId) {
     return (
       <div className="max-w-lg mx-auto px-4 py-20 text-center">
