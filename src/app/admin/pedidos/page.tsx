@@ -104,25 +104,33 @@ export default async function AdminPedidosPage() {
                 {order.pixReceiptUrl && (
                   <div className="space-y-2">
                     <p className="text-xs font-bold text-gray-500 uppercase">Comprovante:</p>
-                    <a href={order.pixReceiptUrl} target="_blank" rel="noopener noreferrer" className="block group">
-                      <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-lg border-2 border-dashed border-gray-200 overflow-hidden flex items-center justify-center bg-gray-50 group-hover:border-[var(--zice-medium)] transition-colors">
+                    <a 
+                      href={order.pixReceiptUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="block group relative"
+                      title="Clique para abrir em tamanho real"
+                    >
+                      <div className="relative w-32 h-32 sm:w-48 sm:h-48 rounded-lg border-2 border-gray-200 overflow-hidden flex items-center justify-center bg-gray-50 group-hover:border-[var(--zice-medium)] transition-colors shadow-sm">
                         <Image
                           src={order.pixReceiptUrl}
                           alt="Comprovante PIX"
                           fill
-                          className="object-cover"
+                          className="object-contain" // Mudado para contain para ver o comprovante inteiro sem cortes
                         />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 flex items-center justify-center transition-colors">
-                          <span className="text-white opacity-0 group-hover:opacity-100 text-xs font-bold">Ver Foto</span>
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 flex items-center justify-center transition-colors">
+                          <div className="bg-black/60 text-white px-3 py-1 rounded-full text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                            CLIQUE PARA AMPLIAR
+                          </div>
                         </div>
                       </div>
                     </a>
                     <a 
                       href={order.pixReceiptUrl} 
-                      target="_blank" 
-                      className="text-xs text-[var(--zice-medium)] hover:underline block text-center"
+                      download={`comprovante-${order.orderNumber}.jpg`}
+                      className="btn-outline py-1 px-3 text-[10px] font-bold w-full text-center"
                     >
-                      Abrir original
+                      BAIXAR IMAGEM
                     </a>
                   </div>
                 )}

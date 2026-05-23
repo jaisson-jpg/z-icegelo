@@ -101,6 +101,9 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
                 onChange={(e) => setImageFile(e.target.files?.[0] || null)}
               />
             </label>
+            <p className="text-[10px] text-blue-600 font-bold bg-blue-50 p-1 px-2 rounded-md inline-block">
+              ✓ TAMANHO RECOMENDADO: QUADRADA (Ex: 500x500px)
+            </p>
             <div>
               <p className="text-[10px] text-gray-500 mb-1 uppercase font-bold">Ou cole um link de imagem:</p>
               <input

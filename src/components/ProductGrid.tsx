@@ -41,7 +41,7 @@ export function ProductGrid({ products }: { products: Product[] }) {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
       {products.map((p) => (
         <article key={p.id} className="ice-card rounded-2xl p-4 sm:p-6 flex flex-col">
-          <div className="w-full h-36 sm:h-40 rounded-xl overflow-hidden mb-4 bg-[var(--zice-ice)] relative">
+          <div className="w-full aspect-square rounded-xl overflow-hidden mb-4 bg-[var(--zice-ice)] relative">
             {p.imageUrl ? (
               <Image
                 src={p.imageUrl}
