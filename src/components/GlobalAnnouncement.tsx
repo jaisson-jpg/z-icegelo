@@ -17,6 +17,7 @@ export function GlobalAnnouncement() {
     async function fetchAnnouncement() {
       try {
         const res = await fetch("/api/announcement");
+        if (!res.ok) return;
         const data = await res.json();
         if (data.active && data.text) {
           const lastSeen = localStorage.getItem(`announcement-${data.title || 'default'}`);

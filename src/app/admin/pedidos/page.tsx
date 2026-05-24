@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ConfirmOrderButton } from "@/components/admin/ConfirmOrderButton";
 import { InvoiceActions } from "@/components/InvoiceActions";
 import { ProgressBar } from "@/components/ProgressBar";
-import { Trash2 } from "lucide-react";
+import { Trash2, Phone, ShoppingBag } from "lucide-react";
 import { DeleteOrderButton } from "@/components/admin/DeleteOrderButton";
 
 export const dynamic = "force-dynamic";
