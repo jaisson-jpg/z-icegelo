@@ -69,8 +69,14 @@ function CheckoutContent() {
 
   const finalTotal = Number(total) || 0;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, isDirectPix: boolean = false) => {
     e.preventDefault();
+    
+    if (isDirectPix && !receipt) {
+      alert("Por favor, anexe o comprovante do PIX para finalizar o pagamento.");
+      return;
+    }
+
     setLoading(true);
     try {
       const fd = new FormData();
@@ -93,7 +99,13 @@ function CheckoutContent() {
       
       // Preparar mensagem para WhatsApp
       const itemsList = items.map(i => `• ${i.quantity}x ${i.name}`).join('\n');
-      const message = `Olá! Acabei de fazer um pedido no site Z-ice Gelo.\n\n*Nº do Pedido:* ${data.orderId}\n*Cliente:* ${form.customerName}\n*Endereço:* ${form.address}\n\n*Produtos:*\n${itemsList}\n\n*Total:* ${formatCurrency(finalTotal)}\n\n_Pode me passar o valor do frete para eu finalizar o pagamento?_`;
+      let message = "";
+      
+      if (isDirectPix) {
+        message = `✅ *PEDIDO COM PIX REALIZADO*\n\n*Nº do Pedido:* ${data.orderId}\n*Cliente:* ${form.customerName}\n*Endereço:* ${form.address}\n\n*Produtos:*\n${itemsList}\n\n*Total:* ${formatCurrency(finalTotal)}\n\n_Já enviei o comprovante pelo site, mas estou mandando aqui também!_`;
+      } else {
+        message = `❓ *CONSULTA DE FRETE*\n\n*Nº do Pedido:* ${data.orderId}\n*Cliente:* ${form.customerName}\n*Endereço:* ${form.address}\n\n*Produtos:*\n${itemsList}\n\n*Total:* ${formatCurrency(finalTotal)}\n\n_Pode me passar o valor do frete para eu finalizar o pagamento?_`;
+      }
       
       const whatsappUrl = `https://wa.me/5547996471803?text=${encodeURIComponent(message)}`;
       
@@ -222,7 +234,7 @@ function CheckoutContent() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-4">
         {profileLoaded && userRole && (
           <div className="p-3 rounded-xl bg-green-50 border border-green-200 text-sm text-green-800">
             ✓ Dados preenchidos automaticamente da sua conta
@@ -262,9 +274,9 @@ function CheckoutContent() {
         <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-start gap-3">
           <Info className="text-blue-600 shrink-0 mt-0.5" size={20} />
           <div>
-            <p className="text-sm font-bold text-blue-800 uppercase">Frete a combinar</p>
+            <p className="text-sm font-bold text-blue-800 uppercase">Como funciona o frete?</p>
             <p className="text-xs text-blue-600">
-              Após clicar no botão abaixo, o seu pedido será enviado e abriremos o seu WhatsApp para combinarmos o valor do frete e finalizar o pagamento.
+              Você pode enviar o pedido agora para **combinar o frete** via WhatsApp, ou se já souber o valor, pode fazer o **PIX direto** e anexar o comprovante.
             </p>
           </div>
         </div>
@@ -304,32 +316,51 @@ function CheckoutContent() {
             />
           </div>
         )}
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Comprovante PIX (imagem) *
-          </label>
-          <label className="flex items-center gap-3 border-2 border-dashed border-[var(--zice-medium)] rounded-xl p-6 cursor-pointer hover:bg-[var(--zice-ice)]">
-            <Upload className="text-[var(--zice-medium)]" />
-            <span className="text-sm">
-              {receipt ? receipt.name : "Clique para enviar o comprovante"}
-            </span>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              required
-              onChange={(e) => setReceipt(e.target.files?.[0] || null)}
-            />
-          </label>
-        </div>
+        
+        <div className="pt-4 space-y-6">
+          <button
+            type="button"
+            onClick={(e) => handleSubmit(e as any, false)}
+            disabled={loading}
+            className={cn("btn-outline w-full py-4 text-lg border-2", loading && "btn-loading")}
+          >
+            {loading ? "" : "Enviar Pedido para saber o frete"}
+          </button>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className={cn("btn-primary w-full py-4 text-lg", loading && "btn-loading")}
-        >
-          {loading ? "" : "Já fiz o PIX — Enviar Pedido"}
-        </button>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-gray-200"></span></div>
+            <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-gray-400 font-bold">OU SE JÁ FEZ O PIX</span></div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-bold text-[var(--zice-dark)] mb-2">
+                Anexar Comprovante PIX (Obrigatório para o botão abaixo)
+              </label>
+              <label className="flex items-center gap-3 border-2 border-dashed border-[var(--zice-medium)] rounded-xl p-6 cursor-pointer hover:bg-[var(--zice-ice)]">
+                <Upload className="text-[var(--zice-medium)]" />
+                <span className="text-sm">
+                  {receipt ? receipt.name : "Clique para enviar o comprovante"}
+                </span>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => setReceipt(e.target.files?.[0] || null)}
+                />
+              </label>
+            </div>
+
+            <button
+              type="button"
+              onClick={(e) => handleSubmit(e as any, true)}
+              disabled={loading}
+              className={cn("btn-primary w-full py-4 text-lg shadow-xl", loading && "btn-loading")}
+            >
+              {loading ? "" : "Já fiz o PIX — Enviar com Comprovante"}
+            </button>
+          </div>
+        </div>
       </form>
     </div>
   );
