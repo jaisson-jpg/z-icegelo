@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import Link from "next/link";
 import { LogoutButton } from "@/components/LogoutButton";
+import { AdminSidebarNav } from "@/components/admin/AdminSidebarNav";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -39,18 +40,7 @@ export default async function AdminLayout({
           <h2 className="font-bold text-lg">Admin Z-ice</h2>
           <p className="text-xs text-[var(--zice-light)]">{session.name}</p>
         </div>
-        <nav className="p-4 space-y-1">
-          {nav.map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/20 transition text-sm font-medium"
-            >
-              <Icon size={18} />
-              {label}
-            </Link>
-          ))}
-        </nav>
+        <AdminSidebarNav />
         <div className="p-4 mt-auto">
           <Link href="/" className="text-sm text-[var(--zice-light)] hover:underline block mb-3">
             ← Ver site

@@ -36,133 +36,170 @@ export default async function AdminPedidosPage() {
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-[var(--zice-dark)]">Pedidos ({orders.length})</h1>
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-[var(--zice-dark)]">Gerenciamento de Pedidos</h1>
+          <p className="text-gray-500">Total de {orders.length} pedidos realizados</p>
+        </div>
+        <div className="flex gap-2">
+          <div className="bg-white border px-4 py-2 rounded-xl shadow-sm">
+            <p className="text-[10px] text-gray-400 font-bold uppercase">Aguardando</p>
+            <p className="text-xl font-bold text-orange-500">
+              {orders.filter(o => ["PENDING_PIX", "AWAITING_CONFIRMATION"].includes(o.status)).length}
+            </p>
+          </div>
+          <div className="bg-white border px-4 py-2 rounded-xl shadow-sm">
+            <p className="text-[10px] text-gray-400 font-bold uppercase">Confirmados</p>
+            <p className="text-xl font-bold text-green-500">
+              {orders.filter(o => o.status === "CONFIRMED").length}
+            </p>
+          </div>
+        </div>
       </div>
-      <p className="text-sm text-gray-600 mb-6">
-        Confirme o PIX para creditar pontos e sacos automaticamente ao lojista.
-      </p>
 
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-4">
         {orders.map((order) => {
           const lojista = order.user?.lojista;
           return (
-            <div key={order.id} className="bg-white rounded-xl border p-4 sm:p-6">
-              <div className="flex flex-wrap justify-between gap-4 mb-4">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-3">
-                    <p className="font-bold text-lg">{order.orderNumber}</p>
-                    <DeleteOrderButton orderId={order.id} />
-                  </div>
-                  <p className="text-gray-600">{order.customerName} — {order.customerPhone}</p>
-                  {lojista && (
-                    <p className="text-xs text-[var(--zice-medium)] font-semibold mt-1">
-                      🏪 Lojista: {lojista.businessName}
-                    </p>
-                  )}
-                  {!order.userId && order.category === "ATACADO" && (
-                    <p className="text-xs text-amber-600 mt-1">
-                      ⚠ Sem login — vincula pelo telefone ao confirmar
-                    </p>
-                  )}
-                  {order.address && <p className="text-sm text-gray-500 truncate">{order.address}</p>}
-                  <p className="text-xs text-gray-400 mt-1">
-                    {new Date(order.createdAt).toLocaleString("pt-BR")}
-                  </p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-xl sm:text-2xl font-bold text-[var(--zice-medium)]">
-                    {formatCurrency(order.total)}
-                  </p>
-                  <span className={`inline-block text-xs px-3 py-1 rounded-full mt-1 ${statusColors[order.status]}`}>
+            <div key={order.id} className="bg-white rounded-2xl border shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+              {/* Header do Card */}
+              <div className="bg-gray-50 px-6 py-4 border-b flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className={`w-3 h-3 rounded-full animate-pulse ${
+                    order.status === "AWAITING_CONFIRMATION" ? "bg-orange-500" : 
+                    order.status === "PENDING_PIX" ? "bg-yellow-500" : "hidden"
+                  }`} />
+                  <span className="font-mono font-bold text-lg text-[var(--zice-dark)]">{order.orderNumber}</span>
+                  <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${statusColors[order.status]}`}>
                     {statusLabels[order.status]}
                   </span>
                 </div>
+                <div className="flex items-center gap-4">
+                  <p className="text-sm text-gray-400 font-medium">
+                    {new Date(order.createdAt).toLocaleString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit"
+                    })}
+                  </p>
+                  <DeleteOrderButton orderId={order.id} />
+                </div>
               </div>
 
-              {lojista && order.status === "CONFIRMED" && (
-                <div className="mb-4 p-3 bg-[var(--zice-ice)] rounded-lg">
-                  <p className="text-xs font-semibold text-[var(--zice-dark)] mb-2">
-                    Progresso do lojista após este pedido:
-                  </p>
-                  <ProgressBar
-                    value={lojista.sacosComprados}
-                    max={lojista.sacosGratisMeta}
-                    size="sm"
-                    label={`${lojista.sacosComprados}/${lojista.sacosGratisMeta} sacos`}
-                  />
-                  <p className="text-xs text-gray-600 mt-2">
-                    Pontos: <strong>{order.user?.points ?? 0}</strong> | Total histórico:{" "}
-                    <strong>{lojista.totalSacosHistorico}</strong> sacos
-                  </p>
-                </div>
-              )}
-
-              <ul className="text-sm text-gray-600 mb-4">
-                {order.items.map((i) => (
-                  <li key={i.id}>
-                    {i.product.name} x{i.quantity} — {formatCurrency(i.subtotal)}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="flex flex-wrap gap-4 items-start">
-                {order.pixReceiptUrl && (
-                  <div className="space-y-2">
-                    <p className="text-xs font-bold text-gray-500 uppercase">Comprovante:</p>
-                    <a 
-                      href={order.pixReceiptUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="block group relative"
-                      title="Clique para abrir em tamanho real"
-                    >
-                      <div className="relative w-32 h-32 sm:w-48 sm:h-48 rounded-lg border-2 border-gray-200 overflow-hidden flex items-center justify-center bg-gray-50 group-hover:border-[var(--zice-medium)] transition-colors shadow-sm">
-                        <Image
-                          src={order.pixReceiptUrl}
-                          alt="Comprovante PIX"
-                          fill
-                          className="object-contain" // Mudado para contain para ver o comprovante inteiro sem cortes
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 flex items-center justify-center transition-colors">
-                          <div className="bg-black/60 text-white px-3 py-1 rounded-full text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                            CLIQUE PARA AMPLIAR
-                          </div>
-                        </div>
-                      </div>
-                    </a>
-                    <a 
-                      href={order.pixReceiptUrl} 
-                      download={`comprovante-${order.orderNumber}.jpg`}
-                      className="btn-outline py-1 px-3 text-[10px] font-bold w-full text-center"
-                    >
-                      BAIXAR IMAGEM
-                    </a>
+              {/* Corpo do Card */}
+              <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Coluna 1: Cliente e Endereço */}
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Cliente</h3>
+                    <p className="font-bold text-[var(--zice-dark)]">{order.customerName}</p>
+                    <p className="text-sm text-gray-600 flex items-center gap-1">
+                      <Phone size={14} /> {order.customerPhone}
+                    </p>
+                    {order.customerEmail && <p className="text-xs text-gray-400 mt-1">{order.customerEmail}</p>}
                   </div>
-                )}
-                <div className="flex flex-col gap-2">
-                  <ConfirmOrderButton
-                    orderId={order.id}
-                    isConfirmed={order.status === "CONFIRMED"}
-                    loyaltyApplied={order.loyaltyApplied}
-                    sacosCredited={order.sacosCredited}
-                  />
-                  {order.status === "CONFIRMED" && order.loyaltyApplied && (
-                    <div className="text-sm text-green-700 bg-green-50 p-2 rounded-lg">
-                      {order.pointsAwarded > 0 && <p>✓ +{order.pointsAwarded} pontos</p>}
-                      {order.sacosCredited > 0 && <p>✓ +{order.sacosCredited} sacos creditados</p>}
+                  
+                  {order.address && (
+                    <div>
+                      <h3 className="text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Endereço de Entrega</h3>
+                      <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        {order.address}
+                      </p>
+                    </div>
+                  )}
+
+                  {lojista && (
+                    <div className="bg-blue-50 p-3 rounded-xl border border-blue-100">
+                      <p className="text-[10px] font-bold text-blue-400 uppercase mb-1">Perfil Lojista</p>
+                      <p className="text-sm font-bold text-blue-700">🏪 {lojista.businessName}</p>
                     </div>
                   )}
                 </div>
-                {(order.needsInvoice || order.invoiceNumber) && (
-                  <InvoiceActions orderId={order.id} />
-                )}
+
+                {/* Coluna 2: Itens e Total */}
+                <div className="bg-gray-50/50 rounded-2xl p-4 border border-gray-100 space-y-4">
+                  <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Resumo do Pedido</h3>
+                  <div className="space-y-2">
+                    {order.items.map((i) => (
+                      <div key={i.id} className="flex justify-between text-sm">
+                        <span className="text-gray-600 font-medium">
+                          {i.quantity}x {i.product.name}
+                        </span>
+                        <span className="font-bold text-[var(--zice-dark)]">{formatCurrency(i.subtotal)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="pt-4 border-t border-gray-200 flex justify-between items-end">
+                    <span className="text-xs font-bold text-gray-400 uppercase">Total Geral</span>
+                    <span className="text-2xl font-black text-[var(--zice-medium)]">{formatCurrency(order.total)}</span>
+                  </div>
+                </div>
+
+                {/* Coluna 3: Ações e Comprovante */}
+                <div className="space-y-6">
+                  {order.pixReceiptUrl && (
+                    <div>
+                      <h3 className="text-[10px] font-bold text-gray-400 uppercase mb-3 tracking-widest text-center lg:text-left">Comprovante PIX</h3>
+                      <div className="flex flex-col items-center lg:items-start gap-3">
+                        <a 
+                          href={order.pixReceiptUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="block group relative"
+                        >
+                          <div className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-2xl border-2 border-gray-200 overflow-hidden bg-white shadow-sm group-hover:border-[var(--zice-medium)] transition-all">
+                            <Image
+                              src={order.pixReceiptUrl}
+                              alt="Comprovante"
+                              fill
+                              className="object-contain p-2"
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 flex items-center justify-center transition-colors">
+                              <div className="bg-black/60 text-white px-3 py-1 rounded-full text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                                AMPLIAR
+                              </div>
+                            </div>
+                          </div>
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ações de Gestão</h3>
+                    <div className="flex flex-col gap-2">
+                      <ConfirmOrderButton
+                        orderId={order.id}
+                        isConfirmed={order.status === "CONFIRMED"}
+                        loyaltyApplied={order.loyaltyApplied}
+                        sacosCredited={order.sacosCredited}
+                      />
+                      {(order.needsInvoice || order.invoiceNumber) && (
+                        <InvoiceActions orderId={order.id} />
+                      )}
+                    </div>
+                    
+                    {order.status === "CONFIRMED" && order.loyaltyApplied && (
+                      <div className="text-[11px] font-bold text-green-700 bg-green-50 p-3 rounded-xl border border-green-100 flex flex-col gap-1">
+                        {order.pointsAwarded > 0 && <span>✓ {order.pointsAwarded} PONTOS CREDITADOS</span>}
+                        {order.sacosCredited > 0 && <span>✓ {order.sacosCredited} SACOS NA META DO LOJISTA</span>}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           );
         })}
-        {orders.length === 0 && <p className="text-gray-500">Nenhum pedido ainda.</p>}
+        {orders.length === 0 && (
+          <div className="text-center py-20 bg-white rounded-3xl border border-dashed">
+            <ShoppingBag className="mx-auto text-gray-300 mb-4" size={48} />
+            <p className="text-gray-500 font-medium">Nenhum pedido recebido ainda.</p>
+          </div>
+        )}
       </div>
     </div>
   );

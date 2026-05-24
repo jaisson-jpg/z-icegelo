@@ -199,4 +199,8 @@ model SiteConfig {
   companyAddress    String @default("Guaramirim - SC")
   companyPhone      String @default("47996471803")
   companyEmail      String @default("")
+
+  announcementTitle   String?
+  announcementText    String?
+  announcementActive  Boolean @default(false)
 }

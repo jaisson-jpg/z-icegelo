@@ -4,6 +4,7 @@ import { SiteShell } from "@/components/SiteShell";
 import { CartProvider } from "@/components/CartProvider";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { GlobalAnnouncement } from "@/components/GlobalAnnouncement";
 
 export const metadata: Metadata = {
   title: "Z-ice Gelo | Gelo em Guaramirim — Atacado e Varejo",
@@ -29,6 +30,7 @@ export default async function RootLayout({
     <html lang="pt-BR">
       <body>
         <CartProvider>
+          <GlobalAnnouncement />
           <SiteShell userName={session?.name} whatsapp={whatsapp}>
             {children}
           </SiteShell>
