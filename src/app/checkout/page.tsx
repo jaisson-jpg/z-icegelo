@@ -12,7 +12,7 @@ type PixConfig = {
   pixHolder: string;
 };
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const { items, total, clearCart } = useCart();
   const [pix, setPix] = useState<PixConfig | null>(null);
   const [copied, setCopied] = useState(false);
@@ -30,10 +30,8 @@ export default function CheckoutPage() {
   const [receipt, setReceipt] = useState<File | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
     fetch("/api/config")
       .then((r) => r.json())
       .then(setPix)
@@ -60,46 +58,6 @@ export default function CheckoutPage() {
       })
       .catch(() => setProfileLoaded(true));
   }, []);
-
-  if (!isMounted || !profileLoaded) {
-    return (
-      <div className="max-w-lg mx-auto px-4 py-20 text-center">
-        <div className="animate-pulse text-gray-500">Carregando checkout...</div>
-      </div>
-    );
-  }
-
-  if (!userRole && !orderId) {
-    return (
-      <div className="max-w-lg mx-auto px-4 py-20 text-center">
-        <div className="ice-card rounded-2xl p-8 border-2 border-[var(--zice-light)]">
-          <h1 className="text-2xl font-bold text-[var(--zice-dark)] mb-4">
-            Identificação Necessária
-          </h1>
-          <p className="text-gray-600 mb-8">
-            Para finalizar sua compra e garantir seus pontos de fidelidade, você precisa estar logado em sua conta.
-          </p>
-          <div className="flex flex-col gap-3">
-            <Link href={`/login?redirect=/checkout`} className="btn-primary">
-              Entrar na minha conta
-            </Link>
-            <Link href={`/cadastro?redirect=/checkout`} className="btn-outline">
-              Criar uma conta nova
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (items.length === 0 && !orderId) {
-    return (
-      <div className="max-w-lg mx-auto px-4 py-20 text-center">
-        <p className="text-xl font-bold mb-4">Carrinho vazio</p>
-        <Link href="/loja" className="btn-primary">Voltar à loja</Link>
-      </div>
-    );
-  }
 
   const copyPix = () => {
     if (pix?.pixKey) {
@@ -163,6 +121,46 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
+
+  if (!profileLoaded) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-20 text-center">
+        <div className="animate-pulse text-gray-500">Carregando checkout...</div>
+      </div>
+    );
+  }
+
+  if (!userRole && !orderId) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-20 text-center">
+        <div className="ice-card rounded-2xl p-8 border-2 border-[var(--zice-light)]">
+          <h1 className="text-2xl font-bold text-[var(--zice-dark)] mb-4">
+            Identificação Necessária
+          </h1>
+          <p className="text-gray-600 mb-8">
+            Para finalizar sua compra e garantir seus pontos de fidelidade, você precisa estar logado em sua conta.
+          </p>
+          <div className="flex flex-col gap-3">
+            <Link href={`/login?redirect=/checkout`} className="btn-primary">
+              Entrar na minha conta
+            </Link>
+            <Link href={`/cadastro?redirect=/checkout`} className="btn-outline">
+              Criar uma conta nova
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (items.length === 0 && !orderId) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-20 text-center">
+        <p className="text-xl font-bold mb-4">Carrinho vazio</p>
+        <Link href="/loja" className="btn-primary">Voltar à loja</Link>
+      </div>
+    );
+  }
 
   if (orderId) {
     return (
@@ -359,6 +357,7 @@ export default function CheckoutPage() {
             />
           </label>
         </div>
+
         <button
           type="submit"
           disabled={loading}
@@ -369,4 +368,22 @@ export default function CheckoutPage() {
       </form>
     </div>
   );
+}
+
+export default function CheckoutPage() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-20 text-center">
+        <div className="animate-pulse text-gray-500">Carregando checkout...</div>
+      </div>
+    );
+  }
+
+  return <CheckoutContent />;
 }

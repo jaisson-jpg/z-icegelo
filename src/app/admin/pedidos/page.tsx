@@ -76,8 +76,9 @@ export default async function AdminPedidosPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <p className="text-sm text-gray-400 font-medium">
+                  <p className="text-xs text-gray-400 mt-1">
                     {new Date(order.createdAt).toLocaleString("pt-BR", {
+                      timeZone: "America/Sao_Paulo",
                       day: "2-digit",
                       month: "2-digit",
                       year: "numeric",
@@ -162,15 +163,22 @@ export default async function AdminPedidosPage() {
                               className="object-contain p-2"
                             />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 flex items-center justify-center transition-colors">
-                              <div className="bg-black/60 text-white px-3 py-1 rounded-full text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                                AMPLIAR
-                              </div>
+                              <div className="bg-black/60 text-white px-3 py-1 rounded-full text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase">
+                              Ver Grande
                             </div>
                           </div>
-                        </a>
-                      </div>
+                        </div>
+                      </a>
+                      <a 
+                        href={order.pixReceiptUrl} 
+                        download={`comprovante-${order.orderNumber}.jpg`}
+                        className="flex items-center justify-center gap-2 w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold transition-colors border border-gray-200 shadow-sm"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        BAIXAR COMPROVANTE
+                      </a>
                     </div>
-                  )}
+                  </div>
 
                   <div className="space-y-3">
                     <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ações de Gestão</h3>
