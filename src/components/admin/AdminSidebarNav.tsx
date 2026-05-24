@@ -11,15 +11,17 @@ import {
   Store, 
   Gift, 
   BarChart3, 
-  Settings 
+  Settings,
+  Users
 } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/pedidos", label: "Pedidos", icon: ShoppingBag, badge: true },
+  { href: "/admin/clientes", label: "Clientes", icon: Users },
+  { href: "/admin/lojistas", label: "Lojistas", icon: Store },
   { href: "/admin/produtos", label: "Produtos", icon: Package },
   { href: "/admin/estoque", label: "Estoque", icon: Boxes },
-  { href: "/admin/lojistas", label: "Lojistas", icon: Store },
   { href: "/admin/recompensas", label: "Recompensas", icon: Gift },
   { href: "/admin/relatorios", label: "Relatórios", icon: BarChart3 },
   { href: "/admin/config", label: "Configurações", icon: Settings },

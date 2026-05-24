@@ -4,7 +4,7 @@ import { createSession, hashPassword } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, name, phone } = await req.json();
+    const { email, password, name, phone, address, city, number } = await req.json();
     if (!email || !password || !name) {
       return NextResponse.json({ error: "Preencha todos os campos" }, { status: 400 });
     }
@@ -16,7 +16,16 @@ export async function POST(req: NextRequest) {
 
     const passwordHash = await hashPassword(password);
     const user = await prisma.user.create({
-      data: { email, passwordHash, name, phone, role: "CUSTOMER" },
+      data: { 
+        email, 
+        passwordHash, 
+        name, 
+        phone, 
+        address,
+        city,
+        number,
+        role: "CUSTOMER" 
+      },
     });
 
     await createSession({

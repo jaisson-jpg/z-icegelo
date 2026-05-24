@@ -3,8 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, User } from "lucide-react";
-import { useState } from "react";
+import { Menu, X, User, Instagram } from "lucide-react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -17,6 +17,16 @@ const links = [
 export function Header({ userName }: { userName?: string | null }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [instaUrl, setInstaUrl] = useState("");
+
+  useEffect(() => {
+    fetch("/api/config")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.instagramUrl) setInstaUrl(data.instagramUrl);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 ice-gradient shadow-lg">
@@ -48,6 +58,19 @@ export function Header({ userName }: { userName?: string | null }) {
               {l.label}
             </Link>
           ))}
+          
+          {instaUrl && (
+            <a 
+              href={instaUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-white/90 hover:text-pink-300 transition-colors p-1"
+              title="Siga-nos no Instagram"
+            >
+              <Instagram size={20} />
+            </a>
+          )}
+
           <Link
             href={userName ? "/minha-conta" : "/login"}
             className="flex items-center gap-1 bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg text-sm font-medium"
@@ -57,13 +80,25 @@ export function Header({ userName }: { userName?: string | null }) {
           </Link>
         </nav>
 
-        <button
-          className="md:hidden text-white p-2"
-          onClick={() => setOpen(!open)}
-          aria-label="Menu"
-        >
-          {open ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="flex items-center gap-3 md:hidden">
+          {instaUrl && (
+            <a 
+              href={instaUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-white/90 p-1"
+            >
+              <Instagram size={24} />
+            </a>
+          )}
+          <button
+            className="text-white p-2"
+            onClick={() => setOpen(!open)}
+            aria-label="Menu"
+          >
+            {open ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {open && (
