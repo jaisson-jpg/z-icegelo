@@ -18,24 +18,30 @@ function CadastroForm() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    const data = await res.json();
-    setLoading(false);
-    if (!res.ok) {
-      setError(data.error || "Erro no cadastro");
-      return;
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        setError(data.error || "Erro no cadastro");
+        setLoading(false);
+        return;
+      }
+      
+      if (redirect) {
+        router.push(redirect);
+      } else {
+        router.push("/minha-conta");
+      }
+      router.refresh();
+    } catch (err) {
+      setError("Ocorreu um erro ao tentar criar sua conta. Verifique sua conexão.");
+      setLoading(false);
     }
-    
-    if (redirect) {
-      router.push(redirect);
-    } else {
-      router.push("/minha-conta");
-    }
-    router.refresh();
   };
 
   return (

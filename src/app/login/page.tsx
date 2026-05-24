@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
+import { cn } from "@/lib/utils";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "";
   const [email, setEmail] = useState("");
-  // ... (no changes to state)
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,28 +18,35 @@ function LoginForm() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await res.json();
-    setLoading(false);
-    if (!res.ok) {
-      setError(data.error || "Erro no login");
-      return;
-    }
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        setError(data.error || "Erro no login");
+        setLoading(false);
+        return;
+      }
 
-    if (redirect) {
-      router.push(redirect);
-    } else if (data.user?.role === "ADMIN") {
-      router.push("/admin");
-    } else if (data.user?.role === "LOJISTA") {
-      router.push("/lojista");
-    } else {
-      router.push("/minha-conta");
+      if (redirect) {
+        router.push(redirect);
+      } else if (data.user?.role === "ADMIN") {
+        router.push("/admin");
+      } else if (data.user?.role === "LOJISTA") {
+        router.push("/lojista");
+      } else {
+        router.push("/minha-conta");
+      }
+      router.refresh();
+    } catch (err) {
+      setError("Ocorreu um erro ao tentar fazer login. Verifique sua conexão.");
+      setLoading(false);
     }
-    router.refresh();
   };
 
   return (

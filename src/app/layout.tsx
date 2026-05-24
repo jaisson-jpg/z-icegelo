@@ -5,6 +5,7 @@ import { CartProvider } from "@/components/CartProvider";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { GlobalAnnouncement } from "@/components/GlobalAnnouncement";
+import NextTopLoader from "nextjs-toploader";
 
 export const metadata: Metadata = {
   title: "Z-ice Gelo | Gelo em Guaramirim — Atacado e Varejo",
@@ -29,6 +30,7 @@ export default async function RootLayout({
   return (
     <html lang="pt-BR">
       <body>
+        <NextTopLoader color="#00a0e3" showSpinner={false} />
         <CartProvider>
           <GlobalAnnouncement />
           <SiteShell userName={session?.name} whatsapp={whatsapp}>
