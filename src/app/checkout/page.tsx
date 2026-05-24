@@ -67,43 +67,22 @@ function CheckoutContent() {
     }
   };
 
-  const selectedNeighborhood = useMemo(() => 
-    NEIGHBORHOODS.find(n => n.name === form.neighborhood),
-    [form.neighborhood]
-  );
-
-  const totalSacos = useMemo(() => 
-    (items || []).reduce((acc, item) => acc + (Number(item.quantity) || 0), 0),
-    [items]
-  );
-
-  const deliveryFee = useMemo(() => {
-    if (!selectedNeighborhood) return 0;
-    const sacos = Number(totalSacos) || 0;
-    const orderTotal = Number(total) || 0;
-    return calculateDeliveryFee(selectedNeighborhood.distanceKm, sacos, orderTotal);
-  }, [selectedNeighborhood, totalSacos, total]);
-
-  const finalTotal = (Number(total) || 0) + deliveryFee;
+  const finalTotal = Number(total) || 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.neighborhood) {
-      alert("Por favor, selecione seu bairro para calcular o frete.");
-      return;
-    }
     setLoading(true);
     try {
       const fd = new FormData();
       fd.append("customerName", form.customerName);
       fd.append("customerPhone", form.customerPhone);
       fd.append("customerEmail", form.customerEmail);
-      fd.append("address", `${form.neighborhood} - ${form.address}`);
+      fd.append("address", form.address);
       fd.append("customerCpfCnpj", form.customerCpfCnpj);
       fd.append("needsInvoice", String(form.needsInvoice));
       fd.append("items", JSON.stringify(items));
       fd.append("total", String(finalTotal));
-      fd.append("deliveryFee", String(deliveryFee));
+      fd.append("deliveryFee", "0");
       if (receipt) fd.append("receipt", receipt);
 
       const res = await fetch("/api/orders", { method: "POST", body: fd });
@@ -111,10 +90,21 @@ function CheckoutContent() {
       if (!res.ok) throw new Error(data.error || "Erro ao criar pedido");
 
       setOrderId(data.orderId);
+      
+      // Preparar mensagem para WhatsApp
+      const itemsList = items.map(i => `• ${i.quantity}x ${i.name}`).join('\n');
+      const message = `Olá! Acabei de fazer um pedido no site Z-ice Gelo.\n\n*Nº do Pedido:* ${data.orderId}\n*Cliente:* ${form.customerName}\n*Endereço:* ${form.address}\n\n*Produtos:*\n${itemsList}\n\n*Total:* ${formatCurrency(finalTotal)}\n\n_Pode me passar o valor do frete para eu finalizar o pagamento?_`;
+      
+      const whatsappUrl = `https://wa.me/5547996471803?text=${encodeURIComponent(message)}`;
+      
       if (data.linkedToAccount) {
         sessionStorage.setItem("zice_last_order_linked", "1");
       }
       clearCart();
+
+      // Abrir WhatsApp em nova aba
+      window.open(whatsappUrl, '_blank');
+
     } catch (err) {
       alert(err instanceof Error ? err.message : "Erro ao enviar pedido");
     } finally {
@@ -201,22 +191,15 @@ function CheckoutContent() {
             <span>{formatCurrency(i.price * i.quantity)}</span>
           </div>
         ))}
-        {deliveryFee > 0 ? (
-          <div className="flex justify-between text-sm py-1 text-gray-600 italic">
-            <span className="flex items-center gap-2">
-              {totalSacos <= 2 ? <Bike size={14} /> : <Truck size={14} />}
-              Frete ({selectedNeighborhood?.name})
-            </span>
-            <span>{formatCurrency(deliveryFee)}</span>
-          </div>
-        ) : form.neighborhood && (
-          <div className="flex justify-between text-sm py-1 text-green-600 font-bold">
-            <span>Frete ({selectedNeighborhood?.name})</span>
-            <span>GRÁTIS</span>
-          </div>
-        )}
+        <div className="flex justify-between text-sm py-1 text-[var(--zice-medium)] font-bold italic bg-[var(--zice-ice)] p-2 rounded-lg mt-2">
+          <span className="flex items-center gap-2">
+            <Truck size={14} />
+            Frete de Entrega
+          </span>
+          <span>A COMBINAR</span>
+        </div>
         <div className="border-t mt-4 pt-4 flex justify-between font-bold text-lg">
-          <span>Total</span>
+          <span>Total (Produtos)</span>
           <span className="text-[var(--zice-medium)]">{formatCurrency(finalTotal)}</span>
         </div>
       </div>
@@ -276,40 +259,22 @@ function CheckoutContent() {
           />
         </div>
         
-        <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
-          <label className="block text-sm font-bold text-blue-800 mb-2 flex items-center gap-2">
-            <Truck size={18} /> SELECIONE SEU BAIRRO PARA O FRETE *
-          </label>
-          <select
-            className="input-field mb-3"
-            required
-            value={form.neighborhood}
-            onChange={(e) => setForm({ ...form, neighborhood: e.target.value })}
-          >
-            <option value="">Selecione um bairro...</option>
-            {NEIGHBORHOODS.map(n => (
-              <option key={n.name} value={n.name}>{n.name}</option>
-            ))}
-          </select>
-          
-          <div className="space-y-2">
-            <div className="flex items-start gap-2 text-[10px] text-blue-600 font-bold uppercase">
-              <Info size={14} className="shrink-0" />
-              <div>
-                <p>• ATÉ 2 SACOS: MOTO (R$ 1,00/KM)</p>
-                <p>• MAIS DE 2 SACOS: CARRO (R$ 3,50/KM)</p>
-                <p>• DENTRO DE 2KM OU ACIMA DE R$ 100,00: FRETE GRÁTIS!</p>
-              </div>
-            </div>
+        <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-start gap-3">
+          <Info className="text-blue-600 shrink-0 mt-0.5" size={20} />
+          <div>
+            <p className="text-sm font-bold text-blue-800 uppercase">Frete a combinar</p>
+            <p className="text-xs text-blue-600">
+              Após clicar no botão abaixo, o seu pedido será enviado e abriremos o seu WhatsApp para combinarmos o valor do frete e finalizar o pagamento.
+            </p>
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Rua e Número (Complemento)</label>
+          <label className="block text-sm font-medium mb-1">Endereço de Entrega (Rua, Nº, Bairro e Cidade) *</label>
           <textarea
             className="input-field min-h-[80px]"
             required
-            placeholder="Ex: Rua João da Silva, 123 - Casa de esquina"
+            placeholder="Ex: Rua João da Silva, 123 - Bairro Centro, Guaramirim"
             value={form.address}
             onChange={(e) => setForm({ ...form, address: e.target.value })}
           />
