@@ -179,8 +179,9 @@ export default async function AdminPedidosPage() {
                       </a>
                     </div>
                   </div>
+                )}
 
-                  <div className="space-y-3">
+                <div className="space-y-3">
                     <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ações de Gestão</h3>
                     <div className="flex flex-col gap-2">
                       <ConfirmOrderButton
