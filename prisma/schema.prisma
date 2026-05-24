@@ -134,6 +134,7 @@ model Order {
   address         String?
   category        ProductCategory
   total           Float
+  deliveryFee     Float           @default(0)
   status          OrderStatus     @default(PENDING_PIX)
   pixReceiptUrl   String?
   adminNotes      String?

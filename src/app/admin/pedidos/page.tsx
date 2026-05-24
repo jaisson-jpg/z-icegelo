@@ -133,7 +133,11 @@ export default async function AdminPedidosPage() {
                     ))}
                   </div>
                   <div className="pt-4 border-t border-gray-200 flex justify-between items-end">
-                    <span className="text-xs font-bold text-gray-400 uppercase">Total Geral</span>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-gray-400 uppercase">Produtos: {formatCurrency(order.total - order.deliveryFee)}</span>
+                      <span className="text-xs font-bold text-blue-400 uppercase">Frete: {formatCurrency(order.deliveryFee)}</span>
+                      <span className="text-xs font-bold text-gray-400 uppercase mt-1">Total Geral</span>
+                    </div>
                     <span className="text-2xl font-black text-[var(--zice-medium)]">{formatCurrency(order.total)}</span>
                   </div>
                 </div>

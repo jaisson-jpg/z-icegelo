@@ -3,8 +3,9 @@
 import { useCart } from "@/components/CartProvider";
 import { formatCurrency, cn } from "@/lib/utils";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Copy, Check, Upload } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import { Copy, Check, Upload, Truck, Bike, Info } from "lucide-react";
+import { NEIGHBORHOODS, calculateDeliveryFee } from "@/lib/delivery";
 
 type PixConfig = {
   pixKey: string;
@@ -24,6 +25,7 @@ export default function CheckoutPage() {
     address: "",
     customerCpfCnpj: "",
     needsInvoice: false,
+    neighborhood: "",
   });
   const [receipt, setReceipt] = useState<File | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
@@ -105,19 +107,41 @@ export default function CheckoutPage() {
     }
   };
 
+  const selectedNeighborhood = useMemo(() => 
+    NEIGHBORHOODS.find(n => n.name === form.neighborhood),
+    [form.neighborhood]
+  );
+
+  const totalSacos = useMemo(() => 
+    items.reduce((acc, item) => acc + item.quantity, 0),
+    [items]
+  );
+
+  const deliveryFee = useMemo(() => {
+    if (!selectedNeighborhood) return 0;
+    return calculateDeliveryFee(selectedNeighborhood.distanceKm, totalSacos, total);
+  }, [selectedNeighborhood, totalSacos, total]);
+
+  const finalTotal = total + deliveryFee;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.neighborhood) {
+      alert("Por favor, selecione seu bairro para calcular o frete.");
+      return;
+    }
     setLoading(true);
     try {
       const fd = new FormData();
       fd.append("customerName", form.customerName);
       fd.append("customerPhone", form.customerPhone);
       fd.append("customerEmail", form.customerEmail);
-      fd.append("address", form.address);
+      fd.append("address", `${form.neighborhood} - ${form.address}`);
       fd.append("customerCpfCnpj", form.customerCpfCnpj);
       fd.append("needsInvoice", String(form.needsInvoice));
       fd.append("items", JSON.stringify(items));
-      fd.append("total", String(total));
+      fd.append("total", String(finalTotal));
+      fd.append("deliveryFee", String(deliveryFee));
       if (receipt) fd.append("receipt", receipt);
 
       const res = await fetch("/api/orders", { method: "POST", body: fd });
@@ -175,9 +199,23 @@ export default function CheckoutPage() {
             <span>{formatCurrency(i.price * i.quantity)}</span>
           </div>
         ))}
+        {deliveryFee > 0 ? (
+          <div className="flex justify-between text-sm py-1 text-gray-600 italic">
+            <span className="flex items-center gap-2">
+              {totalSacos <= 2 ? <Bike size={14} /> : <Truck size={14} />}
+              Frete ({selectedNeighborhood?.name})
+            </span>
+            <span>{formatCurrency(deliveryFee)}</span>
+          </div>
+        ) : form.neighborhood && (
+          <div className="flex justify-between text-sm py-1 text-green-600 font-bold">
+            <span>Frete ({selectedNeighborhood?.name})</span>
+            <span>GRÁTIS</span>
+          </div>
+        )}
         <div className="border-t mt-4 pt-4 flex justify-between font-bold text-lg">
           <span>Total</span>
-          <span className="text-[var(--zice-medium)]">{formatCurrency(total)}</span>
+          <span className="text-[var(--zice-medium)]">{formatCurrency(finalTotal)}</span>
         </div>
       </div>
 
@@ -235,19 +273,41 @@ export default function CheckoutPage() {
             onChange={(e) => setForm({ ...form, customerPhone: e.target.value })}
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">E-mail (opcional)</label>
-          <input
-            type="email"
-            className="input-field"
-            value={form.customerEmail}
-            onChange={(e) => setForm({ ...form, customerEmail: e.target.value })}
-          />
+        
+        <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+          <label className="block text-sm font-bold text-blue-800 mb-2 flex items-center gap-2">
+            <Truck size={18} /> SELECIONE SEU BAIRRO PARA O FRETE *
+          </label>
+          <select
+            className="input-field mb-3"
+            required
+            value={form.neighborhood}
+            onChange={(e) => setForm({ ...form, neighborhood: e.target.value })}
+          >
+            <option value="">Selecione um bairro...</option>
+            {NEIGHBORHOODS.map(n => (
+              <option key={n.name} value={n.name}>{n.name}</option>
+            ))}
+          </select>
+          
+          <div className="space-y-2">
+            <div className="flex items-start gap-2 text-[10px] text-blue-600 font-bold uppercase">
+              <Info size={14} className="shrink-0" />
+              <div>
+                <p>• ATÉ 2 SACOS: MOTO (R$ 1,00/KM)</p>
+                <p>• MAIS DE 2 SACOS: CARRO (R$ 3,50/KM)</p>
+                <p>• DENTRO DE 2KM OU ACIMA DE R$ 100,00: FRETE GRÁTIS!</p>
+              </div>
+            </div>
+          </div>
         </div>
+
         <div>
-          <label className="block text-sm font-medium mb-1">Endereço de entrega</label>
+          <label className="block text-sm font-medium mb-1">Rua e Número (Complemento)</label>
           <textarea
             className="input-field min-h-[80px]"
+            required
+            placeholder="Ex: Rua João da Silva, 123 - Casa de esquina"
             value={form.address}
             onChange={(e) => setForm({ ...form, address: e.target.value })}
           />

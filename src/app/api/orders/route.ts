@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
     const needsInvoice = formData.get("needsInvoice") === "true";
     const itemsJson = formData.get("items") as string;
     const total = parseFloat(formData.get("total") as string);
+    const deliveryFee = parseFloat(formData.get("deliveryFee") as string) || 0;
     const receipt = formData.get("receipt") as File | null;
 
     if (!customerName || !customerPhone || !itemsJson || isNaN(total)) {
@@ -80,6 +81,7 @@ export async function POST(req: NextRequest) {
         address,
         category,
         total,
+        deliveryFee,
         needsInvoice,
         status: pixReceiptUrl ? "AWAITING_CONFIRMATION" : "PENDING_PIX",
         pixReceiptUrl,
