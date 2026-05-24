@@ -52,6 +52,40 @@ body {
   box-shadow: 0 8px 24px rgba(0, 74, 128, 0.35);
 }
 
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Efeito de Loading */
+.btn-loading {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+.btn-loading::after {
+  content: "";
+  position: absolute;
+  width: 1.25rem;
+  height: 1.25rem;
+  top: calc(50% - 0.625rem);
+  left: calc(50% - 0.625rem);
+  border: 3px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .btn-outline {
   border: 2px solid var(--zice-medium);
   color: var(--zice-dark);

@@ -1,10 +1,12 @@
 import { unstable_noStore as noStore } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, cn } from "@/lib/utils";
 import Image from "next/image";
 import { ConfirmOrderButton } from "@/components/admin/ConfirmOrderButton";
 import { InvoiceActions } from "@/components/InvoiceActions";
 import { ProgressBar } from "@/components/ProgressBar";
+import { Trash2 } from "lucide-react";
+import { DeleteOrderButton } from "@/components/admin/DeleteOrderButton";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +37,9 @@ export default async function AdminPedidosPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-[var(--zice-dark)] mb-6">Pedidos</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-[var(--zice-dark)]">Pedidos ({orders.length})</h1>
+      </div>
       <p className="text-sm text-gray-600 mb-6">
         Confirme o PIX para creditar pontos e sacos automaticamente ao lojista.
       </p>
@@ -47,7 +51,10 @@ export default async function AdminPedidosPage() {
             <div key={order.id} className="bg-white rounded-xl border p-4 sm:p-6">
               <div className="flex flex-wrap justify-between gap-4 mb-4">
                 <div className="min-w-0 flex-1">
-                  <p className="font-bold text-lg">{order.orderNumber}</p>
+                  <div className="flex items-center gap-3">
+                    <p className="font-bold text-lg">{order.orderNumber}</p>
+                    <DeleteOrderButton orderId={order.id} />
+                  </div>
                   <p className="text-gray-600">{order.customerName} — {order.customerPhone}</p>
                   {lojista && (
                     <p className="text-xs text-[var(--zice-medium)] font-semibold mt-1">

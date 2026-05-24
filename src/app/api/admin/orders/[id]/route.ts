@@ -80,3 +80,16 @@ export async function PATCH(
   await prisma.order.update({ where: { id }, data: { status } });
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await requireSession(["ADMIN"]);
+  if (!session) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+
+  const { id } = await params;
+  await prisma.order.delete({ where: { id } });
+  
+  return NextResponse.json({ ok: true });
+}

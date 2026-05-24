@@ -1,7 +1,7 @@
 "use client";
 
 import { useCart } from "@/components/CartProvider";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, cn } from "@/lib/utils";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Copy, Check, Upload } from "lucide-react";
@@ -295,8 +295,12 @@ export default function CheckoutPage() {
             />
           </label>
         </div>
-        <button type="submit" disabled={loading} className="btn-primary w-full text-lg">
-          {loading ? "Enviando..." : "Enviar pedido"}
+        <button
+          type="submit"
+          disabled={loading}
+          className={cn("btn-primary w-full py-4 text-lg", loading && "btn-loading")}
+        >
+          {loading ? "" : "Já fiz o PIX — Enviar Pedido"}
         </button>
       </form>
     </div>

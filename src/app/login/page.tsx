@@ -67,8 +67,8 @@ function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <button type="submit" disabled={loading} className="btn-primary w-full">
-          {loading ? "Entrando..." : "Entrar"}
+        <button type="submit" disabled={loading} className={cn("btn-primary w-full", loading && "btn-loading")}>
+          {loading ? "" : "Entrar"}
         </button>
         <p className="text-center text-sm text-gray-600">
           Não tem conta?{" "}

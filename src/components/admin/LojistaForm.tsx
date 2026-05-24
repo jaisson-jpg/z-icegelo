@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Trash2 } from "lucide-react";
 
 type LojistaData = {
   id: string;
@@ -54,6 +55,19 @@ export function LojistaForm({ lojista }: { lojista?: LojistaData }) {
     } else {
       const data = await res.json();
       alert(data.error || "Erro ao salvar");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!lojista || !confirm("Tem certeza que deseja excluir este lojista? Esta ação não pode ser desfeita.")) return;
+    setLoading(true);
+    const res = await fetch(`/api/admin/lojistas/${lojista.id}`, { method: "DELETE" });
+    if (res.ok) {
+      router.push("/admin/lojistas");
+      router.refresh();
+    } else {
+      setLoading(false);
+      alert("Erro ao excluir lojista");
     }
   };
 
@@ -113,6 +127,19 @@ export function LojistaForm({ lojista }: { lojista?: LojistaData }) {
       <button type="submit" disabled={loading} className="btn-primary">
         {loading ? "Salvando..." : "Salvar"}
       </button>
+      {lojista && (
+        <div className="pt-6 mt-6 border-t border-red-100">
+          <h3 className="text-sm font-bold text-red-600 mb-2 uppercase">Zona de Perigo</h3>
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="flex items-center gap-2 text-red-600 hover:bg-red-50 p-2 rounded-lg transition text-sm font-bold"
+          >
+            <Trash2 size={18} />
+            EXCLUIR LOJISTA PERMANENTEMENTE
+          </button>
+        </div>
+      )}
     </form>
   );
 }

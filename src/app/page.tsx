@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { ProductGrid } from "@/components/ProductGrid";
 import {
   Factory,
   Truck,
@@ -7,9 +9,16 @@ import {
   ShoppingBag,
   Snowflake,
   Phone,
+  ArrowRight,
 } from "lucide-react";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const products = await prisma.product.findMany({
+    where: { active: true },
+    orderBy: { sortOrder: "asc" },
+    take: 3,
+  });
+
   return (
     <>
       <section className="relative overflow-hidden">
@@ -54,7 +63,55 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="max-w-6xl mx-auto px-4 py-16">
+      {/* Seção de Fidelidade com Destaque */}
+      <section className="py-12 bg-white overflow-hidden">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="ice-card rounded-3xl p-8 md:p-12 relative overflow-hidden border-2 border-[var(--zice-light)]">
+            <div className="absolute top-0 right-0 w-64 h-64 ice-gradient opacity-10 rounded-full -mr-20 -mt-20" />
+            <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+              <div className="w-20 h-20 md:w-24 md:h-24 ice-gradient rounded-2xl flex items-center justify-center shrink-0 shadow-lg">
+                <Award className="text-white" size={48} />
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h2 className="text-2xl md:text-3xl font-bold text-[var(--zice-dark)] mb-2">
+                  Diferencial Z-ice Fidelidade
+                </h2>
+                <p className="text-gray-600 mb-6 text-lg">
+                  Aqui você ganha benefícios reais! <strong className="text-[var(--zice-medium)]">Clientes</strong> acumulam pontos para prêmios e <strong className="text-[var(--zice-medium)]">Lojistas</strong> ganham sacos de gelo grátis direto na meta.
+                </p>
+                <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+                  <Link href="/fidelidade" className="text-[var(--zice-dark)] font-bold flex items-center gap-2 hover:underline">
+                    Ver como funciona <ArrowRight size={18} />
+                  </Link>
+                </div>
+              </div>
+              <Link href="/cadastro" className="btn-primary px-8 py-4 whitespace-nowrap">
+                Quero meus benefícios
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Produtos em Destaque */}
+      <section className="max-w-6xl mx-auto px-4 py-12">
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <h2 className="text-3xl font-bold text-[var(--zice-dark)]">Nossos Produtos</h2>
+            <p className="text-gray-600">Gelo puro e cristalino para sua necessidade</p>
+          </div>
+          <Link href="/loja" className="text-[var(--zice-medium)] font-bold flex items-center gap-1 hover:underline">
+            Ver loja completa <ArrowRight size={16} />
+          </Link>
+        </div>
+        <ProductGrid products={products.map(p => ({
+          ...p,
+          price: Number(p.price),
+          category: p.category as "VAREJO" | "ATACADO"
+        }))} />
+      </section>
+
+      <section className="max-w-6xl mx-auto px-4 py-16 border-t">
         <h2 className="text-3xl font-bold text-[var(--zice-dark)] text-center mb-12">
           Por que escolher a Z-ice?
         </h2>

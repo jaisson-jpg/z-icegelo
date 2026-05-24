@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 
+import { cn } from "@/lib/utils";
+
 function CadastroForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -58,8 +60,8 @@ function CadastroForm() {
             />
           </div>
         ))}
-        <button type="submit" disabled={loading} className="btn-primary w-full">
-          {loading ? "Cadastrando..." : "Criar conta"}
+        <button type="submit" disabled={loading} className={cn("btn-primary w-full", loading && "btn-loading")}>
+          {loading ? "" : "Criar conta"}
         </button>
         <p className="text-center text-sm text-gray-600">
           Já tem conta?{" "}

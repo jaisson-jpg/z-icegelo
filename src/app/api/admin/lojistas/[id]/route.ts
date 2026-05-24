@@ -45,3 +45,22 @@ export async function PATCH(
 
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await requireSession(["ADMIN"]);
+  if (!session) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+
+  const { id } = await params;
+  
+  // O Prisma vai deletar em cascata o Lojista se deletarmos o User (onDelete: Cascade no schema)
+  // Ou podemos deletar apenas o Lojista se preferir manter o usuário
+  const lojista = await prisma.lojista.findUnique({ where: { id } });
+  if (!lojista) return NextResponse.json({ error: "Não encontrado" }, { status: 404 });
+
+  await prisma.lojista.delete({ where: { id } });
+  
+  return NextResponse.json({ ok: true });
+}
