@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ConfirmOrderButton } from "@/components/admin/ConfirmOrderButton";
 import { InvoiceActions } from "@/components/InvoiceActions";
 import { ProgressBar } from "@/components/ProgressBar";
-import { Trash2, Phone, ShoppingBag } from "lucide-react";
+import { Trash2, Phone, ShoppingBag, Truck, Bike } from "lucide-react";
 import { DeleteOrderButton } from "@/components/admin/DeleteOrderButton";
 
 export const dynamic = "force-dynamic";
@@ -135,11 +135,11 @@ export default async function AdminPedidosPage() {
                   </div>
                   <div className="pt-4 border-t border-gray-200 flex justify-between items-end">
                     <div className="flex flex-col">
-                      <span className="text-xs font-bold text-gray-400 uppercase">Produtos: {formatCurrency(order.total - order.deliveryFee)}</span>
-                      <span className="text-xs font-bold text-blue-400 uppercase">Frete: {formatCurrency(order.deliveryFee)}</span>
+                      <span className="text-xs font-bold text-gray-400 uppercase">Produtos: {formatCurrency(Number(order.total) - (Number(order.deliveryFee) || 0))}</span>
+                      <span className="text-xs font-bold text-blue-400 uppercase">Frete: {formatCurrency(Number(order.deliveryFee) || 0)}</span>
                       <span className="text-xs font-bold text-gray-400 uppercase mt-1">Total Geral</span>
                     </div>
-                    <span className="text-2xl font-black text-[var(--zice-medium)]">{formatCurrency(order.total)}</span>
+                    <span className="text-2xl font-black text-[var(--zice-medium)]">{formatCurrency(Number(order.total))}</span>
                   </div>
                 </div>
 
