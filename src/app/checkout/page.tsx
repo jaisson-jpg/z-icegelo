@@ -30,8 +30,10 @@ export default function CheckoutPage() {
   const [receipt, setReceipt] = useState<File | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     fetch("/api/config")
       .then((r) => r.json())
       .then(setPix)
@@ -59,7 +61,7 @@ export default function CheckoutPage() {
       .catch(() => setProfileLoaded(true));
   }, []);
 
-  if (!profileLoaded) {
+  if (!isMounted || !profileLoaded) {
     return (
       <div className="max-w-lg mx-auto px-4 py-20 text-center">
         <div className="animate-pulse text-gray-500">Carregando checkout...</div>
@@ -113,16 +115,18 @@ export default function CheckoutPage() {
   );
 
   const totalSacos = useMemo(() => 
-    items.reduce((acc, item) => acc + item.quantity, 0),
+    (items || []).reduce((acc, item) => acc + (Number(item.quantity) || 0), 0),
     [items]
   );
 
   const deliveryFee = useMemo(() => {
     if (!selectedNeighborhood) return 0;
-    return calculateDeliveryFee(selectedNeighborhood.distanceKm, totalSacos, total);
+    const sacos = Number(totalSacos) || 0;
+    const orderTotal = Number(total) || 0;
+    return calculateDeliveryFee(selectedNeighborhood.distanceKm, sacos, orderTotal);
   }, [selectedNeighborhood, totalSacos, total]);
 
-  const finalTotal = total + deliveryFee;
+  const finalTotal = (Number(total) || 0) + deliveryFee;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
