@@ -30,7 +30,7 @@ export default async function LojistaPage() {
     prisma.loyaltyReward.findMany({
       where: {
         active: true,
-        targetType: "SACOS",
+        targetType: "POINTS",
         audience: { in: ["ATACADO", "TODOS"] },
       },
       orderBy: { sortOrder: "asc" },
@@ -117,7 +117,7 @@ export default async function LojistaPage() {
       {rewards.length > 0 && (
         <section className="mb-8">
           <h2 className="text-xl font-bold text-[var(--zice-dark)] mb-4">Prêmios disponíveis</h2>
-          <LoyaltyRewardsList rewards={rewards} currentValue={atual} type="SACOS" />
+          <LoyaltyRewardsList rewards={rewards} currentValue={user?.points || 0} type="POINTS" />
         </section>
       )}
 
