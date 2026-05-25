@@ -51,6 +51,7 @@ export async function PATCH(
           ? parseInt(formData.get("sacosPerUnit") as string) || 1
           : product.sacosPerUnit,
         active: formData.get("active") === "true",
+        isComingSoon: formData.get("isComingSoon") === "true",
         imageUrl,
       },
     });
@@ -68,6 +69,7 @@ export async function PATCH(
         sortOrder: body.sortOrder !== undefined ? Number(body.sortOrder) : product.sortOrder,
         stock: body.stock !== undefined ? Number(body.stock) : product.stock,
         active: body.active !== undefined ? Boolean(body.active) : product.active,
+        isComingSoon: body.isComingSoon !== undefined ? Boolean(body.isComingSoon) : product.isComingSoon,
       },
     });
   }

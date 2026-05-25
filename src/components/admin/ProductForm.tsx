@@ -17,6 +17,7 @@ export type ProductFormData = {
   stock: number;
   sacosPerUnit: number;
   active: boolean;
+  isComingSoon: boolean;
   imageUrl: string | null;
 };
 
@@ -35,6 +36,7 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
     stock: product?.stock ?? 0,
     sacosPerUnit: product?.sacosPerUnit ?? 1,
     active: product?.active ?? true,
+    isComingSoon: product?.isComingSoon ?? false,
     imageUrl: product?.imageUrl ?? "",
   });
 
@@ -47,6 +49,7 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
       if (k !== "imageUrl") fd.append(k, String(v));
     });
     fd.append("active", String(form.active));
+    fd.append("isComingSoon", String(form.isComingSoon));
     fd.append("imageUrl", form.imageUrl);
     if (imageFile) fd.append("image", imageFile);
 
@@ -227,23 +230,31 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
         </div>
       </div>
 
-      <label className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          checked={form.active}
-          onChange={(e) => setForm({ ...form, active: e.target.checked })}
-        />
-        <span className="text-sm">Produto ativo na loja</span>
-      </label>
+      <div className="flex flex-col gap-3 p-4 bg-gray-50 rounded-xl border">
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            className="w-5 h-5 accent-[var(--zice-medium)]"
+            checked={form.active}
+            onChange={(e) => setForm({ ...form, active: e.target.checked })}
+          />
+          <span className="text-sm font-bold text-[var(--zice-dark)] uppercase">Produto Ativo (Visível no site)</span>
+        </label>
 
-      <div className="flex flex-col sm:flex-row gap-3 pt-2">
-        <button type="submit" disabled={loading} className="btn-primary">
-          {loading ? "Salvando..." : product ? "Salvar alterações" : "Cadastrar produto"}
-        </button>
-        <button type="button" onClick={() => router.push("/admin/produtos")} className="btn-outline">
-          Cancelar
-        </button>
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            className="w-5 h-5 accent-orange-500"
+            checked={form.isComingSoon}
+            onChange={(e) => setForm({ ...form, isComingSoon: e.target.checked })}
+          />
+          <span className="text-sm font-bold text-orange-600 uppercase">Tarja "EM BREVE"</span>
+        </label>
       </div>
+
+      <button type="submit" disabled={loading} className="btn-primary w-full py-4 text-lg">
+        {loading ? "Salvando..." : product ? "Atualizar Produto" : "Criar Produto"}
+      </button>
     </form>
   );
 }

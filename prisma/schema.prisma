@@ -115,6 +115,7 @@ model Product {
   category    ProductCategory
   imageUrl    String?
   stock         Int             @default(0)
+  isComingSoon  Boolean         @default(false)
   sacosPerUnit  Int             @default(1)
   pointsEarn    Int             @default(1)
   active      Boolean         @default(true)

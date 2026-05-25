@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
   const stock = parseInt(formData.get("stock") as string) || 0;
   const sacosPerUnit = parseInt(formData.get("sacosPerUnit") as string) || 1;
   const active = formData.get("active") !== "false";
+  const isComingSoon = formData.get("isComingSoon") === "true";
   const image = formData.get("image") as File | null;
 
   if (!name || isNaN(price) || price < 0 || !category) {
@@ -46,6 +47,7 @@ export async function POST(req: NextRequest) {
       stock,
       sacosPerUnit,
       active,
+      isComingSoon,
       imageUrl,
     },
   });

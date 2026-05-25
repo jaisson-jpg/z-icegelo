@@ -15,6 +15,7 @@ type Product = {
   category: "VAREJO" | "ATACADO";
   pointsEarn: number;
   stock: number;
+  isComingSoon: boolean;
   imageUrl: string | null;
 };
 
@@ -23,6 +24,10 @@ export function ProductGrid({ products }: { products: Product[] }) {
   const [added, setAdded] = useState<string | null>(null);
 
   const handleAdd = (p: Product) => {
+    if (p.isComingSoon) {
+      alert("Este produto estará disponível em breve!");
+      return;
+    }
     if (p.stock <= 0) {
       alert("Produto sem estoque no momento.");
       return;
@@ -40,14 +45,25 @@ export function ProductGrid({ products }: { products: Product[] }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
       {products.map((p) => (
-        <article key={p.id} className="ice-card rounded-2xl p-4 sm:p-6 flex flex-col">
+        <article key={p.id} className="ice-card rounded-2xl p-4 sm:p-6 flex flex-col relative overflow-hidden">
+          {p.isComingSoon && (
+            <div className="absolute top-4 -right-12 bg-orange-500 text-white text-[10px] font-bold py-1 px-12 rotate-45 shadow-md z-10 uppercase tracking-wider">
+              Em breve
+            </div>
+          )}
+          {p.stock <= 0 && !p.isComingSoon && (
+            <div className="absolute top-4 -right-12 bg-red-600 text-white text-[10px] font-bold py-1 px-12 rotate-45 shadow-md z-10 uppercase tracking-wider">
+              Esgotado
+            </div>
+          )}
+          
           <div className="w-full aspect-square rounded-xl overflow-hidden mb-4 bg-[var(--zice-ice)] relative">
             {p.imageUrl ? (
               <Image
                 src={p.imageUrl}
                 alt={p.name}
                 fill
-                className="object-cover"
+                className={cn("object-cover", (p.stock <= 0 || p.isComingSoon) && "grayscale opacity-60")}
                 sizes="(max-width: 640px) 100vw, 33vw"
               />
             ) : (
@@ -60,8 +76,8 @@ export function ProductGrid({ products }: { products: Product[] }) {
           {p.description && (
             <p className="text-sm text-gray-600 mt-2 flex-1 line-clamp-3">{p.description}</p>
           )}
-          <p className={`text-xs mt-2 font-medium ${p.stock > 0 ? "text-green-600" : "text-red-600"}`}>
-            {p.stock > 0 ? `${p.stock} em estoque` : "Sem estoque"}
+          <p className={`text-xs mt-2 font-medium ${p.isComingSoon ? "text-orange-600" : p.stock > 0 ? "text-green-600" : "text-red-600"}`}>
+            {p.isComingSoon ? "Disponível em breve" : p.stock > 0 ? `${p.stock} em estoque` : "Sem estoque no momento"}
           </p>
           <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-3">
             <div>
@@ -73,10 +89,14 @@ export function ProductGrid({ products }: { products: Product[] }) {
             </div>
             <button
               onClick={() => handleAdd(p)}
-              disabled={p.stock <= 0}
-              className="btn-primary py-2 px-4 text-sm justify-center disabled:opacity-50"
+              disabled={p.stock <= 0 || p.isComingSoon}
+              className={cn(
+                "btn-primary py-2 px-4 text-sm justify-center disabled:opacity-50",
+                p.isComingSoon && "bg-orange-500",
+                p.stock <= 0 && !p.isComingSoon && "bg-gray-400"
+              )}
             >
-              {added === p.id ? "Adicionado!" : (
+              {p.isComingSoon ? "Em breve" : p.stock <= 0 ? "Esgotado" : added === p.id ? "Adicionado!" : (
                 <>
                   <Plus size={16} />
                   <ShoppingCart size={16} />

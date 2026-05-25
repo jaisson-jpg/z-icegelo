@@ -1,6 +1,7 @@
 import { unstable_noStore as noStore } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { Users, Search, Phone, MapPin, Calendar } from "lucide-react";
+import { CustomerActions } from "@/components/admin/CustomerActions";
 
 export const dynamic = "force-dynamic";
 
@@ -86,9 +87,17 @@ export default async function AdminClientesPage({
               </div>
             </div>
 
-            <div className="pt-2 flex justify-between items-center border-t">
-              <span className="text-xs font-bold text-gray-400 uppercase">Fidelidade</span>
-              <span className="text-[var(--zice-medium)] font-bold">{c.points} pontos</span>
+            <div className="pt-2 flex flex-col gap-3 border-t">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold text-gray-400 uppercase">Fidelidade</span>
+                <span className="text-[var(--zice-medium)] font-bold">{c.points} pontos</span>
+              </div>
+              
+              <CustomerActions 
+                customerId={c.id} 
+                customerName={c.name} 
+                currentPoints={c.points} 
+              />
             </div>
           </div>
         ))}
