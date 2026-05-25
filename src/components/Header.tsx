@@ -64,10 +64,10 @@ export function Header({ userName }: { userName?: string | null }) {
               href={instaUrl} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-white/90 hover:text-pink-300 transition-colors p-1"
+              className="text-white hover:text-pink-200 transition-all flex items-center justify-center w-9 h-9 bg-white/10 rounded-full"
               title="Siga-nos no Instagram"
             >
-              <Instagram size={20} />
+              <Instagram size={20} strokeWidth={2.5} />
             </a>
           )}
 
@@ -86,9 +86,9 @@ export function Header({ userName }: { userName?: string | null }) {
               href={instaUrl} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-white/90 p-1"
+              className="text-white hover:text-pink-200 transition-all flex items-center justify-center w-10 h-10 bg-white/10 rounded-full"
             >
-              <Instagram size={24} />
+              <Instagram size={24} strokeWidth={2.5} />
             </a>
           )}
           <button

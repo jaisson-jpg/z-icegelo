@@ -10,5 +10,6 @@ export async function GET() {
     pointsPerReal: config?.pointsPerReal ?? 1,
     sacosGratisMeta: config?.sacosGratisMeta ?? 100,
     sacosGratisReward: config?.sacosGratisReward ?? 5,
+    instagramUrl: config?.instagramUrl ?? "",
   });
 }

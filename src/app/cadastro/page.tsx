@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 
-import { cn } from "@/lib/utils";
+import { cn, maskPhone } from "@/lib/utils";
 
 function CadastroForm() {
   const router = useRouter();
@@ -21,6 +21,10 @@ function CadastroForm() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, phone: maskPhone(e.target.value) });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,7 +96,8 @@ function CadastroForm() {
                 required
                 placeholder="(47) 99999-9999"
                 value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                onChange={handlePhoneChange}
+                maxLength={15}
               />
             </div>
           </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCart } from "@/components/CartProvider";
-import { formatCurrency, cn } from "@/lib/utils";
+import { formatCurrency, cn, maskPhone, maskCpfCnpj } from "@/lib/utils";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { Copy, Check, Upload, Truck, Bike, Info } from "lucide-react";
@@ -267,7 +267,8 @@ function CheckoutContent() {
             required
             placeholder="(47) 99999-9999"
             value={form.customerPhone}
-            onChange={(e) => setForm({ ...form, customerPhone: e.target.value })}
+            onChange={(e) => setForm({ ...form, customerPhone: maskPhone(e.target.value) })}
+            maxLength={15}
           />
         </div>
         
@@ -312,7 +313,8 @@ function CheckoutContent() {
               required={form.needsInvoice}
               placeholder="000.000.000-00 ou 00.000.000/0000-00"
               value={form.customerCpfCnpj}
-              onChange={(e) => setForm({ ...form, customerCpfCnpj: e.target.value })}
+              onChange={(e) => setForm({ ...form, customerCpfCnpj: maskCpfCnpj(e.target.value) })}
+              maxLength={18}
             />
           </div>
         )}
