@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, cn } from "@/lib/utils";
 import { Plus, ShoppingCart } from "lucide-react";
 import { useCart } from "./CartProvider";
 import { useState } from "react";

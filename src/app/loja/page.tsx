@@ -9,8 +9,23 @@ export default async function LojaPage() {
     orderBy: { sortOrder: "asc" },
   });
 
-  const varejo = products.filter((p) => p.category === "VAREJO");
-  const atacado = products.filter((p) => p.category === "ATACADO");
+  const varejo = products
+    .filter((p) => p.category === "VAREJO")
+    .map((p) => ({
+      ...p,
+      price: Number(p.price),
+      category: p.category as "VAREJO" | "ATACADO",
+      isComingSoon: !!p.isComingSoon,
+    }));
+
+  const atacado = products
+    .filter((p) => p.category === "ATACADO")
+    .map((p) => ({
+      ...p,
+      price: Number(p.price),
+      category: p.category as "VAREJO" | "ATACADO",
+      isComingSoon: !!p.isComingSoon,
+    }));
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">

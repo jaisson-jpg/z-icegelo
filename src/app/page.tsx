@@ -107,7 +107,8 @@ export default async function HomePage() {
         <ProductGrid products={products.map(p => ({
           ...p,
           price: Number(p.price),
-          category: p.category as "VAREJO" | "ATACADO"
+          category: p.category as "VAREJO" | "ATACADO",
+          isComingSoon: !!p.isComingSoon
         }))} />
       </section>
 
