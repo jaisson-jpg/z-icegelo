@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { SiteShell } from "@/components/SiteShell";
-import { CartProvider } from "@/components/CartProvider";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { GlobalAnnouncement } from "@/components/GlobalAnnouncement";
+import { headers } from "next/headers";
 
 export const metadata: Metadata = {
   title: "Z-ice Gelo | Gelo em Guaramirim — Atacado e Varejo",
@@ -18,6 +17,10 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await getSession();
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || "";
+  const isAdmin = pathname.startsWith("/admin");
+
   let whatsapp = "5547996471803";
   try {
     const config = await prisma.siteConfig.findUnique({ where: { id: "main" } });
@@ -29,9 +32,13 @@ export default async function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <SiteShell userName={session?.name} whatsapp={whatsapp}>
-          {children}
-        </SiteShell>
+        {isAdmin ? (
+          <main>{children}</main>
+        ) : (
+          <SiteShell userName={session?.name} whatsapp={whatsapp}>
+            {children}
+          </SiteShell>
+        )}
       </body>
     </html>
   );
