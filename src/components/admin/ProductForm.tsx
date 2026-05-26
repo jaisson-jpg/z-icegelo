@@ -1,9 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import Image from "next/image";
-import { Upload } from "lucide-react";
+import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
 
 export type ProductFormData = {
   id: string;
@@ -24,7 +23,13 @@ export type ProductFormData = {
 export function ProductForm({ product }: { product?: ProductFormData }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const [form, setForm] = useState({
     name: product?.name ?? "",
     description: product?.description ?? "",
@@ -75,17 +80,17 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
     ? URL.createObjectURL(imageFile)
     : form.imageUrl;
 
+  if (!mounted) return <div className="bg-white rounded-xl border p-6 h-[600px] animate-pulse" />;
+
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-xl border p-4 sm:p-6 space-y-4 max-w-xl">
       <div>
         <label className="block text-sm font-medium mb-2">Imagem do produto</label>
         <div className="flex flex-col sm:flex-row gap-4 items-start">
           {preview ? (
-            <Image
+            <img
               src={preview}
               alt="Preview"
-              width={120}
-              height={120}
               className="rounded-xl object-cover w-28 h-28 border"
             />
           ) : (
@@ -95,7 +100,7 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
           )}
           <div className="flex-1 space-y-3">
             <label className="flex items-center gap-2 btn-outline cursor-pointer text-sm w-fit">
-              <Upload size={18} />
+              <span>📤</span>
               Escolher arquivo
               <input
                 type="file"

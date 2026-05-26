@@ -13,6 +13,13 @@ export default async function EditarProdutoPage({
 
   if (!product) notFound();
 
+  // Sanitiza o produto para evitar passar objetos Date para o Client Component
+  const sanitizedProduct = {
+    ...product,
+    createdAt: product.createdAt.toISOString(),
+    updatedAt: product.updatedAt.toISOString(),
+  };
+
   return (
     <div>
       <div className="mb-6">
@@ -25,7 +32,7 @@ export default async function EditarProdutoPage({
         <h1 className="text-2xl font-bold text-[var(--zice-dark)] mt-2">Editar produto</h1>
         <p className="text-gray-600">{product.name}</p>
       </div>
-      <ProductForm product={product} />
+      <ProductForm product={sanitizedProduct as any} />
     </div>
   );
 }
