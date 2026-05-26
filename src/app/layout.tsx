@@ -27,8 +27,8 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="pt-BR">
-      <body>
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <SiteShell userName={session?.name} whatsapp={whatsapp}>
           {children}
         </SiteShell>
