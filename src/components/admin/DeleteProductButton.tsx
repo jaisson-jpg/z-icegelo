@@ -1,8 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export function DeleteProductButton({
   id,
@@ -15,6 +14,13 @@ export function DeleteProductButton({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return <div className="p-2 w-8 h-8" />;
 
   const handleDelete = async () => {
     const msg = hasOrders
@@ -42,7 +48,7 @@ export function DeleteProductButton({
       title={hasOrders ? "Desativar produto" : "Excluir produto"}
       className="p-2 text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50"
     >
-      <Trash2 size={16} />
+      🗑️
     </button>
   );
 }

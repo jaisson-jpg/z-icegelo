@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Trash2, RotateCcw, X, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export function CustomerActions({ 
@@ -17,6 +16,13 @@ export function CustomerActions({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return <div className="h-10 w-full bg-gray-50 rounded-lg animate-pulse" />;
 
   const handleDelete = async () => {
     setLoading(true);
@@ -59,14 +65,14 @@ export function CustomerActions({
         className="flex-1 flex items-center justify-center gap-1 bg-orange-50 hover:bg-orange-100 text-orange-600 py-2 rounded-lg text-xs font-bold transition-colors"
         title="Zerar pontuação"
       >
-        <RotateCcw size={14} /> ZERAR PONTOS
+        🔄 ZERAR PONTOS
       </button>
       <button
         onClick={() => setShowDeleteModal(true)}
         className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg transition-colors"
         title="Excluir usuário"
       >
-        <Trash2 size={16} />
+        🗑️
       </button>
 
       {/* Modal de Confirmação de Exclusão */}
@@ -74,7 +80,7 @@ export function CustomerActions({
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
             <div className="flex items-center gap-3 text-red-600 mb-4">
-              <AlertTriangle size={32} />
+              <span className="text-3xl">⚠️</span>
               <h3 className="text-xl font-bold">Excluir Usuário?</h3>
             </div>
             <p className="text-gray-600 mb-6">
@@ -105,7 +111,7 @@ export function CustomerActions({
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
             <div className="flex items-center gap-3 text-orange-600 mb-4">
-              <RotateCcw size={32} />
+              <span className="text-3xl">🔄</span>
               <h3 className="text-xl font-bold">Zerar Pontos?</h3>
             </div>
             <p className="text-gray-600 mb-6">

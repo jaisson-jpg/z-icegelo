@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -23,8 +24,20 @@ export function SalesCharts({
   monthly: ChartPoint[];
   yearly: ChartPoint[];
 }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const formatBRL = (v: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
+
+  if (!mounted) return <div className="space-y-8 animate-pulse">
+    <div className="h-64 bg-gray-50 rounded-xl border"></div>
+    <div className="h-64 bg-gray-50 rounded-xl border"></div>
+    <div className="h-64 bg-gray-50 rounded-xl border"></div>
+  </div>;
 
   return (
     <div className="space-y-8">

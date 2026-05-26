@@ -27,23 +27,15 @@ export default async function AdminLojistasPage() {
         </Link>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {lojistas.map((l) => (
           <div key={l.id} className="space-y-3">
-            <LojistaProgressCard
-              lojista={{
-                id: l.id,
-                businessName: l.businessName,
-                sacosComprados: l.sacosComprados,
-                sacosGratisMeta: l.sacosGratisMeta,
-                sacosGratis: l.sacosGratis,
-                totalSacosHistorico: l.totalSacosHistorico,
-                user: {
-                  name: l.user.name,
-                  points: l.user.points,
-                  phone: l.user.phone,
-                },
-              }}
+            <LojistaProgressCard 
+              id={l.id}
+              businessName={l.businessName}
+              userName={l.user?.name || "Lojista"}
+              sacosComprados={l.sacosComprados || 0}
+              meta={l.sacosGratisMeta || 100} 
             />
             {l.weeklyPurchases[0] && (
               <p className="text-xs text-gray-500 px-1">

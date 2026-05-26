@@ -1,7 +1,6 @@
 import { getSalesStats } from "@/lib/stats";
 import { SalesCharts } from "@/components/admin/SalesCharts";
 import { formatCurrency } from "@/lib/utils";
-import { TrendingUp, ShoppingBag } from "lucide-react";
 
 export default async function RelatoriosPage() {
   const stats = await getSalesStats();
@@ -15,14 +14,14 @@ export default async function RelatoriosPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <div className="ice-card rounded-xl p-6">
-          <TrendingUp className="text-[var(--zice-medium)] mb-2" size={28} />
+          <div className="text-2xl mb-2">📈</div>
           <p className="text-2xl font-bold text-[var(--zice-dark)]">
             {formatCurrency(stats.totalRevenue)}
           </p>
           <p className="text-sm text-gray-600">Receita total confirmada</p>
         </div>
         <div className="ice-card rounded-xl p-6">
-          <ShoppingBag className="text-[var(--zice-medium)] mb-2" size={28} />
+          <div className="text-2xl mb-2">🛍️</div>
           <p className="text-2xl font-bold text-[var(--zice-dark)]">{stats.totalOrders}</p>
           <p className="text-sm text-gray-600">Pedidos confirmados</p>
         </div>
