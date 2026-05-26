@@ -39,6 +39,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Carrinho vazio" }, { status: 400 });
     }
 
+    const config = await prisma.siteConfig.findUnique({ where: { id: "main" } });
+    const pointsPerReal = config?.pointsPerReal ?? 1;
+
+    let pointsAwarded = 0;
     for (const item of items) {
       const product = await prisma.product.findUnique({ where: { id: item.productId } });
       if (!product) {
@@ -49,6 +53,12 @@ export async function POST(req: NextRequest) {
           error: `Estoque insuficiente para "${product.name}". Disponível: ${product.stock}`,
         }, { status: 400 });
       }
+      // Calcula pontos baseados no produto ou fallback para pontos por real se o produto tiver 0
+      const itemPoints = (product.pointsEarn || 0) > 0 
+        ? product.pointsEarn * item.quantity 
+        : Math.floor((item.price * item.quantity) * pointsPerReal);
+      
+      pointsAwarded += itemPoints;
     }
 
     let pixReceiptUrl: string | null = null;
@@ -59,16 +69,8 @@ export async function POST(req: NextRequest) {
     const session = await getSession();
     const userId = session?.id ?? null;
 
-    if (!userId) {
-      return NextResponse.json({ error: "Você precisa estar logado para fazer um pedido" }, { status: 401 });
-    }
-
     const category = items.some((i) => i.category === "ATACADO") ? "ATACADO" : "VAREJO";
     const orderNumber = generateOrderNumber();
-
-    const config = await prisma.siteConfig.findUnique({ where: { id: "main" } });
-    const pointsPerReal = config?.pointsPerReal ?? 1;
-    const pointsAwarded = Math.floor(total * pointsPerReal);
 
     const order = await prisma.order.create({
       data: {
@@ -104,7 +106,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (e: unknown) {
     console.error("ERRO NO POST /api/orders:", e);
-    // Retorna mensagem mais específica se for erro do Prisma
     const message = e instanceof Error ? e.message : "Erro desconhecido";
     return NextResponse.json({ 
       error: "Erro ao criar pedido no banco de dados", 

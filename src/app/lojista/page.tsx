@@ -30,7 +30,6 @@ export default async function LojistaPage() {
     prisma.loyaltyReward.findMany({
       where: {
         active: true,
-        targetType: "POINTS",
         audience: { in: ["ATACADO", "TODOS"] },
       },
       orderBy: { sortOrder: "asc" },
@@ -51,6 +50,9 @@ export default async function LojistaPage() {
   const faltam = Math.max(0, meta - atual);
   const reward = config?.sacosGratisReward ?? 5;
   const semanaAtual = lojista.weeklyPurchases[0]?.sacosCount ?? 0;
+
+  const pointRewards = rewards.filter(r => r.targetType === "POINTS");
+  const sacosRewards = rewards.filter(r => r.targetType === "SACOS");
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 sm:py-10">
@@ -114,10 +116,17 @@ export default async function LojistaPage() {
         <ShoppingBag size={20} /> Fazer novo pedido
       </Link>
 
-      {rewards.length > 0 && (
+      {sacosRewards.length > 0 && (
         <section className="mb-8">
-          <h2 className="text-xl font-bold text-[var(--zice-dark)] mb-4">Prêmios disponíveis</h2>
-          <LoyaltyRewardsList rewards={rewards} currentValue={user?.points || 0} type="POINTS" />
+          <h2 className="text-xl font-bold text-[var(--zice-dark)] mb-4">Metas de Sacos</h2>
+          <LoyaltyRewardsList rewards={sacosRewards} currentValue={atual} type="SACOS" />
+        </section>
+      )}
+
+      {pointRewards.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-xl font-bold text-[var(--zice-dark)] mb-4">Prêmios por Pontos</h2>
+          <LoyaltyRewardsList rewards={pointRewards} currentValue={user?.points || 0} type="POINTS" />
         </section>
       )}
 

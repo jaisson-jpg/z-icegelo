@@ -7,12 +7,18 @@ export function normalizePhone(phone: string) {
 }
 
 export function getSacosPerUnit(product: Pick<Product, "name" | "sacosPerUnit">) {
-  if (product.sacosPerUnit && product.sacosPerUnit > 0) {
+  // Se estiver explicitamente configurado com mais de 1 saco, confiamos no campo
+  if (product.sacosPerUnit && product.sacosPerUnit > 1) {
     return product.sacosPerUnit;
   }
+  
+  // Se for 1 (padrão) ou nulo, tentamos extrair do nome (ex: "Pacote 20 sacos")
+  // Isso ajuda caso o usuário esqueça de configurar o campo sacosPerUnit
   const match = product.name.match(/(\d+)\s*sacos?/i);
   if (match) return parseInt(match[1], 10);
-  return 1;
+  
+  // Fallback para o valor configurado ou 1
+  return product.sacosPerUnit || 1;
 }
 
 export function countSacosFromItems(
