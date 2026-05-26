@@ -13,11 +13,19 @@ export function getSacosPerUnit(product: Pick<Product, "name" | "sacosPerUnit">)
   }
   
   // Regex mais agressiva para pegar números antes de palavras-chave
-  // Pega: "20 sacos", "20un", "Pacote 20", "Gelo 20kg", "20 unidades"
-  const match = product.name.match(/(\d+)\s*(sacos?|un|unidades?|kg|pacote)/i);
+  // Pega: "20 sacos", "20un", "Pacote 20", "Gelo 20kg", "20 unidades", "Pacote com 20"
+  const name = product.name.toLowerCase();
+  const match = name.match(/(\d+)\s*(sacos?|un|unidades?|kg|pacote|com)/i);
   if (match) {
     const val = parseInt(match[1], 10);
     if (!isNaN(val) && val > 0) return val;
+  }
+  
+  // Tenta pegar qualquer número no nome se não achou com palavras-chave
+  const simpleMatch = name.match(/(\d+)/);
+  if (simpleMatch) {
+    const val = parseInt(simpleMatch[1], 10);
+    if (!isNaN(val) && val > 1) return val; // Só aceita se for maior que 1 para evitar pegar números aleatórios
   }
   
   // Fallback para o valor configurado ou 1

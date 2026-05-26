@@ -30,25 +30,25 @@ const navItems = [
 export function AdminSidebarNav() {
   const pathname = usePathname();
   const [pendingCount, setPendingCount] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     async function fetchCount() {
       try {
         const res = await fetch("/api/admin/orders/pending-count");
-        if (!res.ok) throw new Error("Falha ao buscar contagem");
+        if (!res.ok) return;
         const data = await res.json();
         if (data && typeof data.count === "number") {
           setPendingCount(data.count);
         }
-      } catch (e) {
-        console.error("Erro ao buscar contagem:", e);
-      }
+      } catch (e) {}
     }
     
     fetchCount();
-    const interval = setInterval(fetchCount, 30000); // Atualiza a cada 30s
-    return () => clearInterval(interval);
   }, []);
+
+  if (!mounted) return <div className="p-4 space-y-2 opacity-0">Carregando...</div>;
 
   return (
     <nav className="p-4 space-y-1">

@@ -17,6 +17,15 @@ export function ConfirmOrderButton({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useState(() => {
+    if (typeof window !== "undefined") {
+      setTimeout(() => setMounted(true), 10);
+    }
+  });
+
+  if (!mounted) return <div className="h-10 w-32 bg-gray-100 animate-pulse rounded-lg" />;
 
   const callApi = async (body: Record<string, unknown>) => {
     setLoading(true);
