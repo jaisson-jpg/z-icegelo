@@ -1,13 +1,10 @@
-import { unstable_noStore as noStore } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Plus } from "lucide-react";
 import { LojistaProgressCard } from "@/components/admin/LojistaProgressCard";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminLojistasPage() {
-  noStore();
 
   const lojistas = await prisma.lojista.findMany({
     include: {
@@ -26,7 +23,7 @@ export default async function AdminLojistasPage() {
           <p className="text-sm text-gray-600">Progresso de sacos e pontos em tempo real</p>
         </div>
         <Link href="/admin/lojistas/novo" className="btn-primary text-sm">
-          <Plus size={18} /> Novo lojista
+          ➕ Novo lojista
         </Link>
       </div>
 

@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
 import { ConfirmOrderButton } from "@/components/admin/ConfirmOrderButton";
 import { InvoiceActions } from "@/components/InvoiceActions";
-import { Trash2, Phone, ShoppingBag } from "lucide-react";
 import { DeleteOrderButton } from "@/components/admin/DeleteOrderButton";
 
 export const dynamic = "force-dynamic";
@@ -93,7 +92,7 @@ export default async function AdminPedidosPage() {
                     <h3 className="text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Cliente</h3>
                     <p className="font-bold text-[var(--zice-dark)]">{order.customerName}</p>
                     <p className="text-sm text-gray-600 flex items-center gap-1">
-                      <Phone size={14} /> {order.customerPhone}
+                      <span>📞</span> {order.customerPhone}
                     </p>
                     {order.customerEmail && <p className="text-xs text-gray-400 mt-1">{order.customerEmail}</p>}
                   </div>
@@ -205,7 +204,7 @@ export default async function AdminPedidosPage() {
         })}
         {orders.length === 0 && (
           <div className="text-center py-20 bg-white rounded-3xl border border-dashed">
-            <ShoppingBag className="mx-auto text-gray-300 mb-4" size={48} />
+            <div className="text-4xl mb-4">🛍️</div>
             <p className="text-gray-500 font-medium">Nenhum pedido recebido ainda.</p>
           </div>
         )}

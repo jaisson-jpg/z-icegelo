@@ -1,8 +1,6 @@
-import { unstable_noStore as noStore } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
-import { ShoppingBag, Store, Users, Snowflake, BarChart3 } from "lucide-react";
 import { LojistaProgressCard } from "@/components/admin/LojistaProgressCard";
 
 export const dynamic = "force-dynamic";
@@ -35,18 +33,18 @@ export default async function AdminDashboard() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-10">
         {[
-          { label: "Pedidos pendentes", value: pendingOrders, icon: ShoppingBag, href: "/admin/pedidos" },
-          { label: "Lojistas ativos", value: totalLojistas, icon: Store, href: "/admin/lojistas" },
-          { label: "Clientes", value: totalCustomers, icon: Users, href: "/admin/lojistas" },
+          { label: "Pedidos pendentes", value: pendingOrders, icon: "🛍️", href: "/admin/pedidos" },
+          { label: "Lojistas ativos", value: totalLojistas, icon: "🏪", href: "/admin/lojistas" },
+          { label: "Clientes", value: totalCustomers, icon: "👥", href: "/admin/lojistas" },
           {
             label: "Freezers",
             value: lojistas.reduce((s, l) => s + l.freezers.length, 0),
-            icon: Snowflake,
+            icon: "❄️",
             href: "/admin/lojistas",
           },
         ].map((card) => (
           <Link key={card.label} href={card.href} className="ice-card rounded-xl p-4 sm:p-6 hover:shadow-lg transition">
-            <card.icon className="text-[var(--zice-medium)] mb-2" size={24} />
+            <div className="text-2xl mb-2">{card.icon}</div>
             <p className="text-2xl sm:text-3xl font-bold text-[var(--zice-dark)]">{card.value}</p>
             <p className="text-xs sm:text-sm text-gray-600">{card.label}</p>
           </Link>
@@ -114,7 +112,7 @@ export default async function AdminDashboard() {
           <h2 className="font-bold text-lg mb-4">Relatórios</h2>
           <p className="text-sm text-gray-600 mb-4">Gráficos de vendas semanal, mensal e anual.</p>
           <Link href="/admin/relatorios" className="btn-primary inline-flex items-center gap-2">
-            <BarChart3 size={18} /> Abrir relatórios
+            📊 Abrir relatórios
           </Link>
         </section>
       </div>

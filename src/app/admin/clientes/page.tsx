@@ -1,6 +1,4 @@
-import { unstable_noStore as noStore } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { Users, Search, Phone, MapPin, Calendar } from "lucide-react";
 import { CustomerActions } from "@/components/admin/CustomerActions";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +8,6 @@ export default async function AdminClientesPage({
 }: {
   searchParams: { q?: string };
 }) {
-  noStore();
   const query = searchParams.q || "";
 
   const customers = await prisma.user.findMany({
@@ -37,7 +34,7 @@ export default async function AdminClientesPage({
           <p className="text-sm text-gray-600">Visualize e busque por todos os clientes cadastrados</p>
         </div>
         <div className="bg-white px-4 py-2 rounded-xl shadow-sm border flex items-center gap-2">
-          <Users className="text-[var(--zice-medium)]" size={20} />
+          <span className="text-xl">👥</span>
           <span className="font-bold text-lg">{customers.length}</span>
           <span className="text-sm text-gray-500">total</span>
         </div>
@@ -45,7 +42,7 @@ export default async function AdminClientesPage({
 
       <div className="bg-white rounded-2xl shadow-sm border p-4">
         <form className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">🔍</span>
           <input
             name="q"
             defaultValue={query}
@@ -70,11 +67,11 @@ export default async function AdminClientesPage({
 
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2 text-gray-600">
-                <Phone size={14} className="shrink-0 text-[var(--zice-medium)]" />
+                <span className="shrink-0 text-[var(--zice-medium)] text-xs">📞</span>
                 <span>{c.phone || "Não informado"}</span>
               </div>
               <div className="flex items-start gap-2 text-gray-600">
-                <MapPin size={14} className="shrink-0 mt-0.5 text-[var(--zice-medium)]" />
+                <span className="shrink-0 mt-0.5 text-[var(--zice-medium)] text-xs">📍</span>
                 <span className="leading-tight">
                   {c.address ? `${c.address}${c.number ? `, ${c.number}` : ""}` : "Endereço não informado"}
                   <br />
@@ -82,8 +79,8 @@ export default async function AdminClientesPage({
                 </span>
               </div>
               <div className="flex items-center gap-2 text-gray-400 text-xs">
-                <Calendar size={12} />
-                <span>Cadastrado em: {new Date(c.createdAt).toLocaleDateString("pt-BR")}</span>
+                <span>📅</span>
+                <span suppressHydrationWarning>Cadastrado em: {new Date(c.createdAt).toLocaleDateString("pt-BR")}</span>
               </div>
             </div>
 
@@ -104,7 +101,7 @@ export default async function AdminClientesPage({
 
         {customers.length === 0 && (
           <div className="col-span-full py-12 text-center bg-gray-50 rounded-2xl border-2 border-dashed">
-            <Users className="mx-auto text-gray-300 mb-2" size={48} />
+            <div className="text-4xl mb-2">👥</div>
             <p className="text-gray-500 font-medium">Nenhum cliente encontrado para sua busca.</p>
           </div>
         )}

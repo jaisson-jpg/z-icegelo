@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
-import { Package, AlertTriangle } from "lucide-react";
 
 export default async function EstoquePage() {
   const products = await prisma.product.findMany({
@@ -23,14 +22,14 @@ export default async function EstoquePage() {
           {outOfStock.length > 0 && (
             <div className="bg-red-50 border border-red-200 rounded-xl p-4">
               <p className="font-semibold text-red-800 flex items-center gap-2">
-                <AlertTriangle size={18} /> Sem estoque ({outOfStock.length})
+                ⚠️ Sem estoque ({outOfStock.length})
               </p>
             </div>
           )}
           {lowStock.length > 0 && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
               <p className="font-semibold text-yellow-800 flex items-center gap-2">
-                <AlertTriangle size={18} /> Estoque baixo ({lowStock.length})
+                ⚠️ Estoque baixo ({lowStock.length})
               </p>
             </div>
           )}
@@ -77,7 +76,7 @@ export default async function EstoquePage() {
       </div>
 
       <Link href="/admin/produtos" className="btn-primary mt-6 inline-flex items-center gap-2">
-        <Package size={18} /> Gerenciar produtos
+        📦 Gerenciar produtos
       </Link>
     </div>
   );

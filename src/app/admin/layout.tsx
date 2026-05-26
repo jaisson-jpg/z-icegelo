@@ -3,26 +3,16 @@ import { getSession } from "@/lib/auth";
 import Link from "next/link";
 import { LogoutButton } from "@/components/LogoutButton";
 import { AdminSidebarNav } from "@/components/admin/AdminSidebarNav";
-import {
-  LayoutDashboard,
-  ShoppingBag,
-  Store,
-  Settings,
-  Package,
-  BarChart3,
-  Boxes,
-  Gift,
-} from "lucide-react";
 
 const nav = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/pedidos", label: "Pedidos", icon: ShoppingBag },
-  { href: "/admin/produtos", label: "Produtos", icon: Package },
-  { href: "/admin/estoque", label: "Estoque", icon: Boxes },
-  { href: "/admin/lojistas", label: "Lojistas", icon: Store },
-  { href: "/admin/recompensas", label: "Recompensas", icon: Gift },
-  { href: "/admin/relatorios", label: "Relatórios", icon: BarChart3 },
-  { href: "/admin/config", label: "Configurações", icon: Settings },
+  { href: "/admin", label: "Dashboard" },
+  { href: "/admin/pedidos", label: "Pedidos" },
+  { href: "/admin/produtos", label: "Produtos" },
+  { href: "/admin/estoque", label: "Estoque" },
+  { href: "/admin/lojistas", label: "Lojistas" },
+  { href: "/admin/recompensas", label: "Recompensas" },
+  { href: "/admin/relatorios", label: "Relatórios" },
+  { href: "/admin/config", label: "Configurações" },
 ];
 
 export default async function AdminLayout({

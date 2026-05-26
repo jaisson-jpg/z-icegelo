@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
-import { Plus, Pencil } from "lucide-react";
 import { DeleteProductButton } from "@/components/admin/DeleteProductButton";
 
 export default async function AdminProdutosPage() {
@@ -20,7 +19,7 @@ export default async function AdminProdutosPage() {
           </p>
         </div>
         <Link href="/admin/produtos/novo" className="btn-primary text-sm">
-          <Plus size={18} /> Novo produto
+          ➕ Novo produto
         </Link>
       </div>
 
@@ -86,7 +85,7 @@ export default async function AdminProdutosPage() {
                         className="p-2 text-[var(--zice-medium)] hover:bg-[var(--zice-ice)] rounded-lg"
                         title="Editar"
                       >
-                        <Pencil size={16} />
+                        ✏️
                       </Link>
                       <DeleteProductButton
                         id={p.id}
