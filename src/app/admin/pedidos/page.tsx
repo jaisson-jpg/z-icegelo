@@ -4,8 +4,7 @@ import { formatCurrency, cn } from "@/lib/utils";
 import Image from "next/image";
 import { ConfirmOrderButton } from "@/components/admin/ConfirmOrderButton";
 import { InvoiceActions } from "@/components/InvoiceActions";
-import { ProgressBar } from "@/components/ProgressBar";
-import { Trash2, Phone, ShoppingBag, Truck, Bike } from "lucide-react";
+import { Trash2, Phone, ShoppingBag } from "lucide-react";
 import { DeleteOrderButton } from "@/components/admin/DeleteOrderButton";
 
 export const dynamic = "force-dynamic";
@@ -71,8 +70,8 @@ export default async function AdminPedidosPage() {
                     order.status === "PENDING_PIX" ? "bg-yellow-500" : "hidden"
                   }`} />
                   <span className="font-mono font-bold text-lg text-[var(--zice-dark)]">{order.orderNumber}</span>
-                  <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${statusColors[order.status]}`}>
-                    {statusLabels[order.status]}
+                  <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${statusColors[order.status] || "bg-gray-100 text-gray-800"}`}>
+                    {statusLabels[order.status] || order.status}
                   </span>
                 </div>
                 <div className="flex items-center gap-4">
@@ -124,12 +123,12 @@ export default async function AdminPedidosPage() {
                 <div className="bg-gray-50/50 rounded-2xl p-4 border border-gray-100 space-y-4">
                   <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Resumo do Pedido</h3>
                   <div className="space-y-2">
-                    {order.items.map((i) => (
+                    {order.items?.map((i) => (
                       <div key={i.id} className="flex justify-between text-sm">
                         <span className="text-gray-600 font-medium">
-                          {i.quantity}x {i.product.name}
+                          {i.quantity}x {i.product?.name || "Produto Indisponível"}
                         </span>
-                        <span className="font-bold text-[var(--zice-dark)]">{formatCurrency(i.subtotal)}</span>
+                        <span className="font-bold text-[var(--zice-dark)]">{formatCurrency(i.subtotal || 0)}</span>
                       </div>
                     ))}
                   </div>

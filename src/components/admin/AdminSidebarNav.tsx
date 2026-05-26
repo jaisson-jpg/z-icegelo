@@ -35,8 +35,11 @@ export function AdminSidebarNav() {
     async function fetchCount() {
       try {
         const res = await fetch("/api/admin/orders/pending-count");
+        if (!res.ok) throw new Error("Falha ao buscar contagem");
         const data = await res.json();
-        setPendingCount(data.count || 0);
+        if (data && typeof data.count === "number") {
+          setPendingCount(data.count);
+        }
       } catch (e) {
         console.error("Erro ao buscar contagem:", e);
       }
