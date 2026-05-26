@@ -68,15 +68,27 @@ export default async function AdminProdutosPage() {
                   </td>
                   <td className="p-3 text-right">{p.pointsEarn}</td>
                   <td className="p-3 text-center">
-                    {p.active ? (
-                      <span className="text-xs text-green-700 bg-green-100 px-2 py-1 rounded-full">
-                        Ativo
-                      </span>
-                    ) : (
-                      <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-full">
-                        Inativo
-                      </span>
-                    )}
+                    <div className="flex flex-col gap-1 items-center">
+                      {p.active ? (
+                        <span className="text-[10px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full uppercase">
+                          Ativo
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-bold text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full uppercase">
+                          Inativo
+                        </span>
+                      )}
+                      {p.isComingSoon && (
+                        <span className="text-[10px] font-bold text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full uppercase">
+                          Em Breve
+                        </span>
+                      )}
+                      {p.stock <= 0 && (
+                        <span className="text-[10px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full uppercase">
+                          Esgotado
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="p-3">
                     <div className="flex items-center justify-center gap-1">

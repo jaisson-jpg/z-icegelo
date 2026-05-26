@@ -230,26 +230,56 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 p-4 bg-gray-50 rounded-xl border">
-        <label className="flex items-center gap-3 cursor-pointer">
+      <div className="flex flex-col gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
+        <h3 className="text-xs font-black text-blue-800 uppercase tracking-widest mb-1">Status e Visibilidade</h3>
+        
+        <label className="flex items-center gap-3 cursor-pointer p-2 hover:bg-white/50 rounded-lg transition-colors">
           <input
             type="checkbox"
             className="w-5 h-5 accent-[var(--zice-medium)]"
             checked={form.active}
             onChange={(e) => setForm({ ...form, active: e.target.checked })}
           />
-          <span className="text-sm font-bold text-[var(--zice-dark)] uppercase">Produto Ativo (Visível no site)</span>
+          <div className="flex flex-col">
+            <span className="text-sm font-bold text-[var(--zice-dark)] uppercase">Produto Ativo</span>
+            <span className="text-[10px] text-gray-500">Se desmarcado, o produto desaparece da loja.</span>
+          </div>
         </label>
 
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            className="w-5 h-5 accent-orange-500"
-            checked={form.isComingSoon}
-            onChange={(e) => setForm({ ...form, isComingSoon: e.target.checked })}
-          />
-          <span className="text-sm font-bold text-orange-600 uppercase">Tarja "EM BREVE"</span>
-        </label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+          <label className={cn(
+            "flex items-center gap-3 cursor-pointer p-3 rounded-xl border-2 transition-all",
+            form.isComingSoon ? "bg-orange-100 border-orange-400" : "bg-white border-gray-100"
+          )}>
+            <input
+              type="checkbox"
+              className="w-5 h-5 accent-orange-500"
+              checked={form.isComingSoon}
+              onChange={(e) => setForm({ ...form, isComingSoon: e.target.checked })}
+            />
+            <div className="flex flex-col">
+              <span className="text-sm font-black text-orange-700 uppercase">Tarja EM BREVE</span>
+              <span className="text-[10px] text-orange-600/70 leading-tight">Exibe uma faixa laranja no produto.</span>
+            </div>
+          </label>
+
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, stock: 0 })}
+            className={cn(
+              "flex items-center gap-3 cursor-pointer p-3 rounded-xl border-2 transition-all text-left",
+              form.stock <= 0 ? "bg-red-100 border-red-400" : "bg-white border-gray-100"
+            )}
+          >
+            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${form.stock <= 0 ? "border-red-500 bg-red-500" : "border-gray-300"}`}>
+              {form.stock <= 0 && <div className="w-2 h-2 bg-white rounded-full" />}
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-black text-red-700 uppercase">Tarja ESGOTADO</span>
+              <span className="text-[10px] text-red-600/70 leading-tight">Zera o estoque e exibe faixa vermelha.</span>
+            </div>
+          </button>
+        </div>
       </div>
 
       <button type="submit" disabled={loading} className="btn-primary w-full py-4 text-lg">

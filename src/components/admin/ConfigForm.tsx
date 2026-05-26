@@ -100,6 +100,10 @@ export function ConfigForm({ config }: { config: Config }) {
         <div className="bg-white rounded-2xl border p-6 shadow-sm space-y-4">
           <h3 className="font-bold text-lg text-[var(--zice-dark)] border-b pb-2">Regras de Fidelidade (Padrão)</h3>
           <p className="text-xs text-gray-500 italic">Estes valores serão usados para novos lojistas, mas você pode ajustar cada lojista individualmente na lista de lojistas.</p>
+          <div className="p-3 bg-blue-50 rounded-xl border border-blue-100 mb-2">
+            <p className="text-[10px] font-black text-blue-700 uppercase tracking-widest mb-1">Dica de Gestão</p>
+            <p className="text-xs text-blue-800">Para colocar tarjas de <strong>"ESGOTADO"</strong> ou <strong>"EM BREVE"</strong> nos produtos, edite o produto desejado na aba <a href="/admin/produtos" className="underline font-bold">Produtos</a>.</p>
+          </div>
           <div>
             <label className="block text-sm font-medium mb-1 text-gray-700">Pontos por R$ 1 gastos</label>
             <input
