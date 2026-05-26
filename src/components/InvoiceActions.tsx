@@ -1,8 +1,15 @@
 "use client";
 
 import { Printer, Share2, FileText } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export function InvoiceActions({ orderId }: { orderId: string }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const url = `/admin/pedidos/${orderId}/nota-fiscal`;
 
   const handlePrint = () => {
@@ -26,6 +33,8 @@ export function InvoiceActions({ orderId }: { orderId: string }) {
       alert("Link copiado!");
     }
   };
+
+  if (!mounted) return <div className="h-10 w-full bg-gray-50 rounded-lg" />;
 
   return (
     <div className="flex flex-wrap gap-2">

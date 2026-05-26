@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Check, X, Gift } from "lucide-react";
 
 export function ConfirmOrderButton({
@@ -19,13 +19,11 @@ export function ConfirmOrderButton({
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  useState(() => {
-    if (typeof window !== "undefined") {
-      setTimeout(() => setMounted(true), 10);
-    }
-  });
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  if (!mounted) return <div className="h-10 w-32 bg-gray-100 animate-pulse rounded-lg" />;
+  if (!mounted) return <div className="h-10 w-32 bg-gray-100 rounded-lg" />;
 
   const callApi = async (body: Record<string, unknown>) => {
     setLoading(true);

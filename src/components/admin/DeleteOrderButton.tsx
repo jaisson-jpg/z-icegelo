@@ -1,12 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Trash2 } from "lucide-react";
 
 export function DeleteOrderButton({ orderId }: { orderId: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return <div className="w-9 h-9" />;
 
   const handleDelete = async () => {
     if (!confirm("Excluir este pedido permanentemente?")) return;

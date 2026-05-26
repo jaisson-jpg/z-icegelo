@@ -71,7 +71,7 @@ export default async function AdminPedidosPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-gray-400 mt-1" suppressHydrationWarning>
                     {new Date(order.createdAt).toLocaleString("pt-BR", {
                       timeZone: "America/Sao_Paulo",
                       day: "2-digit",
