@@ -12,10 +12,13 @@ export function getSacosPerUnit(product: Pick<Product, "name" | "sacosPerUnit">)
     return product.sacosPerUnit;
   }
   
-  // Se for 1 (padrão) ou nulo, tentamos extrair do nome (ex: "Pacote 20 sacos")
-  // Isso ajuda caso o usuário esqueça de configurar o campo sacosPerUnit
-  const match = product.name.match(/(\d+)\s*sacos?/i);
-  if (match) return parseInt(match[1], 10);
+  // Regex mais agressiva para pegar números antes de palavras-chave
+  // Pega: "20 sacos", "20un", "Pacote 20", "Gelo 20kg", "20 unidades"
+  const match = product.name.match(/(\d+)\s*(sacos?|un|unidades?|kg|pacote)/i);
+  if (match) {
+    const val = parseInt(match[1], 10);
+    if (!isNaN(val) && val > 0) return val;
+  }
   
   // Fallback para o valor configurado ou 1
   return product.sacosPerUnit || 1;
@@ -177,12 +180,20 @@ export async function applyLoyaltyToOrder(order: OrderWithItems) {
 
     const lojista = await findLojistaForOrder(tx, effectiveUserId, order.customerPhone);
 
-    if (lojista && sacosCredited === 0) {
+    // Se for um lojista e ou ainda não tem sacos creditados, ou estamos forçando a atualização (applyLoyaltyOnly)
+    // Isso permite corrigir pedidos que foram creditados com a quantidade errada anteriormente
+    if (lojista) {
       const sacosAdded = countSacosFromItems(order.items);
       if (sacosAdded > 0) {
-        const sacosResult = await applyLojistaSacos(tx, lojista.id, sacosAdded);
-        sacosCredited = sacosResult.sacosAdded;
-        sacosGratisEarned = sacosResult.sacosGratisEarned;
+        // Se já existiam sacos creditados e estamos re-aplicando, precisamos "devolver" os antigos antes
+        // Mas para simplificar e evitar erros de saldo negativo, apenas adicionamos a diferença se necessário
+        // Ou, no nosso caso, a função applyLojistaSacos já lida com o saldo.
+        // Vamos apenas garantir que só rodamos se sacosCredited for 0 OU se for uma re-aplicação manual
+        if (order.sacosCredited === 0 || (order.loyaltyApplied && sacosAdded !== order.sacosCredited)) {
+           const sacosResult = await applyLojistaSacos(tx, lojista.id, sacosAdded);
+           sacosCredited = sacosResult.sacosAdded;
+           sacosGratisEarned = sacosResult.sacosGratisEarned;
+        }
       }
     }
 

@@ -1,7 +1,5 @@
-import { unstable_noStore as noStore } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { formatCurrency, cn } from "@/lib/utils";
-import Image from "next/image";
+import { formatCurrency } from "@/lib/utils";
 import { ConfirmOrderButton } from "@/components/admin/ConfirmOrderButton";
 import { InvoiceActions } from "@/components/InvoiceActions";
 import { Trash2, Phone, ShoppingBag } from "lucide-react";
@@ -10,8 +8,6 @@ import { DeleteOrderButton } from "@/components/admin/DeleteOrderButton";
 export const dynamic = "force-dynamic";
 
 export default async function AdminPedidosPage() {
-  noStore();
-
   const orders = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
     include: {
@@ -155,11 +151,12 @@ export default async function AdminPedidosPage() {
                           className="block group relative"
                         >
                           <div className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-2xl border-2 border-gray-200 overflow-hidden bg-white shadow-sm group-hover:border-[var(--zice-medium)] transition-all">
-                            <Image
+                            {/* Substituído Next/Image por img padrão para evitar exceções client-side */}
+                            <img
                               src={order.pixReceiptUrl}
                               alt="Comprovante"
-                              fill
-                              className="object-contain p-2"
+                              className="w-full h-full object-contain p-2"
+                              loading="lazy"
                             />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 flex items-center justify-center transition-colors">
                               <div className="bg-black/60 text-white px-3 py-1 rounded-full text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase">
