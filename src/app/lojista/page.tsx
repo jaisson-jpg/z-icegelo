@@ -66,100 +66,91 @@ export default async function LojistaPage() {
         <LogoutButton />
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <div className="ice-card rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-[var(--zice-medium)]">{user?.points ?? 0}</p>
-          <p className="text-xs text-gray-600">Pontos</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <div className="ice-card rounded-2xl p-6 text-center border-2 border-[var(--zice-light)]">
+          <p className="text-4xl font-black text-[var(--zice-medium)]">{atual}</p>
+          <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">Sacos Comprados</p>
+          <p className="text-xs text-gray-400 mt-1">Neste ciclo de prêmios</p>
         </div>
-        <div className="ice-card rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-[var(--zice-dark)]">{atual}</p>
-          <p className="text-xs text-gray-600">Sacos no ciclo</p>
-        </div>
-        <div className="ice-card rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-[var(--zice-dark)]">{lojista.totalSacosHistorico}</p>
-          <p className="text-xs text-gray-600">Total comprado</p>
-        </div>
-        <div className="ice-card rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-green-600">{lojista.sacosGratis}</p>
-          <p className="text-xs text-gray-600">Sacos grátis</p>
+        <div className="ice-card rounded-2xl p-6 text-center border-2 border-[var(--zice-light)]">
+          <p className="text-4xl font-black text-green-600">{lojista.sacosGratis}</p>
+          <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">Prêmios a Receber</p>
+          <p className="text-xs text-gray-400 mt-1">Aguardando entrega do Admin</p>
         </div>
       </div>
 
-      <div className="ice-card rounded-2xl p-6 sm:p-8 mb-8 border-2 border-[var(--zice-light)]">
-        <div className="flex items-center gap-3 mb-2">
-          <Gift className="text-[var(--zice-medium)]" size={32} />
-          <h2 className="text-xl font-bold text-[var(--zice-dark)]">Progresso — Sacos Grátis</h2>
+      <div className="ice-card rounded-3xl p-8 mb-8 border-2 border-[var(--zice-medium)] shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-4 opacity-10">
+          <Gift size={120} />
         </div>
-        <p className="text-gray-600 mb-6 text-sm">
-          Compre <strong>{meta} sacos</strong> e ganhe <strong>{reward} sacos grátis</strong>!
-        </p>
-        <ProgressBar
-          value={atual}
-          max={meta}
-          size="lg"
-          label={`${atual} de ${meta} sacos neste ciclo`}
-          sublabel={faltam > 0 ? `Faltam ${faltam} sacos para o prêmio` : "🎉 Meta atingida!"}
-        />
-        {lojista.sacosGratis > 0 && (
-          <p className="mt-5 p-4 bg-green-50 text-green-800 rounded-xl font-semibold text-center">
-            🎉 Você tem <strong>{lojista.sacosGratis} sacos grátis</strong> para resgatar!
+        
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="bg-[var(--zice-medium)] text-white p-2 rounded-xl">
+              <Gift size={24} />
+            </div>
+            <h2 className="text-2xl font-black text-[var(--zice-dark)]">Seu Progresso</h2>
+          </div>
+          
+          <p className="text-gray-600 mb-8 text-lg">
+            Complete <strong>{meta} sacos</strong> para ganhar seu benefício!
           </p>
-        )}
-        {semanaAtual > 0 && (
-          <p className="text-sm text-gray-600 mt-4 text-center">
-            Esta semana você já comprou <strong>{semanaAtual} sacos</strong>
-          </p>
-        )}
+          
+          <ProgressBar
+            value={atual}
+            max={meta}
+            size="lg"
+            label={`${atual} de ${meta} sacos`}
+            sublabel={faltam > 0 ? `Faltam apenas ${faltam} sacos!` : "🎉 PARABÉNS! Meta atingida!"}
+          />
+
+          {lojista.sacosGratis > 0 && (
+            <div className="mt-8 p-6 bg-green-600 text-white rounded-2xl shadow-lg animate-bounce text-center">
+              <p className="text-xl font-black">🎁 VOCÊ TEM {lojista.sacosGratis} PRÊMIO(S)!</p>
+              <p className="text-sm opacity-90 font-medium mt-1">O administrador irá entregar seu prêmio em breve.</p>
+            </div>
+          )}
+        </div>
       </div>
 
-      <Link href="/loja" className="btn-primary w-full justify-center mb-8 text-lg">
-        <ShoppingBag size={20} /> Fazer novo pedido
+      <Link href="/loja" className="btn-primary w-full justify-center mb-10 py-5 text-xl shadow-2xl hover:scale-[1.02] transition-transform">
+        <ShoppingBag size={24} /> FAZER NOVO PEDIDO
       </Link>
 
-      {sacosRewards.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-xl font-bold text-[var(--zice-dark)] mb-4">Metas de Sacos</h2>
-          <LoyaltyRewardsList rewards={sacosRewards} currentValue={atual} type="SACOS" />
-        </section>
-      )}
-
-      {pointRewards.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-xl font-bold text-[var(--zice-dark)] mb-4">Prêmios por Pontos</h2>
-          <LoyaltyRewardsList rewards={pointRewards} currentValue={user?.points || 0} type="POINTS" />
-        </section>
-      )}
-
-      {lojista.freezers.length > 0 && (
-        <div className="ice-card rounded-2xl p-6 mb-8">
-          <h2 className="font-bold text-[var(--zice-dark)] mb-4 flex items-center gap-2">
-            <Snowflake size={22} /> Freezer Z-ice
-          </h2>
-          {lojista.freezers.map((f) => (
-            <div key={f.id} className="p-4 bg-[var(--zice-ice)] rounded-lg mb-2">
-              <p className="font-semibold">Código: {f.code}</p>
-              <p className="text-sm text-gray-600">Local: {f.location}</p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="ice-card rounded-2xl p-6">
-        <h2 className="font-bold text-[var(--zice-dark)] mb-4 flex items-center gap-2">
-          <TrendingUp size={22} /> Histórico semanal
-        </h2>
-        {lojista.weeklyPurchases.length === 0 ? (
-          <p className="text-gray-500 text-sm">Nenhum registro ainda. Após confirmar pedidos, aparece aqui.</p>
-        ) : (
-          <div className="space-y-2">
-            {lojista.weeklyPurchases.map((w) => (
-              <div key={w.id} className="flex justify-between text-sm py-2 border-b">
-                <span>Semana de {new Date(w.weekStart).toLocaleDateString("pt-BR")}</span>
-                <strong className="text-[var(--zice-medium)]">{w.sacosCount} sacos</strong>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {lojista.freezers.length > 0 && (
+          <div className="ice-card rounded-2xl p-6">
+            <h2 className="font-bold text-[var(--zice-dark)] mb-4 flex items-center gap-2">
+              <Snowflake size={22} className="text-blue-400" /> Freezer Z-ice
+            </h2>
+            {lojista.freezers.map((f) => (
+              <div key={f.id} className="p-4 bg-[var(--zice-ice)] rounded-xl mb-2 border border-blue-100">
+                <p className="font-bold text-[var(--zice-dark)]">CÓDIGO: {f.code}</p>
+                <p className="text-xs text-gray-500 uppercase font-bold">{f.location}</p>
               </div>
             ))}
           </div>
         )}
+
+        <div className="ice-card rounded-2xl p-6">
+          <h2 className="font-bold text-[var(--zice-dark)] mb-4 flex items-center gap-2">
+            <TrendingUp size={22} className="text-green-500" /> Histórico Recente
+          </h2>
+          {lojista.weeklyPurchases.length === 0 ? (
+            <p className="text-gray-500 text-sm italic">Nenhum registro ainda.</p>
+          ) : (
+            <div className="space-y-3">
+              {lojista.weeklyPurchases.map((w) => (
+                <div key={w.id} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+                  <span className="text-sm text-gray-600 font-medium">Semana {new Date(w.weekStart).toLocaleDateString("pt-BR")}</span>
+                  <span className="bg-[var(--zice-ice)] text-[var(--zice-medium)] px-3 py-1 rounded-full text-xs font-bold">
+                    {w.sacosCount} sacos
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -29,14 +29,20 @@ export default async function AdminLojistasPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {lojistas.map((l) => (
-          <div key={l.id} className="space-y-3">
-            <LojistaProgressCard 
-              id={l.id}
-              businessName={l.businessName}
-              userName={l.user?.name || "Lojista"}
-              sacosComprados={l.sacosComprados || 0}
-              meta={l.sacosGratisMeta || 100} 
-            />
+          <div key={l.id} className="relative group">
+            {l.sacosGratis > 0 && (
+              <div className="absolute -top-3 -right-3 z-10 bg-green-600 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg animate-bounce border-2 border-white">
+                🎁 PRÊMIO PENDENTE
+              </div>
+            )}
+            <div className="space-y-3">
+              <LojistaProgressCard 
+                id={l.id}
+                businessName={l.businessName}
+                userName={l.user?.name || "Lojista"}
+                sacosComprados={l.sacosComprados || 0}
+                meta={l.sacosGratisMeta || 100} 
+              />
             {l.weeklyPurchases[0] && (
               <p className="text-xs text-gray-500 px-1">
                 Semana atual: <strong>{l.weeklyPurchases[0].sacosCount}</strong> sacos
