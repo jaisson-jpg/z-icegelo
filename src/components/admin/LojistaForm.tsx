@@ -12,6 +12,7 @@ type LojistaData = {
   city: string;
   state: string;
   sacosGratisMeta: number;
+  sacosGratisReward: number;
   sacosComprados: number;
   active: boolean;
   notes: string | null;
@@ -32,6 +33,7 @@ export function LojistaForm({ lojista }: { lojista?: LojistaData }) {
     city: lojista?.city ?? "Guaramirim",
     state: lojista?.state ?? "SC",
     sacosGratisMeta: lojista?.sacosGratisMeta ?? 100,
+    sacosGratisReward: lojista?.sacosGratisReward ?? 5,
     sacosComprados: lojista?.sacosComprados ?? 0,
     active: lojista?.active ?? true,
     notes: lojista?.notes ?? "",
@@ -81,7 +83,8 @@ export function LojistaForm({ lojista }: { lojista?: LojistaData }) {
     { key: "address", label: "Endereço *" },
     { key: "city", label: "Cidade" },
     { key: "state", label: "Estado" },
-    { key: "sacosGratisMeta", label: "Meta sacos para grátis", type: "number" },
+    { key: "sacosGratisMeta", label: "Meta de compras (X sacos)", type: "number" },
+    { key: "sacosGratisReward", label: "Prêmio ao bater meta (Y sacos)", type: "number" },
     { key: "sacosComprados", label: "Sacos no ciclo atual", type: "number" },
     { key: "notes", label: "Observações" },
   ];

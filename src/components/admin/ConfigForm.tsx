@@ -98,7 +98,8 @@ export function ConfigForm({ config }: { config: Config }) {
 
         {/* Card de Fidelidade */}
         <div className="bg-white rounded-2xl border p-6 shadow-sm space-y-4">
-          <h3 className="font-bold text-lg text-[var(--zice-dark)] border-b pb-2">Regras de Fidelidade</h3>
+          <h3 className="font-bold text-lg text-[var(--zice-dark)] border-b pb-2">Regras de Fidelidade (Padrão)</h3>
+          <p className="text-xs text-gray-500 italic">Estes valores serão usados para novos lojistas, mas você pode ajustar cada lojista individualmente na lista de lojistas.</p>
           <div>
             <label className="block text-sm font-medium mb-1 text-gray-700">Pontos por R$ 1 gastos</label>
             <input

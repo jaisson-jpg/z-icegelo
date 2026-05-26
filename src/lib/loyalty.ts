@@ -50,7 +50,7 @@ export async function applyLojistaSacos(tx: Tx, lojistaId: string, sacosAdded: n
   if (!lojista) return { sacosAdded: 0, sacosGratisEarned: 0 };
 
   const config = await tx.siteConfig.findUnique({ where: { id: "main" } });
-  const reward = config?.sacosGratisReward ?? 5;
+  const reward = lojista.sacosGratisReward || config?.sacosGratisReward || 5;
 
   const newTotal = lojista.sacosComprados + sacosAdded;
   let sacosGratis = lojista.sacosGratis;

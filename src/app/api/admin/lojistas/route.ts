@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
   const body = await req.json();
-  const { businessName, name, email, phone, password, cnpj, address, city, state, sacosGratisMeta, notes } = body;
+  const { businessName, name, email, phone, password, cnpj, address, city, state, sacosGratisMeta, sacosGratisReward, notes } = body;
 
   if (!businessName || !name || !email || !password || !address) {
     return NextResponse.json({ error: "Campos obrigatórios faltando" }, { status: 400 });
@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
       city: city || "Guaramirim",
       state: state || "SC",
       sacosGratisMeta: sacosGratisMeta || config?.sacosGratisMeta || 100,
+      sacosGratisReward: sacosGratisReward || config?.sacosGratisReward || 5,
       notes: notes || null,
     },
   });

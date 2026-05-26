@@ -37,6 +37,7 @@ export async function PATCH(
       city: body.city,
       state: body.state,
       sacosGratisMeta: body.sacosGratisMeta,
+      sacosGratisReward: body.sacosGratisReward,
       sacosComprados: body.sacosComprados,
       active: body.active,
       notes: body.notes || null,
