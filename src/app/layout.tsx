@@ -29,12 +29,9 @@ export default async function RootLayout({
   return (
     <html lang="pt-BR">
       <body>
-        <CartProvider>
-          <GlobalAnnouncement />
-          <SiteShell userName={session?.name} whatsapp={whatsapp}>
-            {children}
-          </SiteShell>
-        </CartProvider>
+        <SiteShell userName={session?.name} whatsapp={whatsapp}>
+          {children}
+        </SiteShell>
       </body>
     </html>
   );

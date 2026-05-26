@@ -4,6 +4,8 @@ import { usePathname } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { CartProvider } from "@/components/CartProvider";
+import { GlobalAnnouncement } from "@/components/GlobalAnnouncement";
 
 export function SiteShell({
   children,
@@ -18,15 +20,16 @@ export function SiteShell({
   const isAdmin = pathname.startsWith("/admin");
 
   if (isAdmin) {
-    return <>{children}</>;
+    return <main>{children}</main>;
   }
 
   return (
-    <>
+    <CartProvider>
+      <GlobalAnnouncement />
       <Header userName={userName} />
       <main className="min-h-[60vh]">{children}</main>
       <Footer />
       <WhatsAppButton phone={whatsapp} />
-    </>
+    </CartProvider>
   );
 }
