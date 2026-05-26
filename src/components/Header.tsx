@@ -3,9 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, User, Instagram } from "lucide-react";
+import { Menu, X, User, Instagram, ShoppingCart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/components/CartProvider";
 
 const links = [
   { href: "/", label: "Início" },
@@ -16,6 +17,7 @@ const links = [
 
 export function Header({ userName }: { userName?: string | null }) {
   const pathname = usePathname();
+  const { count } = useCart();
   const [open, setOpen] = useState(false);
   const [instaUrl, setInstaUrl] = useState("");
 
@@ -72,6 +74,19 @@ export function Header({ userName }: { userName?: string | null }) {
           )}
 
           <Link
+            href="/carrinho"
+            className="text-white hover:bg-white/10 transition-all flex items-center justify-center w-9 h-9 bg-white/10 rounded-full relative"
+            title="Ver carrinho"
+          >
+            <ShoppingCart size={20} strokeWidth={2.5} />
+            {count > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1 border-2 border-[var(--zice-blue)]">
+                {count}
+              </span>
+            )}
+          </Link>
+
+          <Link
             href={userName ? "/minha-conta" : "/login"}
             className="flex items-center gap-1 bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg text-sm font-medium"
           >
@@ -91,6 +106,19 @@ export function Header({ userName }: { userName?: string | null }) {
               <Instagram size={24} strokeWidth={2.5} />
             </a>
           )}
+
+          <Link
+            href="/carrinho"
+            className="text-white hover:bg-white/10 transition-all flex items-center justify-center w-10 h-10 bg-white/10 rounded-full relative"
+          >
+            <ShoppingCart size={24} strokeWidth={2.5} />
+            {count > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold min-w-[20px] h-[20px] rounded-full flex items-center justify-center px-1 border-2 border-[var(--zice-blue)]">
+                {count}
+              </span>
+            )}
+          </Link>
+
           <button
             className="text-white p-2"
             onClick={() => setOpen(!open)}
