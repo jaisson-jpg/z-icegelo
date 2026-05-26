@@ -1,6 +1,5 @@
 "use client";
 
-import { Printer, Share2, FileText } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export function InvoiceActions({ orderId }: { orderId: string }) {
@@ -44,21 +43,21 @@ export function InvoiceActions({ orderId }: { orderId: string }) {
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1 text-sm px-3 py-2 rounded-lg bg-[var(--zice-ice)] text-[var(--zice-dark)] font-medium hover:bg-[var(--zice-light)]"
       >
-        <FileText size={16} /> Ver NF
+        📄 Ver NF
       </a>
       <button
         type="button"
         onClick={handlePrint}
         className="inline-flex items-center gap-1 text-sm px-3 py-2 rounded-lg border border-[var(--zice-medium)] text-[var(--zice-dark)] font-medium"
       >
-        <Printer size={16} /> Imprimir
+        🖨️ Imprimir
       </button>
       <button
         type="button"
         onClick={handleShare}
         className="inline-flex items-center gap-1 text-sm px-3 py-2 rounded-lg border border-[var(--zice-medium)] text-[var(--zice-dark)] font-medium"
       >
-        <Share2 size={16} /> Compartilhar
+        🔗 Compartilhar
       </button>
     </div>
   );

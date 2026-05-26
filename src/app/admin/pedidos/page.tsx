@@ -70,15 +70,8 @@ export default async function AdminPedidosPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <p className="text-xs text-gray-400 mt-1" suppressHydrationWarning>
-                    {new Date(order.createdAt).toLocaleString("pt-BR", {
-                      timeZone: "America/Sao_Paulo",
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit"
-                    })}
+                  <p className="text-xs text-gray-400 mt-1">
+                    {order.createdAt.toISOString().split('T')[0].split('-').reverse().join('/')}
                   </p>
                   <DeleteOrderButton orderId={order.id} />
                 </div>

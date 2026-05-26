@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Trash2 } from "lucide-react";
 
 export function DeleteOrderButton({ orderId }: { orderId: string }) {
   const router = useRouter();
@@ -18,12 +17,16 @@ export function DeleteOrderButton({ orderId }: { orderId: string }) {
   const handleDelete = async () => {
     if (!confirm("Excluir este pedido permanentemente?")) return;
     setLoading(true);
-    const res = await fetch(`/api/admin/orders/${orderId}`, { method: "DELETE" });
-    if (res.ok) {
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Erro ao excluir");
       router.refresh();
-    } else {
-      setLoading(false);
+    } catch (e) {
       alert("Erro ao excluir pedido");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -31,10 +34,10 @@ export function DeleteOrderButton({ orderId }: { orderId: string }) {
     <button
       onClick={handleDelete}
       disabled={loading}
-      className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
       title="Excluir pedido"
     >
-      <Trash2 size={18} />
+      🗑️
     </button>
   );
 }
