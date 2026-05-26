@@ -12,8 +12,10 @@ type Announcement = {
 export function GlobalAnnouncement() {
   const [announcement, setAnnouncement] = useState<Announcement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     async function fetchAnnouncement() {
       try {
         const res = await fetch("/api/announcement");
@@ -33,7 +35,7 @@ export function GlobalAnnouncement() {
     fetchAnnouncement();
   }, []);
 
-  if (!announcement || !isOpen) return null;
+  if (!mounted || !announcement || !isOpen) return null;
 
   const handleClose = () => {
     localStorage.setItem(`announcement-${announcement.title || 'default'}`, 'seen');
