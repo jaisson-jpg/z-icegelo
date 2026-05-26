@@ -54,6 +54,7 @@ export default async function AdminLojistasPage() {
               </p>
             )}
           </div>
+        </div>
         ))}
       </div>
 
