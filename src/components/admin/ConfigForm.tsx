@@ -5,6 +5,7 @@ import { useState } from "react";
 
 type Config = {
   pixKey: string;
+  pixType: string;
   pixHolder: string;
   whatsapp: string;
   instagramUrl: string;
@@ -26,6 +27,7 @@ export function ConfigForm({ config }: { config: Config }) {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     pixKey: config?.pixKey ?? "47996471803",
+    pixType: config?.pixType ?? "Telefone",
     pixHolder: config?.pixHolder ?? "Z-ice Gelo",
     whatsapp: config?.whatsapp ?? "5547996471803",
     instagramUrl: config?.instagramUrl ?? "",
@@ -68,6 +70,20 @@ export function ConfigForm({ config }: { config: Config }) {
               value={form.pixKey}
               onChange={(e) => setForm({ ...form, pixKey: e.target.value })}
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700">Tipo de Chave</label>
+            <select
+              className="input-field"
+              value={form.pixType}
+              onChange={(e) => setForm({ ...form, pixType: e.target.value })}
+            >
+              <option value="Telefone">Telefone</option>
+              <option value="CPF">CPF</option>
+              <option value="CNPJ">CNPJ</option>
+              <option value="E-mail">E-mail</option>
+              <option value="Aleatória">Chave Aleatória</option>
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium mb-1 text-gray-700">Titular PIX</label>

@@ -195,6 +195,7 @@ model LoyaltyReward {
 model SiteConfig {
   id                String @id @default("main")
   pixKey            String @default("47996471803")
+  pixType           String @default("Telefone")
   pixHolder         String @default("Z-ice Gelo")
   pointsPerReal     Float  @default(1)
   whatsapp          String @default("5547996471803")

@@ -3,6 +3,8 @@ import { ProductGrid } from "@/components/ProductGrid";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 
+export const revalidate = 60;
+
 export default async function LojaPage() {
   const products = await prisma.product.findMany({
     where: { active: true },

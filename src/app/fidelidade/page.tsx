@@ -2,6 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 
+export const revalidate = 60;
+
 export default async function FidelidadePage() {
   const rewards = await prisma.loyaltyReward.findMany({
     where: { active: true },

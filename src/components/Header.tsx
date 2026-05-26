@@ -15,20 +15,16 @@ const links = [
   { href: "/contato", label: "Contato" },
 ];
 
-export function Header({ userName }: { userName?: string | null }) {
+export function Header({ 
+  userName, 
+  instaUrl 
+}: { 
+  userName?: string | null;
+  instaUrl?: string;
+}) {
   const pathname = usePathname();
   const { count } = useCart();
   const [open, setOpen] = useState(false);
-  const [instaUrl, setInstaUrl] = useState("");
-
-  useEffect(() => {
-    fetch("/api/config")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data?.instagramUrl) setInstaUrl(data.instagramUrl);
-      })
-      .catch(() => {});
-  }, []);
 
   return (
     <header className="sticky top-0 z-50 ice-gradient shadow-lg">

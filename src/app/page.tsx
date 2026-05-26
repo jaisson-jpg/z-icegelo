@@ -12,6 +12,8 @@ import {
   ArrowRight,
 } from "lucide-react";
 
+export const revalidate = 60;
+
 export default async function HomePage() {
   const products = await prisma.product.findMany({
     where: { active: true },

@@ -9,6 +9,7 @@ import { NEIGHBORHOODS, calculateDeliveryFee } from "@/lib/delivery";
 
 type PixConfig = {
   pixKey: string;
+  pixType: string;
   pixHolder: string;
 };
 
@@ -217,18 +218,29 @@ function CheckoutContent() {
       </div>
 
       {pix && (
-        <div className="ice-card rounded-xl p-6 mb-8 bg-[var(--zice-ice)]">
-          <h2 className="font-bold text-[var(--zice-dark)] mb-3">Dados PIX</h2>
-          <p className="text-sm text-gray-600 mb-2">Titular: {pix.pixHolder}</p>
-          <div className="flex items-center gap-2">
-            <code className="flex-1 bg-white p-3 rounded-lg text-sm break-all border">
+        <div className="bg-[var(--zice-ice)] p-5 rounded-2xl border-2 border-dashed border-[var(--zice-medium)] text-center space-y-4 mb-8">
+          <div>
+            <p className="text-[10px] font-black text-[var(--zice-medium)] uppercase tracking-widest mb-1">
+              Tipo de Chave: {pix.pixType}
+            </p>
+            <p className="text-xl sm:text-2xl font-black text-[var(--zice-dark)] break-all select-all">
               {pix.pixKey}
-            </code>
-            <button type="button" onClick={copyPix} className="btn-primary py-3 px-4">
-              {copied ? <Check size={18} /> : <Copy size={18} />}
-            </button>
+            </p>
           </div>
-          <p className="text-xs text-gray-500 mt-3">
+          
+          <div className="pt-2 border-t border-blue-100">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Beneficiário</p>
+            <p className="font-bold text-[var(--zice-dark)] uppercase">{pix.pixHolder}</p>
+          </div>
+
+          <button
+            type="button"
+            onClick={copyPix}
+            className="w-full py-3 bg-white text-[var(--zice-medium)] rounded-xl text-xs font-black border-2 border-[var(--zice-medium)] hover:bg-[var(--zice-ice)] transition-all"
+          >
+            {copied ? "✅ COPIADO!" : "📋 COPIAR CHAVE PIX"}
+          </button>
+          <p className="text-xs text-gray-500">
             Faça o PIX do valor total e envie o comprovante abaixo.
           </p>
         </div>

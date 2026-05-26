@@ -5,6 +5,7 @@ export async function GET() {
   const config = await prisma.siteConfig.findUnique({ where: { id: "main" } });
   return NextResponse.json({
     pixKey: config?.pixKey ?? "47996471803",
+    pixType: config?.pixType ?? "Telefone",
     pixHolder: config?.pixHolder ?? "Z-ice Gelo",
     whatsapp: config?.whatsapp ?? "5547996471803",
     pointsPerReal: config?.pointsPerReal ?? 1,

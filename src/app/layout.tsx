@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { SiteShell } from "@/components/SiteShell";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { CartProvider } from "@/components/CartProvider";
+import { GlobalAnnouncement } from "@/components/GlobalAnnouncement";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
@@ -22,22 +26,28 @@ export default async function RootLayout({
   const isAdmin = pathname.startsWith("/admin");
 
   let whatsapp = "5547996471803";
+  let instagramUrl = "";
   try {
     const config = await prisma.siteConfig.findUnique({ where: { id: "main" } });
     if (config?.whatsapp) whatsapp = config.whatsapp;
+    if (config?.instagramUrl) instagramUrl = config.instagramUrl;
   } catch {
     /* db not ready */
   }
 
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body suppressHydrationWarning>
+      <body suppressHydrationWarning className="antialiased">
         {isAdmin ? (
           <main>{children}</main>
         ) : (
-          <SiteShell userName={session?.name} whatsapp={whatsapp}>
-            {children}
-          </SiteShell>
+          <CartProvider>
+            <GlobalAnnouncement />
+            <Header userName={session?.name} instaUrl={instagramUrl} />
+            <main className="min-h-[60vh]">{children}</main>
+            <Footer />
+            <WhatsAppButton phone={whatsapp} />
+          </CartProvider>
         )}
       </body>
     </html>
