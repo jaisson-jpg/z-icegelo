@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth";
-import { getWeekStart } from "@/lib/utils";
+import { applyLojistaSacos } from "@/lib/loyalty";
 
 export async function POST(
   req: NextRequest,
@@ -20,36 +20,14 @@ export async function POST(
   const lojista = await prisma.lojista.findUnique({ where: { id: lojistaId } });
   if (!lojista) return NextResponse.json({ error: "Lojista não encontrado" }, { status: 404 });
 
-  const weekStart = getWeekStart();
-  const config = await prisma.siteConfig.findUnique({ where: { id: "main" } });
-  const reward = config?.sacosGratisReward ?? 5;
-
-  await prisma.$transaction(async (tx) => {
-    await tx.weeklyPurchase.upsert({
-      where: { lojistaId_weekStart: { lojistaId, weekStart } },
-      create: { lojistaId, weekStart, sacosCount },
-      update: { sacosCount: { increment: sacosCount } },
+  try {
+    await prisma.$transaction(async (tx) => {
+      await applyLojistaSacos(tx, lojistaId, sacosCount);
     });
 
-    const newTotal = lojista.sacosComprados + sacosCount;
-    let sacosGratis = lojista.sacosGratis;
-    let remaining = newTotal;
-    const meta = lojista.sacosGratisMeta;
-
-    while (remaining >= meta) {
-      remaining -= meta;
-      sacosGratis += reward;
-    }
-
-    await tx.lojista.update({
-      where: { id: lojistaId },
-      data: {
-        sacosComprados: remaining,
-        sacosGratis,
-        totalSacosHistorico: { increment: sacosCount },
-      },
-    });
-  });
-
-  return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    console.error("Erro ao registrar compra semanal:", e);
+    return NextResponse.json({ error: "Erro ao processar" }, { status: 500 });
+  }
 }

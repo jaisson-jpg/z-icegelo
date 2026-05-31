@@ -12,20 +12,25 @@ export function getSacosPerUnit(product: Pick<Product, "name" | "sacosPerUnit">)
     return product.sacosPerUnit;
   }
   
-  // Regex mais agressiva para pegar números antes de palavras-chave
-  // Pega: "20 sacos", "20un", "Pacote 20", "Gelo 20kg", "20 unidades", "Pacote com 20"
+  // Regex para pegar números antes de palavras-chave que indiquem múltiplos sacos
+  // Pega: "20 sacos", "20un", "Pacote 20", "20 unidades", "Pacote com 20"
+  // REMOVIDO "kg" pois gelo de 10kg é apenas 1 saco, não 10.
   const name = product.name.toLowerCase();
-  const match = name.match(/(\d+)\s*(sacos?|un|unidades?|kg|pacote|com)/i);
+  const match = name.match(/(\d+)\s*(sacos?|un|unidades?|pacote|com)/i);
   if (match) {
     const val = parseInt(match[1], 10);
     if (!isNaN(val) && val > 0) return val;
   }
   
-  // Tenta pegar qualquer número no nome se não achou com palavras-chave
-  const simpleMatch = name.match(/(\d+)/);
-  if (simpleMatch) {
-    const val = parseInt(simpleMatch[1], 10);
-    if (!isNaN(val) && val > 1) return val; // Só aceita se for maior que 1 para evitar pegar números aleatórios
+  // Se for atacado e tiver um número no nome, provavelmente é a quantidade de sacos
+  // mas evitamos pegar "2kg", "5kg", "10kg" etc.
+  if (name.includes("atacado")) {
+    const simpleMatch = name.match(/(\d+)/);
+    if (simpleMatch) {
+      const val = parseInt(simpleMatch[1], 10);
+      // Evitamos 2, 5, 10 que são pesos comuns de sacos individuais
+      if (!isNaN(val) && val > 1 && val !== 2 && val !== 5 && val !== 10) return val;
+    }
   }
   
   // Fallback para o valor configurado ou 1
@@ -44,7 +49,7 @@ export function countSacosFromItems(
 type Tx = Prisma.TransactionClient;
 
 export async function applyLojistaSacos(tx: Tx, lojistaId: string, sacosAdded: number) {
-  if (sacosAdded <= 0) return { sacosAdded: 0, sacosGratisEarned: 0 };
+  if (sacosAdded === 0) return { sacosAdded: 0, sacosGratisEarned: 0 };
 
   const lojista = await tx.lojista.findUnique({ where: { id: lojistaId } });
   if (!lojista) return { sacosAdded: 0, sacosGratisEarned: 0 };
@@ -58,9 +63,16 @@ export async function applyLojistaSacos(tx: Tx, lojistaId: string, sacosAdded: n
   const meta = lojista.sacosGratisMeta;
   const sacosGratisBefore = lojista.sacosGratis;
 
-  while (remaining >= meta) {
-    remaining -= meta;
-    sacosGratis += reward;
+  // Se o total for positivo, processamos ganhos de brindes
+  if (remaining >= meta) {
+    while (remaining >= meta) {
+      remaining -= meta;
+      sacosGratis += reward;
+    }
+  } else if (remaining < 0) {
+    // Se o total for negativo (ajuste para baixo), mantemos o saldo mínimo de 0
+    // mas não tiramos brindes já ganhos para evitar confusão
+    remaining = 0;
   }
 
   await tx.lojista.update({
@@ -188,19 +200,20 @@ export async function applyLoyaltyToOrder(order: OrderWithItems) {
 
     const lojista = await findLojistaForOrder(tx, effectiveUserId, order.customerPhone);
 
-    // Se for um lojista e ou ainda não tem sacos creditados, ou estamos forçando a atualização (applyLoyaltyOnly)
+    // Se for um lojista e ou ainda não tem sacos creditados, ou estamos forçando a atualização
     // Isso permite corrigir pedidos que foram creditados com a quantidade errada anteriormente
     if (lojista) {
-      const sacosAdded = countSacosFromItems(order.items);
-      if (sacosAdded > 0) {
-        // Se já existiam sacos creditados e estamos re-aplicando, precisamos "devolver" os antigos antes
-        // Mas para simplificar e evitar erros de saldo negativo, apenas adicionamos a diferença se necessário
-        // Ou, no nosso caso, a função applyLojistaSacos já lida com o saldo.
-        // Vamos apenas garantir que só rodamos se sacosCredited for 0 OU se for uma re-aplicação manual
-        if (order.sacosCredited === 0 || (order.loyaltyApplied && sacosAdded !== order.sacosCredited)) {
-           const sacosResult = await applyLojistaSacos(tx, lojista.id, sacosAdded);
-           sacosCredited = sacosResult.sacosAdded;
-           sacosGratisEarned = sacosResult.sacosGratisEarned;
+      const currentSacos = countSacosFromItems(order.items);
+      
+      // Se ainda não creditou OU se o valor calculado mudou (ajuste)
+      if (order.sacosCredited === 0 || currentSacos !== order.sacosCredited) {
+        const diff = currentSacos - (order.sacosCredited || 0);
+        
+        if (diff !== 0) {
+          const sacosResult = await applyLojistaSacos(tx, lojista.id, diff);
+          // O total creditado neste pedido passa a ser o valor correto calculado agora
+          sacosCredited = currentSacos;
+          sacosGratisEarned = sacosResult.sacosGratisEarned;
         }
       }
     }

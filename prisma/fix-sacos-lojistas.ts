@@ -15,30 +15,20 @@ async function main() {
   const orders = await prisma.order.findMany({
     where: {
       status: "CONFIRMED",
-      sacosCredited: 0,
       userId: { in: lojistaUserIds },
     },
     include: { items: { include: { product: true } } },
   });
 
-  console.log(`Corrigindo ${orders.length} pedidos de lojistas sem sacos...\n`);
+  console.log(`Verificando fidelidade de ${orders.length} pedidos de lojistas...\n`);
 
   for (const order of orders) {
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { loyaltyApplied: false },
-    });
-
-    const fresh = await prisma.order.findUnique({
-      where: { id: order.id },
-      include: { items: { include: { product: true } } },
-    });
-    if (!fresh) continue;
-
-    const result = await applyLoyaltyToOrder(fresh);
-    console.log(
-      `✓ ${order.orderNumber} | ${order.customerName} → +${result.sacosCredited} sacos (pts já tinha)`
-    );
+    const result = await applyLoyaltyToOrder(order);
+    if (result.sacosCredited !== order.sacosCredited) {
+      console.log(
+        `✓ ${order.orderNumber} | ${order.customerName} → Ajustado de ${order.sacosCredited} para ${result.sacosCredited} sacos`
+      );
+    }
   }
 
   console.log("\n--- Estado dos lojistas ---");
