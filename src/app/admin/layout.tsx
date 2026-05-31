@@ -7,6 +7,7 @@ import { AdminSidebarNav } from "@/components/admin/AdminSidebarNav";
 
 const nav = [
   { href: "/admin", label: "Dashboard" },
+  { href: "/admin/caixa", label: "Caixa" },
   { href: "/admin/pedidos", label: "Pedidos" },
   { href: "/admin/produtos", label: "Produtos" },
   { href: "/admin/estoque", label: "Estoque" },
