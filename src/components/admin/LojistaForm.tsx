@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
+import { useConfirm } from "@/components/ConfirmModal";
 
 type LojistaData = {
   id: string;
@@ -22,6 +23,7 @@ type LojistaData = {
 export function LojistaForm({ lojista }: { lojista?: LojistaData }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const { confirm, ConfirmComponent } = useConfirm();
   const [form, setForm] = useState({
     businessName: lojista?.businessName ?? "",
     name: lojista?.user.name ?? "",
@@ -61,7 +63,14 @@ export function LojistaForm({ lojista }: { lojista?: LojistaData }) {
   };
 
   const handleDelete = async () => {
-    if (!lojista || !confirm("Tem certeza que deseja excluir este lojista? Esta ação não pode ser desfeita.")) return;
+    if (!lojista) return;
+    const ok = await confirm(
+      "Excluir Lojista?",
+      "Tem certeza que deseja excluir este lojista? Esta ação não pode ser desfeita e removerá todo o histórico e freezers associados.",
+      "danger"
+    );
+    if (!ok) return;
+
     setLoading(true);
     const res = await fetch(`/api/admin/lojistas/${lojista.id}`, { method: "DELETE" });
     if (res.ok) {
@@ -91,6 +100,7 @@ export function LojistaForm({ lojista }: { lojista?: LojistaData }) {
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-xl border p-6 space-y-4 max-w-lg">
+      <ConfirmComponent />
       {fields.map(({ key, label, type }) => (
         <div key={key}>
           <label className="block text-sm font-medium mb-1">{label}</label>

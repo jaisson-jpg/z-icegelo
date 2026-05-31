@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useConfirm } from "@/components/ConfirmModal";
 
 export function LojistaRewardActions({ 
   lojistaId, 
@@ -12,10 +13,16 @@ export function LojistaRewardActions({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const { confirm, ConfirmComponent } = useConfirm();
 
   const handlePayReward = async () => {
     if (sacosGratis <= 0) return;
-    if (!confirm(`Confirmar entrega de prêmio para este lojista? Isso irá descontar 1 prêmio do saldo dele.`)) return;
+    const ok = await confirm(
+      "Entregar Prêmio?",
+      "Confirmar entrega de prêmio para este lojista? Isso irá descontar 1 prêmio do saldo dele.",
+      "success"
+    );
+    if (!ok) return;
 
     setLoading(true);
     try {
@@ -26,7 +33,6 @@ export function LojistaRewardActions({
       if (!res.ok) throw new Error("Erro ao processar");
       
       router.refresh();
-      alert("Prêmio registrado com sucesso!");
     } catch (e) {
       alert("Erro ao registrar pagamento do prêmio");
     } finally {
@@ -35,7 +41,12 @@ export function LojistaRewardActions({
   };
 
   const handleResetProgress = async () => {
-    if (!confirm("Deseja zerar o progresso de sacos comprados deste lojista?")) return;
+    const ok = await confirm(
+      "Zerar Progresso?",
+      "Deseja zerar o progresso de sacos comprados deste lojista? Esta ação não pode ser desfeita.",
+      "danger"
+    );
+    if (!ok) return;
 
     setLoading(true);
     try {
@@ -46,7 +57,6 @@ export function LojistaRewardActions({
       if (!res.ok) throw new Error("Erro ao resetar");
       
       router.refresh();
-      alert("Progresso resetado com sucesso!");
     } catch (e) {
       alert("Erro ao resetar progresso");
     } finally {
@@ -56,6 +66,7 @@ export function LojistaRewardActions({
 
   return (
     <div className="flex flex-col sm:flex-row gap-3">
+      <ConfirmComponent />
       <button
         onClick={handlePayReward}
         disabled={loading || sacosGratis <= 0}
