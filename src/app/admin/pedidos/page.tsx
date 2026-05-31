@@ -6,14 +6,44 @@ import { DeleteOrderButton } from "@/components/admin/DeleteOrderButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminPedidosPage() {
-  const orders = await prisma.order.findMany({
-    orderBy: { createdAt: "desc" },
-    include: {
-      items: { include: { product: true } },
-      user: { include: { lojista: true } },
-    },
-  });
+export default async function AdminPedidosPage({
+  searchParams,
+}: {
+  searchParams: { status?: string; page?: string };
+}) {
+  const currentStatus = searchParams.status || "ALL";
+  const page = Math.max(1, parseInt(searchParams.page || "1"));
+  const pageSize = 20;
+
+  const where: any = {};
+  if (currentStatus === "PENDING") {
+    where.status = { in: ["PENDING_PIX", "AWAITING_CONFIRMATION"] };
+  } else if (currentStatus !== "ALL") {
+    where.status = currentStatus;
+  }
+
+  const [orders, total] = await Promise.all([
+    prisma.order.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: {
+        items: { include: { product: true } },
+        user: { include: { lojista: true } },
+      },
+    }),
+    prisma.order.count({ where }),
+  ]);
+
+  const totalPages = Math.ceil(total / pageSize);
+
+  const statusFilters = [
+    { label: "Todos", value: "ALL" },
+    { label: "Pendentes", value: "PENDING" },
+    { label: "Confirmados", value: "CONFIRMED" },
+    { label: "Cancelados", value: "CANCELLED" },
+  ];
 
   const statusLabels: Record<string, string> = {
     PENDING_PIX: "Aguardando PIX",
@@ -34,22 +64,25 @@ export default async function AdminPedidosPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-[var(--zice-dark)]">Gerenciamento de Pedidos</h1>
-          <p className="text-gray-500">Total de {orders.length} pedidos realizados</p>
+          <p className="text-gray-500">Mostrando {orders.length} de {total} pedidos</p>
         </div>
-        <div className="flex gap-2">
-          <div className="bg-white border px-4 py-2 rounded-xl shadow-sm">
-            <p className="text-[10px] text-gray-400 font-bold uppercase">Aguardando</p>
-            <p className="text-xl font-bold text-orange-500">
-              {orders.filter(o => ["PENDING_PIX", "AWAITING_CONFIRMATION"].includes(o.status)).length}
-            </p>
-          </div>
-          <div className="bg-white border px-4 py-2 rounded-xl shadow-sm">
-            <p className="text-[10px] text-gray-400 font-bold uppercase">Confirmados</p>
-            <p className="text-xl font-bold text-green-500">
-              {orders.filter(o => o.status === "CONFIRMED").length}
-            </p>
-          </div>
-        </div>
+      </div>
+
+      {/* Filtros de Status */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        {statusFilters.map((f) => (
+          <Link
+            key={f.value}
+            href={`/admin/pedidos?status=${f.value}`}
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border ${
+              currentStatus === f.value
+                ? "bg-[var(--zice-medium)] text-white border-[var(--zice-medium)] shadow-md"
+                : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+            }`}
+          >
+            {f.label}
+          </Link>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 gap-4">
@@ -202,6 +235,28 @@ export default async function AdminPedidosPage() {
           </div>
         )}
       </div>
+
+      {/* Paginação */}
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2 mt-8 pb-10">
+          {Array.from({ length: totalPages }).map((_, i) => {
+            const p = i + 1;
+            return (
+              <Link
+                key={p}
+                href={`/admin/pedidos?status=${currentStatus}&page=${p}`}
+                className={`w-10 h-10 flex items-center justify-center rounded-xl font-bold transition-all ${
+                  page === p
+                    ? "bg-[var(--zice-medium)] text-white shadow-lg"
+                    : "bg-white text-gray-500 border border-gray-200 hover:bg-gray-50"
+                }`}
+              >
+                {p}
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

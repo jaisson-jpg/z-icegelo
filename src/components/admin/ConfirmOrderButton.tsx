@@ -36,6 +36,8 @@ export function ConfirmOrderButton({
     if (!ok) return;
 
     setLoading(true);
+    
+    // Feedback otimista: se for uma confirmação simples, podemos atualizar o router rapidamente
     try {
       const res = await fetch(`/api/admin/orders/${orderId}`, {
         method: "PATCH",
@@ -43,11 +45,15 @@ export function ConfirmOrderButton({
         body: JSON.stringify({ status: "CONFIRMED" }),
       });
 
-      if (!res.ok) throw new Error("Erro ao confirmar");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Erro ao confirmar");
+      }
+      
+      // Refresh imediato
       router.refresh();
-    } catch (e) {
-      alert("Erro ao confirmar pedido");
-    } finally {
+    } catch (e: any) {
+      alert(e.message || "Erro ao confirmar pedido");
       setLoading(false);
     }
   };
@@ -68,10 +74,14 @@ export function ConfirmOrderButton({
         body: JSON.stringify({ applyLoyaltyOnly: true }),
       });
 
-      if (!res.ok) throw new Error("Erro ao aplicar");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Erro ao aplicar");
+      }
+      
       router.refresh();
-    } catch (e) {
-      alert("Erro ao aplicar fidelidade");
+    } catch (e: any) {
+      alert(e.message || "Erro ao aplicar fidelidade");
     } finally {
       setLoading(false);
     }
