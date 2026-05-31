@@ -3,16 +3,18 @@ import { formatCurrency } from "@/lib/utils";
 import { ConfirmOrderButton } from "@/components/admin/ConfirmOrderButton";
 import { InvoiceActions } from "@/components/InvoiceActions";
 import { DeleteOrderButton } from "@/components/admin/DeleteOrderButton";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPedidosPage({
   searchParams,
 }: {
-  searchParams: { status?: string; page?: string };
+  searchParams: Promise<{ status?: string; page?: string }>;
 }) {
-  const currentStatus = searchParams.status || "ALL";
-  const page = Math.max(1, parseInt(searchParams.page || "1"));
+  const params = await searchParams;
+  const currentStatus = params.status || "ALL";
+  const page = Math.max(1, parseInt(params.page || "1"));
   const pageSize = 20;
 
   const where: any = {};
