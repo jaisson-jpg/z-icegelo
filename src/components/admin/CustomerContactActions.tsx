@@ -36,19 +36,7 @@ export function CustomerContactActions({ name, phone, email }: ContactActionsPro
     setIsOpen(false);
   };
 
-  const handleEmail = () => {
-    const subject = "Z-ice Gelo - Temos novidades para você!";
-    const body = templates[template as keyof typeof templates].text;
-    
-    // Usar um link invisível e clicar nele para forçar o sistema a abrir o app de e-mail padrão
-    // sem abrir uma aba em branco no Chrome
-    const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    const link = document.createElement("a");
-    link.href = mailtoUrl;
-    link.click();
-    
-    setIsOpen(false);
-  };
+  const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent("Z-ice Gelo - Temos novidades para você!")}&body=${encodeURIComponent(templates[template as keyof typeof templates].text)}`;
 
   return (
     <div className="relative">
@@ -112,12 +100,13 @@ export function CustomerContactActions({ name, phone, email }: ContactActionsPro
                 >
                   <MessageCircle size={18} /> WhatsApp
                 </button>
-                <button
-                  onClick={handleEmail}
-                  className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-bold shadow-lg shadow-blue-100 transition-all"
+                <a
+                  href={mailtoUrl}
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-bold shadow-lg shadow-blue-100 transition-all text-center"
                 >
                   <Mail size={18} /> E-mail
-                </button>
+                </a>
               </div>
               {!phone && <p className="text-[10px] text-red-500 text-center font-bold uppercase">Telefone não cadastrado para este cliente</p>}
             </div>
