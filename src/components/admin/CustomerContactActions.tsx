@@ -37,9 +37,12 @@ export function CustomerContactActions({ name, phone, email }: ContactActionsPro
   };
 
   const handleEmail = () => {
-    const subject = encodeURIComponent("Z-ice Gelo - Temos novidades para você!");
-    const body = encodeURIComponent(templates[template as keyof typeof templates].text);
-    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+    const subject = "Z-ice Gelo - Temos novidades para você!";
+    const body = templates[template as keyof typeof templates].text;
+    
+    // Usar window.open com mailto para garantir melhor compatibilidade
+    const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(mailtoUrl, "_blank");
     setIsOpen(false);
   };
 
