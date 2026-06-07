@@ -36,8 +36,6 @@ export function CustomerContactActions({ name, phone, email }: ContactActionsPro
     setIsOpen(false);
   };
 
-  const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent("Z-ice Gelo - Temos novidades para você!")}&body=${encodeURIComponent(templates[template as keyof typeof templates].text)}`;
-
   return (
     <div className="relative">
       <div className="flex gap-2">
@@ -101,8 +99,7 @@ export function CustomerContactActions({ name, phone, email }: ContactActionsPro
                   <MessageCircle size={18} /> WhatsApp
                 </button>
                 <a
-                  href={mailtoUrl}
-                  onClick={() => setIsOpen(false)}
+                  href={`mailto:${email}?subject=Z-ice%20Gelo%20-%20Temos%20novidades%20para%20voc%C3%AA!&body=${encodeURIComponent(templates[template as keyof typeof templates].text)}`}
                   className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-bold shadow-lg shadow-blue-100 transition-all text-center"
                 >
                   <Mail size={18} /> E-mail
