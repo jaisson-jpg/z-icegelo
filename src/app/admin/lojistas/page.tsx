@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { LojistaProgressCard } from "@/components/admin/LojistaProgressCard";
+import { CustomerContactActions } from "@/components/admin/CustomerContactActions";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +54,13 @@ export default async function AdminLojistasPage() {
                 🧊 {l.freezers.length} freezer(s) alocado(s)
               </p>
             )}
+            <div className="pt-2">
+              <CustomerContactActions 
+                name={l.businessName}
+                phone={l.user.phone}
+                email={l.user.email}
+              />
+            </div>
           </div>
         </div>
         ))}

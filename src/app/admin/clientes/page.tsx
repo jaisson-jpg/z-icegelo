@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { CustomerActions } from "@/components/admin/CustomerActions";
+import { CustomerContactActions } from "@/components/admin/CustomerContactActions";
 
 export const dynamic = "force-dynamic";
 
@@ -85,6 +86,12 @@ export default async function AdminClientesPage({
             </div>
 
             <div className="pt-2 flex flex-col gap-3 border-t">
+              <CustomerContactActions 
+                name={c.name}
+                phone={c.phone}
+                email={c.email}
+              />
+              
               <div className="flex justify-between items-center">
                 <span className="text-xs font-bold text-gray-400 uppercase">Fidelidade</span>
                 <span className="text-[var(--zice-medium)] font-bold">{c.points} pontos</span>
