@@ -13,6 +13,11 @@ export const metadata: Metadata = {
   title: "Z-ice Gelo | Gelo em Guaramirim — Atacado e Varejo",
   description:
     "Z-ice Gelo — Fábrica nova em Guaramirim, SC. Entrega rápida de emergência 24h. Atacado e varejo. Faltou gelo? Fique Zem.",
+  icons: {
+    icon: "/logo.png", 
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default async function RootLayout({
