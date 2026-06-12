@@ -39,11 +39,23 @@ export async function PATCH(
   }
 
   if (status === "CONFIRMED" && order.status !== "CONFIRMED") {
+    // Verificar estoque
     for (const item of order.items) {
-      if (item.product.stock < item.quantity) {
-        return NextResponse.json({
-          error: `Estoque insuficiente: ${item.product.name} (tem ${item.product.stock}, pedido ${item.quantity})`,
-        }, { status: 400 });
+      const product = item.product;
+      // Se tiver categoria de estoque, verifica a categoria; se não, o estoque individual do produto
+      if (product.stockCategoryId) {
+        const cat = await prisma.stockCategory.findUnique({ where: { id: product.stockCategoryId } });
+        if (cat && cat.quantity < item.quantity) {
+          return NextResponse.json({
+            error: `Estoque insuficiente: ${product.name} (tem ${cat.quantity} em estoque, pedido ${item.quantity})`,
+          }, { status: 400 });
+        }
+      } else {
+        if (product.stock < item.quantity) {
+          return NextResponse.json({
+            error: `Estoque insuficiente: ${product.name} (tem ${product.stock}, pedido ${item.quantity})`,
+          }, { status: 400 });
+        }
       }
     }
 
@@ -59,10 +71,20 @@ export async function PATCH(
     await prisma.order.update({ where: { id }, data: invoiceData });
 
     for (const item of order.items) {
-      await prisma.product.update({
-        where: { id: item.productId },
-        data: { stock: { decrement: item.quantity } },
-      });
+      const product = item.product;
+      if (product.stockCategoryId) {
+        // Decrementa a quantidade da categoria de estoque
+        await prisma.stockCategory.update({
+          where: { id: product.stockCategoryId },
+          data: { quantity: { decrement: item.quantity } },
+        });
+      } else {
+        // Decrementa estoque individual do produto
+        await prisma.product.update({
+          where: { id: item.productId },
+          data: { stock: { decrement: item.quantity } },
+        });
+      }
     }
 
     const updatedOrder = await prisma.order.findUnique({

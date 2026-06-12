@@ -125,6 +125,21 @@ model Product {
   updatedAt   DateTime        @updatedAt
 
   orderItems OrderItem[]
+  // Associa o produto a uma categoria de estoque (grupo de peso: 3kg, 5kg, 10kg, etc)
+  stockCategoryId String?
+  stockCategory   StockCategory? @relation(fields: [stockCategoryId], references: [id], onDelete: SetNull)
+}
+
+// NOVO MODELO: Grupo de estoque por peso
+model StockCategory {
+  id          String  @id @default(cuid())
+  name        String // "3kg", "5kg", "10kg", etc
+  description String?
+  quantity    Int     @default(0) // Estoque total para esse grupo de peso
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products    Product[]
 }
 
 model Order {

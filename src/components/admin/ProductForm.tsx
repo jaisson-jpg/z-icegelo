@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
+type StockCategory = { id: string; name: string; description: string | null };
+
 export type ProductFormData = {
   id: string;
   name: string;
@@ -18,6 +20,7 @@ export type ProductFormData = {
   active: boolean;
   isComingSoon: boolean;
   imageUrl: string | null;
+  stockCategoryId?: string | null;
 };
 
 export function ProductForm({ product }: { product?: ProductFormData }) {
@@ -25,9 +28,15 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [stockCategories, setStockCategories] = useState<StockCategory[]>([]);
 
   useEffect(() => {
     setMounted(true);
+    // Carregar categorias de estoque
+    fetch("/api/admin/stock-categories")
+      .then((res) => res.json())
+      .then((data) => setStockCategories(data))
+      .catch(console.error);
   }, []);
 
   const [form, setForm] = useState({
@@ -43,6 +52,7 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
     active: product?.active ?? true,
     isComingSoon: product?.isComingSoon ?? false,
     imageUrl: product?.imageUrl ?? "",
+    stockCategoryId: product?.stockCategoryId ?? "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -145,7 +155,7 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">Preço (R$) *</label>
           <input
@@ -166,7 +176,24 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Estoque disponível *</label>
+          <label className="block text-sm font-medium mb-1">Grupo de Estoque (Peso)</label>
+          <select
+            className="input-field"
+            value={form.stockCategoryId || ""}
+            onChange={(e) =>
+              setForm({ ...form, stockCategoryId: e.target.value || null })
+            }
+          >
+            <option value="">Nenhum (estoque individual)</option>
+            {stockCategories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Estoque Individual*</label>
           <input
             type="number"
             min="0"

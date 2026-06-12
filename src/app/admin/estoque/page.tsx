@@ -1,83 +1,242 @@
-import { prisma } from "@/lib/prisma";
-import Link from "next/link";
+"use client";
+
+import { useEffect, useState } from "react";
+import { Trash2, Plus } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
-export default async function EstoquePage() {
-  const products = await prisma.product.findMany({
-    orderBy: [{ stock: "asc" }, { name: "asc" }],
-  });
+type StockCategory = {
+  id: string;
+  name: string;
+  description: string | null;
+  quantity: number;
+  products: { id: string; name: string; price: number; stock: number }[];
+};
 
-  const lowStock = products.filter((p) => p.stock > 0 && p.stock <= 10);
-  const outOfStock = products.filter((p) => p.stock <= 0);
+export default function EstoquePage() {
+  const [categories, setCategories] = useState<StockCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({ name: "", description: "", quantity: 0 });
+
+  // Carregar categorias de estoque
+  const loadCategories = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/stock-categories");
+      if (res.ok) setCategories(await res.json());
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editingId) {
+        await fetch(`/api/admin/stock-categories/${editingId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+      } else {
+        await fetch("/api/admin/stock-categories", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+      }
+      setShowAddModal(false);
+      setFormData({ name: "", description: "", quantity: 0 });
+      setEditingId(null);
+      loadCategories();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm("Excluir essa categoria de estoque?")) {
+      await fetch(`/api/admin/stock-categories/${id}`, { method: "DELETE" });
+      loadCategories();
+    }
+  };
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-[var(--zice-dark)] mb-2">Estoque</h1>
-      <p className="text-sm text-gray-600 mb-6">
-        O estoque baixa automaticamente ao confirmar um pedido. Edite em Produtos.
-      </p>
-
-      {(lowStock.length > 0 || outOfStock.length > 0) && (
-        <div className="grid sm:grid-cols-2 gap-4 mb-6">
-          {outOfStock.length > 0 && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-              <p className="font-semibold text-red-800 flex items-center gap-2">
-                ⚠️ Sem estoque ({outOfStock.length})
-              </p>
-            </div>
-          )}
-          {lowStock.length > 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-              <p className="font-semibold text-yellow-800 flex items-center gap-2">
-                ⚠️ Estoque baixo ({lowStock.length})
-              </p>
-            </div>
-          )}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--zice-dark)] mb-2">Estoque</h1>
+          <p className="text-sm text-gray-600">
+            Gerencie o estoque por grupos de peso (3kg, 5kg, 10kg, etc). Vendas diminuem o estoque automaticamente!
+          </p>
         </div>
-      )}
-
-      <div className="bg-white rounded-xl border overflow-x-auto">
-        <table className="w-full text-sm min-w-[500px]">
-          <thead className="bg-[var(--zice-ice)]">
-            <tr>
-              <th className="text-left p-3">Produto</th>
-              <th className="text-left p-3">Categoria</th>
-              <th className="text-right p-3">Preço</th>
-              <th className="text-right p-3">Estoque</th>
-              <th className="text-center p-3">Status</th>
-              <th className="p-3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((p) => (
-              <tr key={p.id} className="border-t">
-                <td className="p-3 font-medium">{p.name}</td>
-                <td className="p-3">{p.category === "ATACADO" ? "Atacado" : "Varejo"}</td>
-                <td className="p-3 text-right">{formatCurrency(p.price)}</td>
-                <td className="p-3 text-right font-bold">{p.stock}</td>
-                <td className="p-3 text-center">
-                  {p.stock <= 0 ? (
-                    <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">Zerado</span>
-                  ) : p.stock <= 10 ? (
-                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">Baixo</span>
-                  ) : (
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">OK</span>
-                  )}
-                </td>
-                <td className="p-3">
-                  <Link href={`/admin/produtos/${p.id}`} className="text-[var(--zice-medium)] text-xs font-semibold hover:underline">
-                    Editar
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="btn-primary flex items-center gap-2"
+        >
+          <Plus size={20} /> Nova Categoria (Peso)
+        </button>
       </div>
 
-      <Link href="/admin/produtos" className="btn-primary mt-6 inline-flex items-center gap-2">
-        📦 Gerenciar produtos
-      </Link>
+      {loading && <p>Carregando...</p>}
+
+      <div className="grid grid-cols-1 gap-6">
+        {categories.map((cat) => (
+          <div key={cat.id} className="bg-white rounded-xl border p-6 shadow-sm">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="text-lg font-bold text-[var(--zice-dark)]">{cat.name}</h3>
+                {cat.description && <p className="text-sm text-gray-500">{cat.description}</p>}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setEditingId(cat.id);
+                    setFormData({
+                      name: cat.name,
+                      description: cat.description || "",
+                      quantity: cat.quantity,
+                    });
+                    setShowAddModal(true);
+                  }}
+                  className="text-sm text-[var(--zice-medium)] hover:underline font-semibold"
+                >
+                  Editar
+                </button>
+                <button
+                  onClick={() => handleDelete(cat.id)}
+                  className="text-sm text-red-500 hover:text-red-700"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-gray-400 uppercase">Estoque Disponível</span>
+                <span
+                  className={`text-3xl font-black ${
+                    cat.quantity <= 0 ? "text-red-600" : cat.quantity <= 10 ? "text-yellow-600" : "text-green-600"
+                  }`}
+                >
+                  {cat.quantity}
+                </span>
+              </div>
+              <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className={`h-full transition-all ${
+                    cat.quantity <= 0 ? "bg-red-400" : cat.quantity <= 10 ? "bg-yellow-400" : "bg-green-400"
+                  }`}
+                  style={{ width: `${Math.min(100, cat.quantity)}%` }}
+                ></div>
+              </div>
+            </div>
+
+            {cat.products.length > 0 && (
+              <div className="border-t pt-4">
+                <p className="text-xs font-bold text-gray-400 uppercase mb-3">Produtos Nesse Grupo</p>
+                <div className="flex flex-wrap gap-2">
+                  {cat.products.map((p) => (
+                    <div
+                      key={p.id}
+                      className="px-3 py-2 bg-gray-50 rounded-lg text-sm border"
+                    >
+                      <span className="font-medium">{p.name}</span>
+                      <span className="text-gray-500 ml-2">({formatCurrency(p.price)})</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+
+        {!loading && categories.length === 0 && (
+          <div className="text-center py-20 bg-white rounded-xl border">
+            <p className="text-gray-500 mb-4">Nenhuma categoria de estoque criada!</p>
+            <p className="text-sm text-gray-400">Comece criando grupos como "3kg", "5kg" e "10kg".</p>
+          </div>
+        )}
+      </div>
+
+      {/* Modal de adicionar/editar */}
+      {showAddModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={(e) => e.target === e.currentTarget && setShowAddModal(false)}
+        >
+          <div className="bg-white rounded-2xl p-6 shadow-2xl w-full max-w-md">
+            <h3 className="text-xl font-bold mb-4 text-[var(--zice-dark)]">
+              {editingId ? "Editar Categoria de Estoque" : "Nova Categoria de Estoque"}
+            </h3>
+            <form onSubmit={handleSave} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Nome (ex: "5kg", "10kg")
+                </label>
+                <input
+                  required
+                  type="text"
+                  className="input-field w-full"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="3kg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Descrição (opcional)
+                </label>
+                <input
+                  type="text"
+                  className="input-field w-full"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Quantidade em Estoque
+                </label>
+                <input
+                  required
+                  type="number"
+                  min="0"
+                  className="input-field w-full"
+                  value={formData.quantity}
+                  onChange={(e) =>
+                    setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })
+                  }
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddModal(false);
+                    setFormData({ name: "", description: "", quantity: 0 });
+                    setEditingId(null);
+                  }}
+                  className="flex-1 py-3 rounded-xl font-bold text-gray-500 hover:bg-gray-100 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button type="submit" className="flex-1 btn-primary">
+                  Salvar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

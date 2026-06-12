@@ -53,6 +53,9 @@ export async function PATCH(
         active: formData.get("active") === "true",
         isComingSoon: formData.get("isComingSoon") === "true",
         imageUrl,
+        stockCategoryId: formData.has("stockCategoryId")
+          ? (formData.get("stockCategoryId") as string) || null
+          : product.stockCategoryId,
       },
     });
   } else {
@@ -70,6 +73,7 @@ export async function PATCH(
         stock: body.stock !== undefined ? Number(body.stock) : product.stock,
         active: body.active !== undefined ? Boolean(body.active) : product.active,
         isComingSoon: body.isComingSoon !== undefined ? Boolean(body.isComingSoon) : product.isComingSoon,
+        stockCategoryId: body.stockCategoryId !== undefined ? (body.stockCategoryId || null) : product.stockCategoryId,
       },
     });
   }

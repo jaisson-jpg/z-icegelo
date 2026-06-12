@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
   const active = formData.get("active") !== "false";
   const isComingSoon = formData.get("isComingSoon") === "true";
   const image = formData.get("image") as File | null;
+  const stockCategoryId = (formData.get("stockCategoryId") as string) || null;
 
   if (!name || isNaN(price) || price < 0 || !category) {
     return NextResponse.json({ error: "Nome, preço e categoria são obrigatórios" }, { status: 400 });
@@ -49,6 +50,7 @@ export async function POST(req: NextRequest) {
       active,
       isComingSoon,
       imageUrl,
+      stockCategoryId: stockCategoryId || null,
     },
   });
 
