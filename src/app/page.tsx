@@ -12,13 +12,14 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-export const revalidate = 60;
+export const revalidate = 10;
 
 export default async function HomePage() {
   const products = await prisma.product.findMany({
     where: { active: true },
     orderBy: { sortOrder: "asc" },
     take: 3,
+    include: { stockCategory: true }
   });
 
   return (
@@ -110,7 +111,8 @@ export default async function HomePage() {
           ...p,
           price: Number(p.price),
           category: p.category as "VAREJO" | "ATACADO",
-          isComingSoon: !!p.isComingSoon
+          isComingSoon: !!p.isComingSoon,
+          stock: p.stockCategory ? p.stockCategory.quantity : p.stock
         }))} />
       </section>
 

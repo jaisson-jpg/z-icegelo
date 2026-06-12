@@ -96,6 +96,25 @@ export function FinanceManager() {
     }
   };
 
+  const handleResetData = async () => {
+    const ok = await confirm(
+      "Zerar Dados?", 
+      "Tem certeza que quer zerar todos os dados de estoque, investimentos, pontos e sacos dos lojistas? Essa ação é irreversível!", 
+      "danger"
+    );
+    if (!ok) return;
+
+    try {
+      const res = await fetch("/api/admin/reset-data", { method: "POST" });
+      if (res.ok) {
+        alert("Dados zerados com sucesso!");
+        fetchData();
+      }
+    } catch (e) {
+      alert("Erro ao zerar dados");
+    }
+  };
+
   return (
     <div className="space-y-8">
       <ConfirmComponent />
@@ -123,12 +142,20 @@ export function FinanceManager() {
           </div>
         </div>
         
-        <button 
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="btn-primary"
-        >
-          <Plus size={20} /> REGISTRAR INVESTIMENTO
-        </button>
+        <div className="flex gap-3">
+          <button 
+            onClick={handleResetData}
+            className="px-4 py-2 border border-red-200 text-red-600 font-bold rounded-xl hover:bg-red-50 transition-colors"
+          >
+            ZERAR DADOS
+          </button>
+          <button 
+            onClick={() => setShowAddForm(!showAddForm)}
+            className="btn-primary"
+          >
+            <Plus size={20} /> REGISTRAR INVESTIMENTO
+          </button>
+        </div>
       </div>
 
       {/* Cards de Resumo */}
