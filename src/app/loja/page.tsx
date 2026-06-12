@@ -9,6 +9,7 @@ export default async function LojaPage() {
   const products = await prisma.product.findMany({
     where: { active: true },
     orderBy: { sortOrder: "asc" },
+    include: { stockCategory: true },
   });
 
   const varejo = products
@@ -18,6 +19,7 @@ export default async function LojaPage() {
       price: Number(p.price),
       category: p.category as "VAREJO" | "ATACADO",
       isComingSoon: !!p.isComingSoon,
+      stock: p.stockCategory ? p.stockCategory.quantity : p.stock,
     }));
 
   const atacado = products
@@ -27,6 +29,7 @@ export default async function LojaPage() {
       price: Number(p.price),
       category: p.category as "VAREJO" | "ATACADO",
       isComingSoon: !!p.isComingSoon,
+      stock: p.stockCategory ? p.stockCategory.quantity : p.stock,
     }));
 
   return (

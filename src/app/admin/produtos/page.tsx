@@ -6,7 +6,7 @@ import { DeleteProductButton } from "@/components/admin/DeleteProductButton";
 export default async function AdminProdutosPage() {
   const products = await prisma.product.findMany({
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-    include: { _count: { select: { orderItems: true } } },
+    include: { _count: { select: { orderItems: true } }, stockCategory: true },
   });
 
   return (
@@ -63,8 +63,15 @@ export default async function AdminProdutosPage() {
                     {formatCurrency(p.price)}
                     <span className="text-xs text-gray-400 font-normal"> /{p.unit}</span>
                   </td>
-                  <td className={`p-3 text-right font-bold ${p.stock <= 0 ? "text-red-600" : p.stock <= 10 ? "text-yellow-600" : ""}`}>
-                    {p.stock}
+                  <td className={`p-3 text-right font-bold ${(p.stockCategory ? p.stockCategory.quantity : p.stock) <= 0 ? "text-red-600" : (p.stockCategory ? p.stockCategory.quantity : p.stock) <= 10 ? "text-yellow-600" : ""}`}>
+                    {p.stockCategory ? (
+                      <div className="flex flex-col items-end">
+                        <span>{p.stockCategory.quantity}</span>
+                        <span className="text-[10px] text-gray-400 font-normal">{p.stockCategory.name}</span>
+                      </div>
+                    ) : (
+                      p.stock
+                    )}
                   </td>
                   <td className="p-3 text-right">{p.pointsEarn}</td>
                   <td className="p-3 text-center">
@@ -83,7 +90,7 @@ export default async function AdminProdutosPage() {
                           Em Breve
                         </span>
                       )}
-                      {p.stock <= 0 && (
+                      {(p.stockCategory ? p.stockCategory.quantity : p.stock) <= 0 && (
                         <span className="text-[10px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full uppercase">
                           Esgotado
                         </span>

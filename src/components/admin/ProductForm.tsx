@@ -192,17 +192,29 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
             ))}
           </select>
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Estoque Individual*</label>
-          <input
-            type="number"
-            min="0"
-            className="input-field"
-            required
-            value={form.stock}
-            onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })}
-          />
-        </div>
+        {form.stockCategoryId ? (
+          <div>
+            <label className="block text-sm font-medium mb-1">Estoque da Categoria</label>
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              {stockCategories.find(c => c.id === form.stockCategoryId)?.quantity ?? 0} unidades
+              <p className="text-[10px] text-gray-400 mt-1">
+                Para alterar o estoque, edite a categoria diretamente na página de Estoque.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <label className="block text-sm font-medium mb-1">Estoque Individual*</label>
+            <input
+              type="number"
+              min="0"
+              className="input-field"
+              required
+              value={form.stock}
+              onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })}
+            />
+          </div>
+        )}
         <div>
           <label className="block text-sm font-medium mb-1">Sacos por unidade</label>
           <input
