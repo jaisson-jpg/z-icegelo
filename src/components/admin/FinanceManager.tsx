@@ -115,6 +115,29 @@ export function FinanceManager() {
     }
   };
 
+  const handleResetSales = async () => {
+    const ok = await confirm(
+      "Zerar Vendas do Período?", 
+      `Tem certeza que quer zerar todas as vendas confirmadas entre ${dates.from} e ${dates.to}? Essa ação é irreversível!`, 
+      "danger"
+    );
+    if (!ok) return;
+
+    try {
+      const res = await fetch("/api/admin/reset-data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resetOnlySales: true, from: dates.from, to: dates.to }),
+      });
+      if (res.ok) {
+        alert("Vendas do período zeradas com sucesso!");
+        fetchData();
+      }
+    } catch (e) {
+      alert("Erro ao zerar vendas");
+    }
+  };
+
   return (
     <div className="space-y-8">
       <ConfirmComponent />
@@ -143,6 +166,12 @@ export function FinanceManager() {
         </div>
         
         <div className="flex gap-3">
+          <button 
+            onClick={handleResetSales}
+            className="px-4 py-2 border border-orange-200 text-orange-600 font-bold rounded-xl hover:bg-orange-50 transition-colors"
+          >
+            ZERAR VENDAS DO PERÍODO
+          </button>
           <button 
             onClick={handleResetData}
             className="px-4 py-2 border border-red-200 text-red-600 font-bold rounded-xl hover:bg-red-50 transition-colors"

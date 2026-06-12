@@ -8,41 +8,79 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
+  const body = await req.json();
+  const { resetOnlySales, from, to } = body;
+
   try {
-    // Zera estoque das categorias
-    await prisma.stockCategory.updateMany({
-      data: { quantity: 0 },
-    });
+    if (resetOnlySales) {
+      // Zera apenas vendas no período
+      const dateFilter: any = {};
+      if (from) dateFilter.gte = new Date(from);
+      if (to) {
+        const toDate = new Date(to);
+        toDate.setHours(23, 59, 59, 999);
+        dateFilter.lte = toDate;
+      }
 
-    // Zera estoque dos produtos
-    await prisma.product.updateMany({
-      data: { stock: 0 },
-    });
+      const ordersToDelete = await prisma.order.findMany({
+        where: {
+          status: "CONFIRMED",
+          ...(Object.keys(dateFilter).length > 0 ? { createdAt: dateFilter } : {}),
+        },
+        select: { id: true },
+      });
 
-    // Zera investimentos
-    await prisma.investment.deleteMany();
+      await prisma.orderItem.deleteMany({
+        where: { orderId: { in: ordersToDelete.map(o => o.id) } },
+      });
 
-    // Reseta dados dos lojistas (sacos comprados, etc.)
-    await prisma.lojista.updateMany({
-      data: {
-        sacosComprados: 0,
-        sacosGratis: 0,
-        totalSacosHistorico: 0,
-      },
-    });
+      await prisma.order.deleteMany({
+        where: {
+          id: { in: ordersToDelete.map(o => o.id) },
+        },
+      });
 
-    // Reseta pontos dos clientes
-    await prisma.user.updateMany({
-      data: { points: 0 },
-    });
+      return NextResponse.json({
+        success: true,
+        message: `Vendas do período zeradas com sucesso! ${ordersToDelete.length} pedidos removidos.`,
+      });
+    } else {
+      // Zera tudo
+      // Zera estoque das categorias
+      await prisma.stockCategory.updateMany({
+        data: { quantity: 0 },
+      });
 
-    // Apaga histórico de pontos
-    await prisma.pointTransaction.deleteMany();
+      // Zera estoque dos produtos
+      await prisma.product.updateMany({
+        data: { stock: 0 },
+      });
 
-    return NextResponse.json({
-      success: true,
-      message: "Dados de estoque e financeiro zerados com sucesso!"
-    });
+      // Zera investimentos
+      await prisma.investment.deleteMany();
+
+      // Reseta dados dos lojistas (sacos comprados, etc.)
+      await prisma.lojista.updateMany({
+        data: {
+          sacosComprados: 0,
+          sacosGratis: 0,
+          totalSacosHistorico: 0,
+        },
+      });
+
+      // Reseta pontos dos clientes
+      await prisma.user.updateMany({
+        data: { points: 0 },
+      });
+
+      // Apaga histórico de pontos
+      await prisma.pointTransaction.deleteMany();
+
+      return NextResponse.json({
+        success: true,
+        message: "Dados de estoque e financeiro zerados com sucesso!",
+      });
+    }
   } catch (e) {
     console.error(e);
     return NextResponse.json({
