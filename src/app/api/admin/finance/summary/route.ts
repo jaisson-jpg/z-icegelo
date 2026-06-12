@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const [sales, investments, products, pendingCount] = await Promise.all([
+    const [sales, investments, products, categories, pendingCount] = await Promise.all([
       prisma.order.aggregate({
         where: {
           status: "CONFIRMED",
@@ -32,8 +32,11 @@ export async function GET(req: NextRequest) {
         _sum: { amount: true },
       }),
       prisma.product.findMany({
-        where: { active: true },
+        where: { active: true, stockCategoryId: null },
         select: { stock: true, price: true },
+      }),
+      prisma.stockCategory.findMany({
+        include: { products: { select: { price: true, active: true } } }
       }),
       prisma.order.count({
         where: { status: { in: ["PENDING_PIX", "AWAITING_CONFIRMATION"] } },
@@ -42,7 +45,17 @@ export async function GET(req: NextRequest) {
 
     const totalSales = sales._sum.total || 0;
     const totalInvestments = investments._sum.amount || 0;
-    const stockValue = products.reduce((acc, p) => acc + p.stock * p.price, 0);
+    
+    // Valor dos produtos individuais (sem categoria de estoque)
+    let stockValue = products.reduce((acc, p) => acc + p.stock * p.price, 0);
+    
+    // Valor dos produtos de cada categoria de estoque (usando a qtd da categoria e o primeiro preço ativo)
+    for (const cat of categories) {
+      const activeProduct = cat.products.find(p => p.active);
+      if (activeProduct) {
+        stockValue += cat.quantity * activeProduct.price;
+      }
+    }
 
     return NextResponse.json({
       totalSales,
