@@ -44,13 +44,17 @@ export async function POST(req: NextRequest) {
 
     let pointsAwarded = 0;
     for (const item of items) {
-      const product = await prisma.product.findUnique({ where: { id: item.productId } });
+      const product = await prisma.product.findUnique({ 
+        where: { id: item.productId },
+        include: { stockCategory: true }
+      });
       if (!product) {
         return NextResponse.json({ error: `Produto não encontrado: ${item.name}` }, { status: 400 });
       }
-      if (product.stock < item.quantity) {
+      const availableStock = product.stockCategory ? product.stockCategory.quantity : product.stock;
+      if (availableStock < item.quantity) {
         return NextResponse.json({
-          error: `Estoque insuficiente para "${product.name}". Disponível: ${product.stock}`,
+          error: `Estoque insuficiente para "${product.name}". Disponível: ${availableStock}`,
         }, { status: 400 });
       }
       // Calcula pontos baseados no produto ou fallback para pontos por real se o produto tiver 0
