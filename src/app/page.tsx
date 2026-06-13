@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { formatPhone } from "@/lib/utils";
 import { ProductGrid } from "@/components/ProductGrid";
 import {
   Factory,
@@ -15,12 +16,17 @@ import {
 export const revalidate = 10;
 
 export default async function HomePage() {
-  const products = await prisma.product.findMany({
-    where: { active: true },
-    orderBy: { sortOrder: "asc" },
-    take: 3,
-    include: { stockCategory: true }
-  });
+  const [products, config] = await Promise.all([
+    prisma.product.findMany({
+      where: { active: true },
+      orderBy: { sortOrder: "asc" },
+      take: 3,
+      include: { stockCategory: true }
+    }),
+    prisma.siteConfig.findUnique({ where: { id: "main" } }),
+  ]);
+
+  const phone = config?.whatsapp ?? "5547996471803";
 
   return (
     <>
@@ -47,9 +53,9 @@ export default async function HomePage() {
                 <ShoppingBag size={20} />
                 Comprar agora
               </Link>
-              <a href="tel:+5547996471803" className="btn-outline bg-white/10 border-white text-white hover:bg-white/20">
+              <a href={`tel:+${phone}`} className="btn-outline bg-white/10 border-white text-white hover:bg-white/20">
                 <Phone size={20} />
-                (47) 99647-1803
+                {formatPhone(phone)}
               </a>
             </div>
           </div>

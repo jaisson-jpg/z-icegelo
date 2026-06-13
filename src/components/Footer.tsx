@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { MapPin, Phone, Clock } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { formatPhone } from "@/lib/utils";
 
-export function Footer() {
+export async function Footer() {
+  const config = await prisma.siteConfig.findUnique({ where: { id: "main" } });
+  const phone = config?.whatsapp ?? "5547996471803";
+
   return (
     <footer className="ice-gradient text-white mt-16">
       <div className="max-w-6xl mx-auto px-4 py-12 grid md:grid-cols-3 gap-8">
@@ -26,11 +31,11 @@ export function Footer() {
         <div>
           <h4 className="font-semibold mb-3">Contato</h4>
           <a
-            href="tel:+5547996471803"
+            href={`tel:+${phone}`}
             className="flex items-center gap-2 text-sm hover:underline"
           >
             <Phone size={18} />
-            (47) 99647-1803
+            {formatPhone(phone)}
           </a>
           <p className="text-sm mt-3 text-[var(--zice-light)] italic">
             Faltou gelo? Fique Zem.

@@ -5,10 +5,15 @@ import { prisma } from "@/lib/prisma";
 export const revalidate = 60;
 
 export default async function FidelidadePage() {
-  const rewards = await prisma.loyaltyReward.findMany({
-    where: { active: true },
-    orderBy: { sortOrder: "asc" },
-  });
+  const [rewards, config] = await Promise.all([
+    prisma.loyaltyReward.findMany({
+      where: { active: true },
+      orderBy: { sortOrder: "asc" },
+    }),
+    prisma.siteConfig.findUnique({ where: { id: "main" } }),
+  ]);
+
+  const phone = config?.whatsapp ?? "5547996471803";
 
   const varejo = rewards.filter((r) => r.audience === "VAREJO" || r.audience === "TODOS");
   const atacado = rewards.filter((r) => r.audience === "ATACADO" || r.audience === "TODOS");
@@ -30,7 +35,7 @@ export default async function FidelidadePage() {
       <div className="text-center flex flex-col sm:flex-row gap-3 justify-center">
         <Link href="/cadastro" className="btn-primary">Criar conta</Link>
         <a
-          href="https://wa.me/5547996471803?text=Quero ser lojista parceiro Z-ice"
+          href={`https://wa.me/${phone}?text=Quero ser lojista parceiro Z-ice`}
           className="btn-outline"
           target="_blank"
           rel="noopener noreferrer"

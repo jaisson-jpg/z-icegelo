@@ -11,6 +11,7 @@ type PixConfig = {
   pixKey: string;
   pixType: string;
   pixHolder: string;
+  whatsapp: string;
 };
 
 function CheckoutContent() {
@@ -108,7 +109,7 @@ function CheckoutContent() {
         message = `❓ *CONSULTA DE FRETE*\n\n*Nº do Pedido:* ${data.orderId}\n*Cliente:* ${form.customerName}\n*Endereço:* ${form.address}\n\n*Produtos:*\n${itemsList}\n\n*Total:* ${formatCurrency(finalTotal)}\n\n_Pode me passar o valor do frete para eu finalizar o pagamento?_`;
       }
       
-      const whatsappUrl = `https://wa.me/5547996471803?text=${encodeURIComponent(message)}`;
+      const whatsappUrl = `https://wa.me/${pix?.whatsapp ?? "5547996471803"}?text=${encodeURIComponent(message)}`;
       
       if (data.linkedToAccount) {
         sessionStorage.setItem("zice_last_order_linked", "1");

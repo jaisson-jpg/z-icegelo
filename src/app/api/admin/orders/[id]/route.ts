@@ -42,18 +42,19 @@ export async function PATCH(
     // Verificar estoque
     for (const item of order.items) {
       const product = item.product;
+      const totalSacadosPedidos = item.quantity * product.sacosPerUnit;
       // Se tiver categoria de estoque, verifica a categoria; se não, o estoque individual do produto
       if (product.stockCategoryId) {
         const cat = await prisma.stockCategory.findUnique({ where: { id: product.stockCategoryId } });
-        if (cat && cat.quantity < item.quantity) {
+        if (cat && cat.quantity < totalSacadosPedidos) {
           return NextResponse.json({
-            error: `Estoque insuficiente: ${product.name} (tem ${cat.quantity} em estoque, pedido ${item.quantity})`,
+            error: `Estoque insuficiente: ${product.name} (tem ${cat.quantity} em estoque, pedido ${totalSacadosPedidos})`,
           }, { status: 400 });
         }
       } else {
-        if (product.stock < item.quantity) {
+        if (product.stock < totalSacadosPedidos) {
           return NextResponse.json({
-            error: `Estoque insuficiente: ${product.name} (tem ${product.stock}, pedido ${item.quantity})`,
+            error: `Estoque insuficiente: ${product.name} (tem ${product.stock}, pedido ${totalSacadosPedidos})`,
           }, { status: 400 });
         }
       }
@@ -72,17 +73,18 @@ export async function PATCH(
 
     for (const item of order.items) {
       const product = item.product;
+      const totalSacadosPedidos = item.quantity * product.sacosPerUnit;
       if (product.stockCategoryId) {
         // Decrementa a quantidade da categoria de estoque
         await prisma.stockCategory.update({
           where: { id: product.stockCategoryId },
-          data: { quantity: { decrement: item.quantity } },
+          data: { quantity: { decrement: totalSacadosPedidos } },
         });
       } else {
         // Decrementa estoque individual do produto
         await prisma.product.update({
           where: { id: item.productId },
-          data: { stock: { decrement: item.quantity } },
+          data: { stock: { decrement: totalSacadosPedidos } },
         });
       }
     }
