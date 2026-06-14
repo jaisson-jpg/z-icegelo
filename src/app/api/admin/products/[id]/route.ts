@@ -38,6 +38,7 @@ export async function PATCH(
           ? ((formData.get("description") as string)?.trim() || null)
           : product.description,
         price: formData.has("price") ? parseFloat(formData.get("price") as string) : product.price,
+        lojaPrice: formData.has("lojaPrice") ? (formData.get("lojaPrice") ? parseFloat(formData.get("lojaPrice") as string) : null) : product.lojaPrice,
         unit: (formData.get("unit") as string)?.trim() || product.unit,
         category: (formData.get("category") as ProductCategory) || product.category,
         pointsEarn: formData.has("pointsEarn")
@@ -66,6 +67,7 @@ export async function PATCH(
         name: body.name?.trim() ?? product.name,
         description: body.description !== undefined ? (body.description?.trim() || null) : product.description,
         price: body.price !== undefined ? Number(body.price) : product.price,
+        lojaPrice: body.lojaPrice !== undefined ? (body.lojaPrice === null ? null : Number(body.lojaPrice)) : product.lojaPrice,
         unit: body.unit?.trim() ?? product.unit,
         category: body.category ?? product.category,
         pointsEarn: body.pointsEarn !== undefined ? Number(body.pointsEarn) : product.pointsEarn,

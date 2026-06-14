@@ -11,6 +11,7 @@ export type ProductFormData = {
   name: string;
   description: string | null;
   price: number;
+  lojaPrice: number | null;
   unit: string;
   category: "VAREJO" | "ATACADO";
   pointsEarn: number;
@@ -43,6 +44,7 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
     name: product?.name ?? "",
     description: product?.description ?? "",
     price: product?.price ?? 0,
+    lojaPrice: product?.lojaPrice ?? null,
     unit: product?.unit ?? "saco",
     category: product?.category ?? ("VAREJO" as "VAREJO" | "ATACADO"),
     pointsEarn: product?.pointsEarn ?? 0,
@@ -61,8 +63,11 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
 
     const fd = new FormData();
     Object.entries(form).forEach(([k, v]) => {
-      if (k !== "imageUrl") fd.append(k, String(v));
+      if (k !== "imageUrl" && k !== "lojaPrice") fd.append(k, String(v));
     });
+    if (form.lojaPrice !== null && form.lojaPrice !== undefined) {
+      fd.append("lojaPrice", String(form.lojaPrice));
+    }
     fd.append("active", String(form.active));
     fd.append("isComingSoon", String(form.isComingSoon));
     fd.append("imageUrl", form.imageUrl);
@@ -172,6 +177,21 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
                 price,
                 pointsEarn: product ? form.pointsEarn : Math.round(price),
               });
+            }}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Preço Lojista Exclusivo (R$)</label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            className="input-field"
+            placeholder="Deixe vazio para não usar"
+            value={form.lojaPrice === null ? "" : form.lojaPrice}
+            onChange={(e) => {
+              const lojaPrice = e.target.value ? parseFloat(e.target.value) : null;
+              setForm({ ...form, lojaPrice });
             }}
           />
         </div>

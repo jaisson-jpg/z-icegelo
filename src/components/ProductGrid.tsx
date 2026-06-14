@@ -11,6 +11,7 @@ type Product = {
   name: string;
   description: string | null;
   price: number;
+  lojaPrice: number | null;
   unit: string;
   category: "VAREJO" | "ATACADO";
   pointsEarn: number;
@@ -19,9 +20,16 @@ type Product = {
   imageUrl: string | null;
 };
 
-export function ProductGrid({ products }: { products: Product[] }) {
+export function ProductGrid({ products, userRole }: { products: Product[], userRole?: "ADMIN" | "CUSTOMER" | "LOJISTA" | null }) {
   const { addItem } = useCart();
   const [added, setAdded] = useState<string | null>(null);
+
+  const getProductPrice = (p: Product) => {
+    if (userRole === "LOJISTA" && p.lojaPrice !== null) {
+      return p.lojaPrice;
+    }
+    return p.price;
+  };
 
   const handleAdd = (p: Product) => {
     if (p.isComingSoon) {
@@ -35,7 +43,7 @@ export function ProductGrid({ products }: { products: Product[] }) {
     addItem({
       productId: p.id,
       name: p.name,
-      price: p.price,
+      price: getProductPrice(p),
       category: p.category,
     });
     setAdded(p.id);
@@ -81,9 +89,20 @@ export function ProductGrid({ products }: { products: Product[] }) {
           </p>
           <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-3">
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-[var(--zice-medium)]">
-                {formatCurrency(p.price)}
-              </p>
+              {userRole === "LOJISTA" && p.lojaPrice !== null ? (
+                <>
+                  <p className="text-sm text-gray-400 line-through">
+                    {formatCurrency(p.price)}
+                  </p>
+                  <p className="text-xl sm:text-2xl font-bold text-[var(--zice-medium)]">
+                    {formatCurrency(p.lojaPrice)}
+                  </p>
+                </>
+              ) : (
+                <p className="text-xl sm:text-2xl font-bold text-[var(--zice-medium)]">
+                  {formatCurrency(p.price)}
+                </p>
+              )}
               <p className="text-xs text-gray-500">/{p.unit}</p>
               <p className="text-xs text-[var(--zice-dark)] mt-1">+{p.pointsEarn} pontos</p>
             </div>

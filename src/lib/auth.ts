@@ -40,7 +40,10 @@ export async function createSession(user: SessionUser) {
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    // Desativamos temporariamente a exigência de HTTPS (secure: true) 
+    // para que você consiga logar enquanto o Netlify gera o seu certificado SSL.
+    // Assim que o cadeado aparecer no navegador, podemos voltar para true.
+    secure: false, 
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 7,

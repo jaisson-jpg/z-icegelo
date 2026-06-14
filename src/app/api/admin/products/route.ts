@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
   const name = formData.get("name") as string;
   const description = (formData.get("description") as string) || null;
   const price = parseFloat(formData.get("price") as string);
+  const lojaPrice = formData.has("lojaPrice") ? parseFloat(formData.get("lojaPrice") as string) : null;
   const unit = (formData.get("unit") as string) || "saco";
   const category = formData.get("category") as string;
   const pointsEarn = parseInt(formData.get("pointsEarn") as string) || Math.round(price);
@@ -41,6 +42,7 @@ export async function POST(req: NextRequest) {
       name: name.trim(),
       description: description?.trim() || null,
       price,
+      lojaPrice,
       unit: unit.trim(),
       category: category as ProductCategory,
       pointsEarn,

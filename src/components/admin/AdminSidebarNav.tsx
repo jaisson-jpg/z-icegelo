@@ -12,6 +12,7 @@ const navItems = [
   { href: "/admin/lojistas", label: "Lojistas", icon: "🏪" },
   { href: "/admin/produtos", label: "Produtos", icon: "📦" },
   { href: "/admin/estoque", label: "Estoque", icon: "📉" },
+  { href: "/admin/banners", label: "Banners", icon: "🖼️" },
   { href: "/admin/recompensas", label: "Recompensas", icon: "🎁" },
   { href: "/admin/relatorios", label: "Relatórios", icon: "📈" },
   { href: "/admin/config", label: "Configurações", icon: "⚙️" },

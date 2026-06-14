@@ -3,6 +3,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatPhone } from "@/lib/utils";
 import { ProductGrid } from "@/components/ProductGrid";
+import { BannerSlider } from "@/components/BannerSlider";
+import { getSession } from "@/lib/auth";
 import {
   Factory,
   Truck,
@@ -16,7 +18,7 @@ import {
 export const revalidate = 10;
 
 export default async function HomePage() {
-  const [products, config] = await Promise.all([
+  const [products, config, session, banners] = await Promise.all([
     prisma.product.findMany({
       where: { active: true },
       orderBy: { sortOrder: "asc" },
@@ -24,12 +26,18 @@ export default async function HomePage() {
       include: { stockCategory: true }
     }),
     prisma.siteConfig.findUnique({ where: { id: "main" } }),
+    getSession(),
+    prisma.banner.findMany({
+      where: { active: true },
+      orderBy: { sortOrder: "asc" },
+    }),
   ]);
 
   const phone = config?.whatsapp ?? "5547996471803";
 
   return (
     <>
+      <BannerSlider banners={banners} />
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 ice-gradient opacity-95" />
         <div className="absolute inset-0 bg-[url('/logo.png')] bg-center bg-no-repeat bg-contain opacity-5 scale-150" />
@@ -113,13 +121,17 @@ export default async function HomePage() {
             Ver loja completa <ArrowRight size={16} />
           </Link>
         </div>
-        <ProductGrid products={products.map(p => ({
-          ...p,
-          price: Number(p.price),
-          category: p.category as "VAREJO" | "ATACADO",
-          isComingSoon: !!p.isComingSoon,
-          stock: p.stockCategory ? p.stockCategory.quantity : p.stock
-        }))} />
+        <ProductGrid
+          userRole={session?.role}
+          products={products.map(p => ({
+            ...p,
+            price: Number(p.price),
+            lojaPrice: p.lojaPrice !== null ? Number(p.lojaPrice) : null,
+            category: p.category as "VAREJO" | "ATACADO",
+            isComingSoon: !!p.isComingSoon,
+            stock: p.stockCategory ? p.stockCategory.quantity : p.stock
+          }))}
+        />
       </section>
 
       <section className="max-w-6xl mx-auto px-4 py-16 border-t">

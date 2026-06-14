@@ -1,22 +1,27 @@
 import { prisma } from "@/lib/prisma";
 import { ProductGrid } from "@/components/ProductGrid";
+import { getSession } from "@/lib/auth";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 
 export const revalidate = 10;
 
 export default async function LojaPage() {
-  const products = await prisma.product.findMany({
-    where: { active: true },
-    orderBy: { sortOrder: "asc" },
-    include: { stockCategory: true },
-  });
+  const [products, session] = await Promise.all([
+    prisma.product.findMany({
+      where: { active: true },
+      orderBy: { sortOrder: "asc" },
+      include: { stockCategory: true },
+    }),
+    getSession(),
+  ]);
 
   const varejo = products
     .filter((p) => p.category === "VAREJO")
     .map((p) => ({
       ...p,
       price: Number(p.price),
+      lojaPrice: p.lojaPrice !== null ? Number(p.lojaPrice) : null,
       category: p.category as "VAREJO" | "ATACADO",
       isComingSoon: !!p.isComingSoon,
       stock: p.stockCategory ? p.stockCategory.quantity : p.stock,
@@ -27,6 +32,7 @@ export default async function LojaPage() {
     .map((p) => ({
       ...p,
       price: Number(p.price),
+      lojaPrice: p.lojaPrice !== null ? Number(p.lojaPrice) : null,
       category: p.category as "VAREJO" | "ATACADO",
       isComingSoon: !!p.isComingSoon,
       stock: p.stockCategory ? p.stockCategory.quantity : p.stock,
@@ -52,7 +58,7 @@ export default async function LojaPage() {
           <h2 className="text-2xl font-bold text-[var(--zice-medium)] mb-6 border-b-2 border-[var(--zice-light)] pb-2">
             Varejo
           </h2>
-          <ProductGrid products={varejo} />
+          <ProductGrid userRole={session?.role} products={varejo} />
         </section>
       )}
 
@@ -64,7 +70,7 @@ export default async function LojaPage() {
           <p className="text-sm text-gray-600 mb-4">
             Para mercados, padarias e comércios. Cadastre-se como lojista para acompanhar sacos grátis.
           </p>
-          <ProductGrid products={atacado} />
+          <ProductGrid userRole={session?.role} products={atacado} />
         </section>
       )}
     </div>
