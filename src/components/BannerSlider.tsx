@@ -60,12 +60,32 @@ export function BannerSlider({ banners }: { banners: Banner[] }) {
           </div>
         </div>
       )}
+      
+      {banners.length > 1 && (
+        <>
+          <button
+            onClick={prevSlide}
+            className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
+            aria-label="Slide anterior"
+          >
+            <ChevronLeft className="w-6 h-6 text-[var(--zice-dark)]" />
+          </button>
+          
+          <button
+            onClick={nextSlide}
+            className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
+            aria-label="Próximo slide"
+          >
+            <ChevronRight className="w-6 h-6 text-[var(--zice-dark)]" />
+          </button>
+        </>
+      )}
     </div>
   );
 
   return (
     <section 
-      className="max-w-6xl mx-auto px-4 py-4"
+      className="ice-gradient max-w-6xl mx-auto px-4 py-4 rounded-2xl sm:mx-4 md:mx-auto"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -78,38 +98,20 @@ export function BannerSlider({ banners }: { banners: Banner[] }) {
       )}
       
       {banners.length > 1 && (
-        <>
-          <div className="flex justify-center gap-2 mt-4">
-            {banners.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goToSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  index === currentSlide
-                    ? 'bg-[var(--zice-medium)] w-8'
-                    : 'bg-gray-300 hover:bg-gray-400'
-                }`}
-                aria-label={`Ir para slide ${index + 1}`}
-              />
-            ))}
-          </div>
-          
-          <button
-            onClick={prevSlide}
-            className="absolute left-8 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
-            aria-label="Slide anterior"
-          >
-            <ChevronLeft className="w-6 h-6 text-[var(--zice-dark)]" />
-          </button>
-          
-          <button
-            onClick={nextSlide}
-            className="absolute right-8 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
-            aria-label="Próximo slide"
-          >
-            <ChevronRight className="w-6 h-6 text-[var(--zice-dark)]" />
-          </button>
-        </>
+        <div className="flex justify-center gap-2 mt-4">
+          {banners.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`w-3 h-3 rounded-full transition-all ${
+                index === currentSlide
+                  ? 'bg-white w-8'
+                  : 'bg-white/50 hover:bg-white/80'
+              }`}
+              aria-label={`Ir para slide ${index + 1}`}
+            />
+          ))}
+        </div>
       )}
     </section>
   );
