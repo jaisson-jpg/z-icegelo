@@ -2,8 +2,9 @@
 
 import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ShoppingBag, Phone } from 'lucide-react';
 import Link from 'next/link';
+import { formatPhone } from '@/lib/utils';
 
 type Banner = {
   id: string;
@@ -13,7 +14,12 @@ type Banner = {
   linkUrl: string | null;
 };
 
-export function BannerSlider({ banners }: { banners: Banner[] }) {
+type BannerSliderProps = {
+  banners: Banner[];
+  phone?: string;
+};
+
+export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -35,37 +41,112 @@ export function BannerSlider({ banners }: { banners: Banner[] }) {
     return () => clearInterval(interval);
   }, [banners.length, isPaused, nextSlide]);
 
-  if (banners.length === 0) return null;
+  if (banners.length === 0) {
+    // Fallback para o conteúdo original quando não há banners
+    return (
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 ice-gradient opacity-95" />
+        <div className="absolute inset-0 bg-[url('/logo.png')] bg-center bg-no-repeat bg-contain opacity-5 scale-150" />
+        <div className="relative max-w-6xl mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center gap-10">
+          <div className="flex-1 text-white text-center md:text-left">
+            <span className="inline-block bg-white/20 text-[var(--zice-light)] text-sm font-semibold px-4 py-1 rounded-full mb-4">
+              Fábrica Nova — Guaramirim, Santa Catarina
+            </span>
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
+              Gelo de qualidade com entrega{" "}
+              <span className="text-[var(--zice-light)]">24 horas</span>
+            </h1>
+            <p className="text-lg text-white/90 mb-2">
+              Atacado para mercados, padarias e comércios. Varejo para você e sua família.
+            </p>
+            <p className="text-xl font-semibold italic text-[var(--zice-light)] mb-8">
+              Faltou gelo? Fique Zem.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              <Link href="/loja" className="btn-primary text-lg px-8">
+                <ShoppingBag size={20} />
+                Comprar agora
+              </Link>
+              <a href={`tel:+${phone}`} className="btn-outline bg-white/10 border-white text-white hover:bg-white/20">
+                <Phone size={20} />
+                {formatPhone(phone)}
+              </a>
+            </div>
+          </div>
+          <div className="flex-1 flex justify-center">
+            <Image
+              src="/logo.png"
+              alt="Z-ice Gelo Logo"
+              width={400}
+              height={400}
+              className="drop-shadow-2xl rounded-2xl max-w-[320px] md:max-w-[400px] w-full h-auto"
+              priority
+            />
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const currentBanner = banners[currentSlide];
 
   const SlideContent = () => (
-    <div className="relative w-full aspect-[16/5] sm:aspect-[21/9] overflow-hidden rounded-2xl">
+    <div className="relative w-full overflow-hidden">
+      <div className="absolute inset-0 ice-gradient opacity-95" />
+      <div className="absolute inset-0 bg-[url('/logo.png')] bg-center bg-no-repeat bg-contain opacity-5 scale-150" />
       <Image
         src={currentBanner.imageUrl}
         alt={currentBanner.title || 'Banner'}
         fill
-        className="object-cover"
+        className="object-cover opacity-40"
         priority
       />
-      {(currentBanner.title || currentBanner.description) && (
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent">
-          <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 text-white">
-            {currentBanner.title && (
-              <h2 className="text-2xl sm:text-4xl font-bold mb-2">{currentBanner.title}</h2>
-            )}
-            {currentBanner.description && (
-              <p className="text-sm sm:text-lg opacity-90">{currentBanner.description}</p>
-            )}
-          </div>
+      <div className="relative max-w-6xl mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center gap-10">
+        <div className="flex-1 text-white text-center md:text-left">
+          {currentBanner.title && (
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
+              {currentBanner.title}
+            </h1>
+          )}
+          {currentBanner.description && (
+            <p className="text-lg text-white/90 mb-8">
+              {currentBanner.description}
+            </p>
+          )}
+          {currentBanner.linkUrl ? (
+            <Link href={currentBanner.linkUrl} className="btn-primary text-lg px-8">
+              Saiba mais
+            </Link>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              <Link href="/loja" className="btn-primary text-lg px-8">
+                <ShoppingBag size={20} />
+                Comprar agora
+              </Link>
+              <a href={`tel:+${phone}`} className="btn-outline bg-white/10 border-white text-white hover:bg-white/20">
+                <Phone size={20} />
+                {formatPhone(phone)}
+              </a>
+            </div>
+          )}
         </div>
-      )}
+        <div className="flex-1 flex justify-center hidden md:block">
+          <Image
+            src="/logo.png"
+            alt="Z-ice Gelo Logo"
+            width={400}
+            height={400}
+            className="drop-shadow-2xl rounded-2xl max-w-[320px] md:max-w-[400px] w-full h-auto opacity-90"
+            priority
+          />
+        </div>
+      </div>
       
       {banners.length > 1 && (
         <>
           <button
             onClick={prevSlide}
-            className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors z-10"
             aria-label="Slide anterior"
           >
             <ChevronLeft className="w-6 h-6 text-[var(--zice-dark)]" />
@@ -73,7 +154,7 @@ export function BannerSlider({ banners }: { banners: Banner[] }) {
           
           <button
             onClick={nextSlide}
-            className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors z-10"
             aria-label="Próximo slide"
           >
             <ChevronRight className="w-6 h-6 text-[var(--zice-dark)]" />
@@ -85,28 +166,21 @@ export function BannerSlider({ banners }: { banners: Banner[] }) {
 
   return (
     <section 
-      className="ice-gradient max-w-6xl mx-auto px-4 py-4 rounded-2xl sm:mx-4 md:mx-auto"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {currentBanner.linkUrl ? (
-        <Link href={currentBanner.linkUrl} className="block">
-          <SlideContent />
-        </Link>
-      ) : (
-        <SlideContent />
-      )}
+      <SlideContent />
       
       {banners.length > 1 && (
-        <div className="flex justify-center gap-2 mt-4">
+        <div className="flex justify-center gap-2 mt-4 pb-4">
           {banners.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
               className={`w-3 h-3 rounded-full transition-all ${
                 index === currentSlide
-                  ? 'bg-white w-8'
-                  : 'bg-white/50 hover:bg-white/80'
+                  ? 'bg-[var(--zice-medium)] w-8'
+                  : 'bg-gray-300 hover:bg-gray-400'
               }`}
               aria-label={`Ir para slide ${index + 1}`}
             />

@@ -37,48 +37,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <BannerSlider banners={banners} />
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 ice-gradient opacity-95" />
-        <div className="absolute inset-0 bg-[url('/logo.png')] bg-center bg-no-repeat bg-contain opacity-5 scale-150" />
-        <div className="relative max-w-6xl mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center gap-10">
-          <div className="flex-1 text-white text-center md:text-left">
-            <span className="inline-block bg-white/20 text-[var(--zice-light)] text-sm font-semibold px-4 py-1 rounded-full mb-4">
-              Fábrica Nova — Guaramirim, Santa Catarina
-            </span>
-            <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
-              Gelo de qualidade com entrega{" "}
-              <span className="text-[var(--zice-light)]">24 horas</span>
-            </h1>
-            <p className="text-lg text-white/90 mb-2">
-              Atacado para mercados, padarias e comércios. Varejo para você e sua família.
-            </p>
-            <p className="text-xl font-semibold italic text-[var(--zice-light)] mb-8">
-              Faltou gelo? Fique Zem.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-              <Link href="/loja" className="btn-primary text-lg px-8">
-                <ShoppingBag size={20} />
-                Comprar agora
-              </Link>
-              <a href={`tel:+${phone}`} className="btn-outline bg-white/10 border-white text-white hover:bg-white/20">
-                <Phone size={20} />
-                {formatPhone(phone)}
-              </a>
-            </div>
-          </div>
-          <div className="flex-1 flex justify-center">
-            <Image
-              src="/logo.png"
-              alt="Z-ice Gelo Logo"
-              width={400}
-              height={400}
-              className="drop-shadow-2xl rounded-2xl max-w-[320px] md:max-w-[400px] w-full h-auto"
-              priority
-            />
-          </div>
-        </div>
-      </section>
+      <BannerSlider banners={banners} phone={phone} />
 
       {/* Seção de Fidelidade com Destaque */}
       <section className="py-12 bg-white overflow-hidden">
