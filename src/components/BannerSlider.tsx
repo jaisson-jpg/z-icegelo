@@ -140,17 +140,19 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
                         </>
                       )}
                     </div>
-                    {/* Exibe a logo em todos os banners em telas médias+ */}
-                    <div className="flex-1 flex justify-center hidden md:block">
-                      <Image
-                        src="/logo.png"
-                        alt="Z-ice Gelo Logo"
-                        width={350}
-                        height={350}
-                        className="drop-shadow-2xl rounded-2xl max-w-[250px] md:max-w-[320px] lg:max-w-[400px] w-full h-auto opacity-90"
-                        priority={index === 0}
-                      />
-                    </div>
+                    {/* Somente exibe logo no banner padrão e em telas médias+ */}
+                    {banner.id === "default-banner" && (
+                      <div className="flex-1 flex justify-center hidden md:block">
+                        <Image
+                          src="/logo.png"
+                          alt="Z-ice Gelo Logo"
+                          width={350}
+                          height={350}
+                          className="drop-shadow-2xl rounded-2xl max-w-[250px] md:max-w-[320px] lg:max-w-[400px] w-full h-auto opacity-90"
+                          priority={index === 0}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
