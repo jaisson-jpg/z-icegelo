@@ -55,15 +55,12 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
       onMouseLeave={() => setIsPaused(false)}
     >
       <div className="relative w-full min-h-[350px] sm:min-h-[400px] md:min-h-[500px] overflow-hidden">
-        {allBanners.map((banner, index) => {
-          return (
-            <div
-              key={banner.id}
-              className={`absolute inset-0 transition-transform duration-700 ease-in-out ${
-                index === currentSlide ? 'translate-x-0' : 'translate-x-full'
-              }`}
-              style={{ transform: `translateX(${(index - currentSlide) * 100}%)` }}
-            >
+        <div 
+          className="flex h-full transition-transform duration-700 ease-in-out"
+          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+        >
+          {allBanners.map((banner, index) => (
+            <div key={banner.id} className="w-full flex-shrink-0 h-full relative">
               {banner.id === "default-banner" ? (
                 <>
                   <div className="absolute inset-0 ice-gradient opacity-95" />
@@ -143,25 +140,23 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
                         </>
                       )}
                     </div>
-                    {/* Somente exibe logo no banner padrão e em telas médias+ */}
-                    {banner.id === "default-banner" && (
-                      <div className="flex-1 flex justify-center hidden md:block">
-                        <Image
-                          src="/logo.png"
-                          alt="Z-ice Gelo Logo"
-                          width={350}
-                          height={350}
-                          className="drop-shadow-2xl rounded-2xl max-w-[250px] md:max-w-[320px] lg:max-w-[400px] w-full h-auto opacity-90"
-                          priority={index === 0}
-                        />
-                      </div>
-                    )}
+                    {/* Exibe a logo em todos os banners em telas médias+ */}
+                    <div className="flex-1 flex justify-center hidden md:block">
+                      <Image
+                        src="/logo.png"
+                        alt="Z-ice Gelo Logo"
+                        width={350}
+                        height={350}
+                        className="drop-shadow-2xl rounded-2xl max-w-[250px] md:max-w-[320px] lg:max-w-[400px] w-full h-auto opacity-90"
+                        priority={index === 0}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          );
-        })}
+          ))}
+        </div>
       </div>
       
       {allBanners.length > 1 && (
