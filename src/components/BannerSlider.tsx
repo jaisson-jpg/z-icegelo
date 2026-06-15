@@ -58,16 +58,22 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
 
   const SlideContent = () => (
     <div className="relative w-full overflow-hidden">
-      <div className="absolute inset-0 ice-gradient opacity-95" />
-      <div className="absolute inset-0 bg-[url('/logo.png')] bg-center bg-no-repeat bg-contain opacity-5 scale-150" />
-      {!isDefaultBanner && (
-        <Image
-          src={currentBanner.imageUrl}
-          alt={currentBanner.title || 'Banner'}
-          fill
-          className="object-cover opacity-40"
-          priority
-        />
+      {isDefaultBanner ? (
+        <>
+          <div className="absolute inset-0 ice-gradient opacity-95" />
+          <div className="absolute inset-0 bg-[url('/logo.png')] bg-center bg-no-repeat bg-contain opacity-5 scale-150" />
+        </>
+      ) : (
+        <>
+          <Image
+            src={currentBanner.imageUrl}
+            alt={currentBanner.title || 'Banner'}
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-black/50" />
+        </>
       )}
       <div className="relative max-w-6xl mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center gap-10">
         <div className="flex-1 text-white text-center md:text-left">
