@@ -49,7 +49,7 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
 
   useEffect(() => {
     if (allBanners.length <= 1 || isPaused) return;
-    const interval = setInterval(nextSlide, 3000);
+    const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
   }, [allBanners.length, isPaused, nextSlide]);
 
@@ -60,16 +60,15 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
     >
       <div className="relative w-full min-h-[400px] md:min-h-[500px] overflow-hidden">
         {allBanners.map((banner, index) => {
-          const isCurrent = index === currentSlide;
-          const isPrev = index === (currentSlide - 1 + allBanners.length) % allBanners.length;
+          const offset = (index - currentSlide + allBanners.length) % allBanners.length;
           
           return (
             <div
               key={banner.id}
               className={`absolute inset-0 transition-transform duration-700 ease-in-out ${
-                isCurrent ? 'translate-x-0 z-10' :
-                isPrev ? '-translate-x-full z-0' :
-                'translate-x-full z-0'
+                offset === 0 ? 'translate-x-0 z-10' :
+                offset === 1 ? 'translate-x-full z-0' :
+                '-translate-x-full z-0'
               }`}
             >
               {banner.id === "default-banner" ? (
@@ -86,7 +85,7 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
                     className="object-cover"
                     priority={index === 0}
                   />
-                  <div className="absolute inset-0 bg-black/50" />
+                  <div className="absolute inset-0 bg-black/20" />
                 </>
               )}
               <div className="relative max-w-6xl mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center gap-10">
