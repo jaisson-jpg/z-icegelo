@@ -49,7 +49,7 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
 
   useEffect(() => {
     if (allBanners.length <= 1 || isPaused) return;
-    const interval = setInterval(nextSlide, 5000);
+    const interval = setInterval(nextSlide, 3000);
     return () => clearInterval(interval);
   }, [allBanners.length, isPaused, nextSlide]);
 
@@ -57,7 +57,7 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
   const isDefaultBanner = currentBanner.id === "default-banner";
 
   const SlideContent = () => (
-    <div className="relative w-full overflow-hidden">
+    <div className="relative w-full min-h-[400px] md:min-h-[500px] overflow-hidden">
       {isDefaultBanner ? (
         <>
           <div className="absolute inset-0 ice-gradient opacity-95" />
