@@ -58,7 +58,7 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className="relative w-full min-h-[400px] md:min-h-[500px] overflow-hidden">
+      <div className="relative w-full min-h-[300px] sm:min-h-[400px] md:min-h-[500px] overflow-hidden">
         {allBanners.map((banner, index) => {
           const offset = (index - currentSlide + allBanners.length) % allBanners.length;
           
@@ -88,30 +88,30 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
                   <div className="absolute inset-0 bg-black/20" />
                 </>
               )}
-              <div className="relative max-w-6xl mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center gap-10">
-                <div className="flex-1 text-white text-center md:text-left">
+              <div className="relative max-w-6xl mx-auto px-4 py-8 sm:py-12 md:py-16 flex flex-col md:flex-row items-center gap-6 md:gap-10">
+                <div className="flex-1 text-white text-center md:text-left w-full">
                   {banner.id === "default-banner" ? (
                     <>
-                      <span className="inline-block bg-white/20 text-[var(--zice-light)] text-sm font-semibold px-4 py-1 rounded-full mb-4">
+                      <span className="inline-block bg-white/20 text-[var(--zice-light)] text-xs sm:text-sm font-semibold px-3 sm:px-4 py-1 sm:py-1.5 rounded-full mb-3 sm:mb-4">
                         Fábrica Nova — Guaramirim, Santa Catarina
                       </span>
-                      <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
+                      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-3 sm:mb-4">
                         Gelo de qualidade com entrega{" "}
                         <span className="text-[var(--zice-light)]">24 horas</span>
                       </h1>
-                      <p className="text-lg text-white/90 mb-2">
+                      <p className="text-sm sm:text-lg text-white/90 mb-2 sm:mb-3">
                         Atacado para mercados, padarias e comércios. Varejo para você e sua família.
                       </p>
-                      <p className="text-xl font-semibold italic text-[var(--zice-light)] mb-8">
+                      <p className="text-base sm:text-xl font-semibold italic text-[var(--zice-light)] mb-6 sm:mb-8">
                         Faltou gelo? Fique Zem.
                       </p>
-                      <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                        <Link href="/loja" className="btn-primary text-lg px-8">
-                          <ShoppingBag size={20} />
+                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
+                        <Link href="/loja" className="btn-primary text-base sm:text-lg px-6 sm:px-8">
+                          <ShoppingBag size={18} />
                           Comprar agora
                         </Link>
-                        <a href={`tel:+${phone}`} className="btn-outline bg-white/10 border-white text-white hover:bg-white/20">
-                          <Phone size={20} />
+                        <a href={`tel:+${phone}`} className="btn-outline bg-white/10 border-white text-white hover:bg-white/20 text-base">
+                          <Phone size={18} />
                           {formatPhone(phone)}
                         </a>
                       </div>
@@ -119,27 +119,27 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
                   ) : (
                     <>
                       {banner.title && (
-                        <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-3 sm:mb-4">
                           {banner.title}
                         </h1>
                       )}
                       {banner.description && (
-                        <p className="text-lg text-white/90 mb-8">
+                        <p className="text-sm sm:text-lg text-white/90 mb-6 sm:mb-8">
                           {banner.description}
                         </p>
                       )}
                       {banner.linkUrl ? (
-                        <Link href={banner.linkUrl} className="btn-primary text-lg px-8">
+                        <Link href={banner.linkUrl} className="btn-primary text-base sm:text-lg px-6 sm:px-8">
                           Saiba mais
                         </Link>
                       ) : (
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                          <Link href="/loja" className="btn-primary text-lg px-8">
-                            <ShoppingBag size={20} />
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
+                          <Link href="/loja" className="btn-primary text-base sm:text-lg px-6 sm:px-8">
+                            <ShoppingBag size={18} />
                             Comprar agora
                           </Link>
-                          <a href={`tel:+${phone}`} className="btn-outline bg-white/10 border-white text-white hover:bg-white/20">
-                            <Phone size={20} />
+                          <a href={`tel:+${phone}`} className="btn-outline bg-white/10 border-white text-white hover:bg-white/20 text-base">
+                            <Phone size={18} />
                             {formatPhone(phone)}
                           </a>
                         </div>
@@ -147,15 +147,15 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
                     </>
                   )}
                 </div>
-                {/* Somente exibe logo no banner padrão */}
+                {/* Somente exibe logo no banner padrão e em telas médias+ */}
                 {banner.id === "default-banner" && (
                   <div className="flex-1 flex justify-center hidden md:block">
                     <Image
                       src="/logo.png"
                       alt="Z-ice Gelo Logo"
-                      width={400}
-                      height={400}
-                      className="drop-shadow-2xl rounded-2xl max-w-[320px] md:max-w-[400px] w-full h-auto opacity-90"
+                      width={350}
+                      height={350}
+                      className="drop-shadow-2xl rounded-2xl max-w-[250px] md:max-w-[320px] lg:max-w-[400px] w-full h-auto opacity-90"
                       priority={index === 0}
                     />
                   </div>
@@ -169,18 +169,18 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
           <>
             <button
               onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors z-20"
+              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-1.5 sm:p-2 rounded-full shadow-lg transition-colors z-20"
               aria-label="Slide anterior"
             >
-              <ChevronLeft className="w-6 h-6 text-[var(--zice-dark)]" />
+              <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6 text-[var(--zice-dark)]" />
             </button>
             
             <button
               onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors z-20"
+              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-1.5 sm:p-2 rounded-full shadow-lg transition-colors z-20"
               aria-label="Próximo slide"
             >
-              <ChevronRight className="w-6 h-6 text-[var(--zice-dark)]" />
+              <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6 text-[var(--zice-dark)]" />
             </button>
           </>
         )}
@@ -192,9 +192,9 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all ${
+              className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all ${
                 index === currentSlide
-                  ? 'bg-[var(--zice-medium)] w-8'
+                  ? 'bg-[var(--zice-medium)] w-6 sm:w-8'
                   : 'bg-gray-300 hover:bg-gray-400'
               }`}
               aria-label={`Ir para slide ${index + 1}`}
