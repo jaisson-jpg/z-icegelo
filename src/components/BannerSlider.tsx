@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, ShoppingBag, Phone } from 'lucide-react';
+import { ShoppingBag, Phone } from 'lucide-react';
 import Link from 'next/link';
 import { formatPhone } from '@/lib/utils';
 
@@ -39,10 +39,6 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
     setCurrentSlide((prev) => (prev + 1) % allBanners.length);
   }, [allBanners.length]);
 
-  const prevSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev - 1 + allBanners.length) % allBanners.length);
-  }, [allBanners.length]);
-
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
   };
@@ -58,18 +54,15 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className="relative w-full min-h-[300px] sm:min-h-[400px] md:min-h-[500px] overflow-hidden">
+      <div className="relative w-full min-h-[350px] sm:min-h-[400px] md:min-h-[500px] overflow-hidden">
         {allBanners.map((banner, index) => {
-          const offset = (index - currentSlide + allBanners.length) % allBanners.length;
-          
           return (
             <div
               key={banner.id}
               className={`absolute inset-0 transition-transform duration-700 ease-in-out ${
-                offset === 0 ? 'translate-x-0 z-10' :
-                offset === 1 ? 'translate-x-full z-0' :
-                '-translate-x-full z-0'
+                index === currentSlide ? 'translate-x-0' : 'translate-x-full'
               }`}
+              style={{ transform: `translateX(${(index - currentSlide) * 100}%)` }}
             >
               {banner.id === "default-banner" ? (
                 <>
@@ -88,102 +81,87 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
                   <div className="absolute inset-0 bg-black/20" />
                 </>
               )}
-              <div className="relative max-w-6xl mx-auto px-4 py-8 sm:py-12 md:py-16 flex flex-col md:flex-row items-center gap-6 md:gap-10">
-                <div className="flex-1 text-white text-center md:text-left w-full">
-                  {banner.id === "default-banner" ? (
-                    <>
-                      <span className="inline-block bg-white/20 text-[var(--zice-light)] text-xs sm:text-sm font-semibold px-3 sm:px-4 py-1 sm:py-1.5 rounded-full mb-3 sm:mb-4">
-                        Fábrica Nova — Guaramirim, Santa Catarina
-                      </span>
-                      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-3 sm:mb-4">
-                        Gelo de qualidade com entrega{" "}
-                        <span className="text-[var(--zice-light)]">24 horas</span>
-                      </h1>
-                      <p className="text-sm sm:text-lg text-white/90 mb-2 sm:mb-3">
-                        Atacado para mercados, padarias e comércios. Varejo para você e sua família.
-                      </p>
-                      <p className="text-base sm:text-xl font-semibold italic text-[var(--zice-light)] mb-6 sm:mb-8">
-                        Faltou gelo? Fique Zem.
-                      </p>
-                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
-                        <Link href="/loja" className="btn-primary text-base sm:text-lg px-6 sm:px-8">
-                          <ShoppingBag size={18} />
-                          Comprar agora
-                        </Link>
-                        <a href={`tel:+${phone}`} className="btn-outline bg-white/10 border-white text-white hover:bg-white/20 text-base">
-                          <Phone size={18} />
-                          {formatPhone(phone)}
-                        </a>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      {banner.title && (
-                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-3 sm:mb-4">
-                          {banner.title}
-                        </h1>
-                      )}
-                      {banner.description && (
-                        <p className="text-sm sm:text-lg text-white/90 mb-6 sm:mb-8">
-                          {banner.description}
-                        </p>
-                      )}
-                      {banner.linkUrl ? (
-                        <Link href={banner.linkUrl} className="btn-primary text-base sm:text-lg px-6 sm:px-8">
-                          Saiba mais
-                        </Link>
+              
+              <div className="relative h-full flex flex-col justify-center px-4 sm:px-6 lg:px-8">
+                <div className="max-w-6xl mx-auto w-full">
+                  <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10">
+                    <div className="flex-1 text-white text-center md:text-left w-full">
+                      {banner.id === "default-banner" ? (
+                        <>
+                          <span className="inline-block bg-white/20 text-[var(--zice-light)] text-xs sm:text-sm font-semibold px-3 sm:px-4 py-1 rounded-full mb-3 sm:mb-4">
+                            Fábrica Nova — Guaramirim, Santa Catarina
+                          </span>
+                          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-3 sm:mb-4">
+                            Gelo de qualidade com entrega{" "}
+                            <span className="text-[var(--zice-light)]">24 horas</span>
+                          </h1>
+                          <p className="text-sm sm:text-base md:text-lg text-white/90 mb-2 sm:mb-3">
+                            Atacado para mercados, padarias e comércios. Varejo para você e sua família.
+                          </p>
+                          <p className="text-base sm:text-lg md:text-xl font-semibold italic text-[var(--zice-light)] mb-6 sm:mb-8">
+                            Faltou gelo? Fique Zem.
+                          </p>
+                          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
+                            <Link href="/loja" className="btn-primary text-sm sm:text-base md:text-lg px-6 sm:px-8 py-3">
+                              <ShoppingBag size={18} />
+                              Comprar agora
+                            </Link>
+                            <a href={`tel:+${phone}`} className="btn-outline bg-white/10 border-white text-white hover:bg-white/20 text-sm sm:text-base py-3">
+                              <Phone size={18} />
+                              {formatPhone(phone)}
+                            </a>
+                          </div>
+                        </>
                       ) : (
-                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
-                          <Link href="/loja" className="btn-primary text-base sm:text-lg px-6 sm:px-8">
-                            <ShoppingBag size={18} />
-                            Comprar agora
-                          </Link>
-                          <a href={`tel:+${phone}`} className="btn-outline bg-white/10 border-white text-white hover:bg-white/20 text-base">
-                            <Phone size={18} />
-                            {formatPhone(phone)}
-                          </a>
-                        </div>
+                        <>
+                          {banner.title && (
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-3 sm:mb-4">
+                              {banner.title}
+                            </h1>
+                          )}
+                          {banner.description && (
+                            <p className="text-sm sm:text-base md:text-lg text-white/90 mb-6 sm:mb-8">
+                              {banner.description}
+                            </p>
+                          )}
+                          {banner.linkUrl ? (
+                            <Link href={banner.linkUrl} className="btn-primary text-sm sm:text-base md:text-lg px-6 sm:px-8 py-3">
+                              Saiba mais
+                            </Link>
+                          ) : (
+                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
+                              <Link href="/loja" className="btn-primary text-sm sm:text-base md:text-lg px-6 sm:px-8 py-3">
+                                <ShoppingBag size={18} />
+                                Comprar agora
+                              </Link>
+                              <a href={`tel:+${phone}`} className="btn-outline bg-white/10 border-white text-white hover:bg-white/20 text-sm sm:text-base py-3">
+                                <Phone size={18} />
+                                {formatPhone(phone)}
+                              </a>
+                            </div>
+                          )}
+                        </>
                       )}
-                    </>
-                  )}
-                </div>
-                {/* Somente exibe logo no banner padrão e em telas médias+ */}
-                {banner.id === "default-banner" && (
-                  <div className="flex-1 flex justify-center hidden md:block">
-                    <Image
-                      src="/logo.png"
-                      alt="Z-ice Gelo Logo"
-                      width={350}
-                      height={350}
-                      className="drop-shadow-2xl rounded-2xl max-w-[250px] md:max-w-[320px] lg:max-w-[400px] w-full h-auto opacity-90"
-                      priority={index === 0}
-                    />
+                    </div>
+                    {/* Somente exibe logo no banner padrão e em telas médias+ */}
+                    {banner.id === "default-banner" && (
+                      <div className="flex-1 flex justify-center hidden md:block">
+                        <Image
+                          src="/logo.png"
+                          alt="Z-ice Gelo Logo"
+                          width={350}
+                          height={350}
+                          className="drop-shadow-2xl rounded-2xl max-w-[250px] md:max-w-[320px] lg:max-w-[400px] w-full h-auto opacity-90"
+                          priority={index === 0}
+                        />
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             </div>
           );
         })}
-        
-        {allBanners.length > 1 && (
-          <>
-            <button
-              onClick={prevSlide}
-              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-1.5 sm:p-2 rounded-full shadow-lg transition-colors z-20"
-              aria-label="Slide anterior"
-            >
-              <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6 text-[var(--zice-dark)]" />
-            </button>
-            
-            <button
-              onClick={nextSlide}
-              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-1.5 sm:p-2 rounded-full shadow-lg transition-colors z-20"
-              aria-label="Próximo slide"
-            >
-              <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6 text-[var(--zice-dark)]" />
-            </button>
-          </>
-        )}
       </div>
       
       {allBanners.length > 1 && (
