@@ -59,75 +59,53 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
       onMouseLeave={() => setIsPaused(false)}
     >
       <div className="relative w-full min-h-[400px] md:min-h-[500px] overflow-hidden">
-        {allBanners.map((banner, index) => (
-          <div
-            key={banner.id}
-            className={`absolute inset-0 transition-opacity duration-700 ${
-              index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
-            }`}
-          >
-            {banner.id === "default-banner" ? (
-              <>
-                <div className="absolute inset-0 ice-gradient opacity-95" />
-                <div className="absolute inset-0 bg-[url('/logo.png')] bg-center bg-no-repeat bg-contain opacity-5 scale-150" />
-              </>
-            ) : (
-              <>
-                <Image
-                  src={banner.imageUrl}
-                  alt={banner.title || 'Banner'}
-                  fill
-                  className="object-cover"
-                  priority={index === 0}
-                />
-                <div className="absolute inset-0 bg-black/50" />
-              </>
-            )}
-            <div className="relative max-w-6xl mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center gap-10">
-              <div className="flex-1 text-white text-center md:text-left">
-                {banner.id === "default-banner" ? (
-                  <>
-                    <span className="inline-block bg-white/20 text-[var(--zice-light)] text-sm font-semibold px-4 py-1 rounded-full mb-4">
-                      Fábrica Nova — Guaramirim, Santa Catarina
-                    </span>
-                    <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
-                      Gelo de qualidade com entrega{" "}
-                      <span className="text-[var(--zice-light)]">24 horas</span>
-                    </h1>
-                    <p className="text-lg text-white/90 mb-2">
-                      Atacado para mercados, padarias e comércios. Varejo para você e sua família.
-                    </p>
-                    <p className="text-xl font-semibold italic text-[var(--zice-light)] mb-8">
-                      Faltou gelo? Fique Zem.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                      <Link href="/loja" className="btn-primary text-lg px-8">
-                        <ShoppingBag size={20} />
-                        Comprar agora
-                      </Link>
-                      <a href={`tel:+${phone}`} className="btn-outline bg-white/10 border-white text-white hover:bg-white/20">
-                        <Phone size={20} />
-                        {formatPhone(phone)}
-                      </a>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {banner.title && (
+        {allBanners.map((banner, index) => {
+          const isCurrent = index === currentSlide;
+          const isPrev = index === (currentSlide - 1 + allBanners.length) % allBanners.length;
+          
+          return (
+            <div
+              key={banner.id}
+              className={`absolute inset-0 transition-transform duration-700 ease-in-out ${
+                isCurrent ? 'translate-x-0 z-10' :
+                isPrev ? '-translate-x-full z-0' :
+                'translate-x-full z-0'
+              }`}
+            >
+              {banner.id === "default-banner" ? (
+                <>
+                  <div className="absolute inset-0 ice-gradient opacity-95" />
+                  <div className="absolute inset-0 bg-[url('/logo.png')] bg-center bg-no-repeat bg-contain opacity-5 scale-150" />
+                </>
+              ) : (
+                <>
+                  <Image
+                    src={banner.imageUrl}
+                    alt={banner.title || 'Banner'}
+                    fill
+                    className="object-cover"
+                    priority={index === 0}
+                  />
+                  <div className="absolute inset-0 bg-black/50" />
+                </>
+              )}
+              <div className="relative max-w-6xl mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center gap-10">
+                <div className="flex-1 text-white text-center md:text-left">
+                  {banner.id === "default-banner" ? (
+                    <>
+                      <span className="inline-block bg-white/20 text-[var(--zice-light)] text-sm font-semibold px-4 py-1 rounded-full mb-4">
+                        Fábrica Nova — Guaramirim, Santa Catarina
+                      </span>
                       <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
-                        {banner.title}
+                        Gelo de qualidade com entrega{" "}
+                        <span className="text-[var(--zice-light)]">24 horas</span>
                       </h1>
-                    )}
-                    {banner.description && (
-                      <p className="text-lg text-white/90 mb-8">
-                        {banner.description}
+                      <p className="text-lg text-white/90 mb-2">
+                        Atacado para mercados, padarias e comércios. Varejo para você e sua família.
                       </p>
-                    )}
-                    {banner.linkUrl ? (
-                      <Link href={banner.linkUrl} className="btn-primary text-lg px-8">
-                        Saiba mais
-                      </Link>
-                    ) : (
+                      <p className="text-xl font-semibold italic text-[var(--zice-light)] mb-8">
+                        Faltou gelo? Fique Zem.
+                      </p>
                       <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                         <Link href="/loja" className="btn-primary text-lg px-8">
                           <ShoppingBag size={20} />
@@ -138,23 +116,55 @@ export function BannerSlider({ banners, phone = "5547996471803" }: BannerSliderP
                           {formatPhone(phone)}
                         </a>
                       </div>
-                    )}
-                  </>
+                    </>
+                  ) : (
+                    <>
+                      {banner.title && (
+                        <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
+                          {banner.title}
+                        </h1>
+                      )}
+                      {banner.description && (
+                        <p className="text-lg text-white/90 mb-8">
+                          {banner.description}
+                        </p>
+                      )}
+                      {banner.linkUrl ? (
+                        <Link href={banner.linkUrl} className="btn-primary text-lg px-8">
+                          Saiba mais
+                        </Link>
+                      ) : (
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                          <Link href="/loja" className="btn-primary text-lg px-8">
+                            <ShoppingBag size={20} />
+                            Comprar agora
+                          </Link>
+                          <a href={`tel:+${phone}`} className="btn-outline bg-white/10 border-white text-white hover:bg-white/20">
+                            <Phone size={20} />
+                            {formatPhone(phone)}
+                          </a>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+                {/* Somente exibe logo no banner padrão */}
+                {banner.id === "default-banner" && (
+                  <div className="flex-1 flex justify-center hidden md:block">
+                    <Image
+                      src="/logo.png"
+                      alt="Z-ice Gelo Logo"
+                      width={400}
+                      height={400}
+                      className="drop-shadow-2xl rounded-2xl max-w-[320px] md:max-w-[400px] w-full h-auto opacity-90"
+                      priority={index === 0}
+                    />
+                  </div>
                 )}
               </div>
-              <div className="flex-1 flex justify-center hidden md:block">
-                <Image
-                  src={banner.id === "default-banner" ? "/logo.png" : banner.imageUrl}
-                  alt="Z-ice Gelo Logo"
-                  width={400}
-                  height={400}
-                  className="drop-shadow-2xl rounded-2xl max-w-[320px] md:max-w-[400px] w-full h-auto opacity-90"
-                  priority={index === 0}
-                />
-              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         
         {allBanners.length > 1 && (
           <>
