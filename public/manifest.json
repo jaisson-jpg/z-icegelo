@@ -1,0 +1,16 @@
+{
+  "name": "Z-ice Gelo",
+  "short_name": "Z-ice",
+  "description": "Gelo de qualidade com entrega 24 horas",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e40af",
+  "theme_color": "#1e40af",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "any",
+      "type": "image/png"
+    }
+  ]
+}

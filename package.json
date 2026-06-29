@@ -13,6 +13,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@prisma/client": "^6.9.0",
     "bcryptjs": "^3.0.2",
     "jose": "^6.0.11",
