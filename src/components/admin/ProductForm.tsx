@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
-type StockCategory = { id: string; name: string; description: string | null };
+type StockCategory = { id: string; name: string; description: string | null; quantity: number };
 
 export type ProductFormData = {
   id: string;
@@ -54,7 +54,7 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
     active: product?.active ?? true,
     isComingSoon: product?.isComingSoon ?? false,
     imageUrl: product?.imageUrl ?? "",
-    stockCategoryId: product?.stockCategoryId ?? "",
+    stockCategoryId: product?.stockCategoryId ?? "" as string | null,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {

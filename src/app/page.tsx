@@ -15,7 +15,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-export const revalidate = 10;
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const [products, config, session, banners] = await Promise.all([

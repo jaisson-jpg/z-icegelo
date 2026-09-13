@@ -3,6 +3,7 @@ import { formatCurrency } from "@/lib/utils";
 import { ConfirmOrderButton } from "@/components/admin/ConfirmOrderButton";
 import { InvoiceActions } from "@/components/InvoiceActions";
 import { DeleteOrderButton } from "@/components/admin/DeleteOrderButton";
+import { ManualOrderButton } from "@/components/admin/ManualOrderButton";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -68,6 +69,7 @@ export default async function AdminPedidosPage({
           <h1 className="text-3xl font-bold text-[var(--zice-dark)]">Gerenciamento de Pedidos</h1>
           <p className="text-gray-500">Mostrando {orders.length} de {total} pedidos</p>
         </div>
+        <ManualOrderButton />
       </div>
 
       {/* Filtros de Status */}

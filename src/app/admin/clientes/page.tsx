@@ -7,9 +7,10 @@ export const dynamic = "force-dynamic";
 export default async function AdminClientesPage({
   searchParams,
 }: {
-  searchParams: { q?: string };
+  searchParams: Promise<{ q?: string }>;
 }) {
-  const query = searchParams.q || "";
+  const params = await searchParams;
+  const query = params.q || "";
 
   const customers = await prisma.user.findMany({
     where: {

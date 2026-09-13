@@ -1,3 +1,11 @@
+/** Capacidade máxima da barra de estoque por tamanho (pacotes). */
+export const STOCK_CAPACITY = 2000;
+
+export function stockBarPercent(quantity: number) {
+  if (quantity <= 0) return 0;
+  return Math.min(100, (quantity / STOCK_CAPACITY) * 100);
+}
+
 export function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",

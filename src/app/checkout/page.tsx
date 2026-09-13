@@ -37,7 +37,12 @@ function CheckoutContent() {
     fetch("/api/config")
       .then((r) => r.json())
       .then(setPix)
-      .catch(() => setPix({ pixKey: "47996471803", pixHolder: "Z-ice Gelo" }));
+      .catch(() => setPix({ 
+        pixKey: "47996471803", 
+        pixHolder: "Z-ice Gelo",
+        pixType: "TELEFONE",
+        whatsapp: "5547996471803"
+      }));
   }, []);
 
   useEffect(() => {

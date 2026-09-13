@@ -4,7 +4,7 @@ import { getSession } from "@/lib/auth";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 
-export const revalidate = 10;
+export const dynamic = "force-dynamic";
 
 export default async function LojaPage() {
   const [products, session] = await Promise.all([
