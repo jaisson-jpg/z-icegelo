@@ -4,16 +4,26 @@ import { requireSession } from "@/lib/auth";
 import { saveUpload } from "@/lib/upload";
 import { ProductCategory } from "@prisma/client";
 
+export const dynamic = "force-dynamic";
+
+function addNoCache(res: NextResponse) {
+  res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.headers.set("Pragma", "no-cache");
+  res.headers.set("Expires", "0");
+  res.headers.set("Surrogate-Control", "no-store");
+  return res;
+}
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await requireSession(["ADMIN"]);
-  if (!session) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  if (!session) return addNoCache(NextResponse.json({ error: "Não autorizado" }, { status: 401 }));
 
   const { id } = await params;
   const product = await prisma.product.findUnique({ where: { id } });
-  if (!product) return NextResponse.json({ error: "Produto não encontrado" }, { status: 404 });
+  if (!product) return addNoCache(NextResponse.json({ error: "Produto não encontrado" }, { status: 404 }));
 
   const contentType = req.headers.get("content-type") || "";
 
@@ -73,6 +83,7 @@ export async function PATCH(
         pointsEarn: body.pointsEarn !== undefined ? Number(body.pointsEarn) : product.pointsEarn,
         sortOrder: body.sortOrder !== undefined ? Number(body.sortOrder) : product.sortOrder,
         stock: body.stock !== undefined ? Number(body.stock) : product.stock,
+        sacosPerUnit: body.sacosPerUnit !== undefined ? (Number(body.sacosPerUnit) || 1) : product.sacosPerUnit,
         active: body.active !== undefined ? Boolean(body.active) : product.active,
         isComingSoon: body.isComingSoon !== undefined ? Boolean(body.isComingSoon) : product.isComingSoon,
         stockCategoryId: body.stockCategoryId !== undefined ? (body.stockCategoryId || null) : product.stockCategoryId,
@@ -80,7 +91,7 @@ export async function PATCH(
     });
   }
 
-  return NextResponse.json({ ok: true });
+  return addNoCache(NextResponse.json({ ok: true }));
 }
 
 export async function DELETE(
@@ -88,7 +99,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await requireSession(["ADMIN"]);
-  if (!session) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  if (!session) return addNoCache(NextResponse.json({ error: "Não autorizado" }, { status: 401 }));
 
   const { id } = await params;
   const product = await prisma.product.findUnique({
@@ -96,13 +107,13 @@ export async function DELETE(
     include: { _count: { select: { orderItems: true } } },
   });
 
-  if (!product) return NextResponse.json({ error: "Produto não encontrado" }, { status: 404 });
+  if (!product) return addNoCache(NextResponse.json({ error: "Produto não encontrado" }, { status: 404 }));
 
   if (product._count.orderItems > 0) {
     await prisma.product.update({ where: { id }, data: { active: false } });
-    return NextResponse.json({ ok: true, deactivated: true });
+    return addNoCache(NextResponse.json({ ok: true, deactivated: true }));
   }
 
   await prisma.product.delete({ where: { id } });
-  return NextResponse.json({ ok: true });
+  return addNoCache(NextResponse.json({ ok: true }));
 }

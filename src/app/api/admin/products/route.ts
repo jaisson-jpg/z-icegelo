@@ -4,9 +4,19 @@ import { requireSession } from "@/lib/auth";
 import { saveUpload } from "@/lib/upload";
 import { ProductCategory } from "@prisma/client";
 
+export const dynamic = "force-dynamic";
+
+function addNoCache(res: NextResponse) {
+  res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.headers.set("Pragma", "no-cache");
+  res.headers.set("Expires", "0");
+  res.headers.set("Surrogate-Control", "no-store");
+  return res;
+}
+
 export async function POST(req: NextRequest) {
   const session = await requireSession(["ADMIN"]);
-  if (!session) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  if (!session) return addNoCache(NextResponse.json({ error: "Não autorizado" }, { status: 401 }));
 
   const formData = await req.formData();
   const name = formData.get("name") as string;
@@ -25,7 +35,7 @@ export async function POST(req: NextRequest) {
   const stockCategoryId = (formData.get("stockCategoryId") as string) || null;
 
   if (!name || isNaN(price) || price < 0 || !category) {
-    return NextResponse.json({ error: "Nome, preço e categoria são obrigatórios" }, { status: 400 });
+    return addNoCache(NextResponse.json({ error: "Nome, preço e categoria são obrigatórios" }, { status: 400 }));
   }
 
   let imageUrl = (formData.get("imageUrl") as string) || null;
@@ -56,5 +66,5 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  return NextResponse.json({ id: product.id });
+  return addNoCache(NextResponse.json({ id: product.id }));
 }

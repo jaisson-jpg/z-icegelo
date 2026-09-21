@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { formatCurrency } from "@/lib/utils";
-import { Plus, Trash2, Calendar, TrendingDown, DollarSign, Package, Info, Calculator } from "lucide-react";
+import { Plus, Trash2, Calendar, TrendingDown, DollarSign, Package, Info, Calculator, RefreshCw } from "lucide-react";
 import { useConfirm } from "@/components/ConfirmModal";
 
 type Investment = {
@@ -64,9 +64,20 @@ export function FinanceManager() {
   const fetchData = async () => {
     setLoading(true);
     try {
+      const noCacheInit: RequestInit = {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          "Pragma": "no-cache",
+          "Expires": "0",
+        },
+        // @ts-ignore
+        next: { revalidate: 0 },
+      };
+      const ts = `&_t=${Date.now()}`;
       const [invRes, summaryRes] = await Promise.all([
-        fetch(`/api/admin/investments?from=${dates.from}&to=${dates.to}`),
-        fetch(`/api/admin/finance/summary?from=${dates.from}&to=${dates.to}`),
+        fetch(`/api/admin/investments?from=${dates.from}&to=${dates.to}${ts}`, noCacheInit),
+        fetch(`/api/admin/finance/summary?from=${dates.from}&to=${dates.to}${ts}`, noCacheInit),
       ]);
 
       if (invRes.ok) setInvestments(await invRes.json());
@@ -89,6 +100,14 @@ export function FinanceManager() {
 
   useEffect(() => {
     fetchData();
+  }, [dates]);
+
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") fetchData();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
   }, [dates]);
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -208,6 +227,14 @@ export function FinanceManager() {
         </div>
 
         <div className="flex gap-3 flex-wrap">
+          <button
+            onClick={() => fetchData()}
+            disabled={loading}
+            className="px-4 py-2 border-2 border-blue-300 text-blue-700 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center gap-2 disabled:opacity-50"
+          >
+            <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+            {loading ? "ATUALIZANDO..." : "🔄 ATUALIZAR"}
+          </button>
           <button
             onClick={handleResetSales}
             className="px-4 py-2 border border-orange-200 text-orange-600 font-bold rounded-xl hover:bg-orange-50 transition-colors"

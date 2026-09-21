@@ -228,15 +228,22 @@ export async function GET(req: NextRequest) {
       stockValue += total;
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       totalSales,
       totalInvestments,
       stockValue,
       stockBreakdown: breakdown,
       pendingOrders: pendingCount,
     });
+    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
+    response.headers.set("Surrogate-Control", "no-store");
+    return response;
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Erro ao buscar resumo financeiro" }, { status: 500 });
+    const err = NextResponse.json({ error: "Erro ao buscar resumo financeiro" }, { status: 500 });
+    err.headers.set("Cache-Control", "no-store");
+    return err;
   }
 }
