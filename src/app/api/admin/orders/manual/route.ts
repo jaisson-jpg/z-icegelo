@@ -123,33 +123,38 @@ export async function POST(req: NextRequest) {
     }
 
     // 4) Criar o pedido
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        userId: userIdFinal,
-        customerName,
-        customerPhone: normalizePhone(customerPhone) || customerPhone,
-        customerEmail: customerEmail || user?.email || null,
-        customerCpfCnpj: customerCpfCnpj ? customerCpfCnpj.replace(/\D/g, "") : (user?.lojista?.cnpj || null),
-        address: address || (user?.lojista?.address || null),
-        category,
-        total,
-        deliveryFee,
-        needsInvoice,
-        status: initialStatus,
-        note: note || null,
-        pointsAwarded,
-        ...(createAndConfirm ? { confirmedAt: new Date() } : {}),
-        ...invoiceData,
-        items: {
-          create: orderItems.map((i) => ({
-            productId: i.productId,
-            quantity: i.quantity,
-            unitPrice: i.unitPrice,
-            subtotal: i.subtotal,
-          })),
-        },
+    const orderCreateData: Record<string, any> = {
+      orderNumber,
+      customerName,
+      customerPhone: normalizePhone(customerPhone) || customerPhone,
+      customerEmail: customerEmail || user?.email || null,
+      customerCpfCnpj: customerCpfCnpj ? customerCpfCnpj.replace(/\D/g, "") : (user?.lojista?.cnpj || null),
+      address: address || (user?.lojista?.address || null),
+      category,
+      total,
+      deliveryFee,
+      needsInvoice,
+      status: initialStatus,
+      note: note || null,
+      pointsAwarded,
+      ...(createAndConfirm ? { confirmedAt: new Date() } : {}),
+      ...invoiceData,
+      items: {
+        create: orderItems.map((i) => ({
+          productId: i.productId,
+          quantity: i.quantity,
+          unitPrice: i.unitPrice,
+          subtotal: i.subtotal,
+        })),
       },
+    };
+    // IMPORTANTE (Bug Fix): No Prisma, quando tem relação user 1→N, NÃO podemos passar userId direto.
+    // Temos que usar user: { connect: { id } }. Se não tiver usuário vinculado, omite user.
+    if (userIdFinal) {
+      orderCreateData.user = { connect: { id: userIdFinal } };
+    }
+    const order = await prisma.order.create({
+      data: orderCreateData,
       include: {
         items: { include: { product: true } },
         user: { include: { lojista: true } },
