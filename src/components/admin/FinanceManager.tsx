@@ -29,6 +29,7 @@ type StockBreakdownItem = {
   updatedAt: string | null;
   candidateCount: number;
   warningMulti: boolean;
+  productCategory: string;
 };
 
 type Summary = {
@@ -380,6 +381,15 @@ export function FinanceManager() {
                         <p className="text-[11px] text-gray-700 mt-0.5 font-bold truncate max-w-[300px]">
                           📦 {item.productName}
                         </p>
+                        <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${
+                            (item.productCategory || "").toUpperCase() === "VAREJO"
+                              ? "bg-sky-100 text-sky-800 border-sky-200"
+                              : "bg-pink-100 text-pink-800 border-pink-200"
+                          }`}>
+                            📁 {item.productCategory || "-"}
+                          </span>
+                        </div>
                         {item.warningMulti && (
                           <p className="mt-2 text-[10px] font-black uppercase text-amber-700 bg-amber-100/70 border border-amber-200 px-2 py-1 rounded-lg inline-block">
                             ⚠️ {item.candidateCount} produtos ATIVOS nesta categoria! Desative os antigos em Admin → Produtos para evitar dúvidas.
@@ -496,22 +506,25 @@ export function FinanceManager() {
           </table>
         </div>
 
-        <div className="p-4 bg-amber-50 border-t border-amber-200 text-xs text-amber-800 flex items-start gap-3">
-          <Info size={18} className="flex-shrink-0 mt-0.5 text-amber-600" />
-          <div className="space-y-1">
-            <p className="font-bold">⚠️ Como garantir o cálculo 100% certo (sempre dará R$ 3,50 / R$ 5,50):</p>
-            <ol className="list-decimal pl-5 space-y-1">
+        <div className="p-4 bg-emerald-50 border-t border-emerald-200 text-xs text-emerald-900 flex items-start gap-3">
+          <Info size={18} className="flex-shrink-0 mt-0.5 text-emerald-600" />
+          <div className="space-y-2">
+            <p className="font-black text-emerald-800 text-sm">
+              ✅ COMO FUNCIONA (100% do SEU JEITO):
+            </p>
+            <ol className="list-decimal pl-5 space-y-1 font-semibold">
               <li>
-                Acesse <strong>Admin → Produtos</strong> → edite o produto atacado (ex: "Gelo Atacado - 20 pacotes 3kg")
+                🥇 <strong>É USADO SEMPRE o produto com PREÇO LOJISTA EXCLUSIVO</strong> preenchido (campo "Preço Lojista Exclusivo (R$)" na edição do produto) — não importa se categoria é <strong>VAREJO</strong> ou <strong>ATACADO</strong>.
               </li>
               <li>
-                Verifique o campo <strong>"Quantidade de sacos por unidade (atacado)"</strong> → deve ser <strong>20</strong> (para o pacote de 20) ou <strong>15</strong> (para o de 5kg)
+                🆕 <strong>Desempate: o MAIS RECENTEMENTE EDITADO GANHA!</strong>
+                Se tem +1 produto com preço lojista preenchido na mesma categoria (3kg/5kg/10kg), SEMPRE usa o último que VOCÊ SALVOU! (Produtos de dias antigos nunca vencem um salvo hoje.)
               </li>
               <li>
-                Preencha <strong>"Preço de atacado (lojista)"</strong> com o valor do pacote fechado (ex: 3kg com 20 unid = <strong>R$ 70,00</strong> / 5kg com 15 unid = <strong>R$ 82,50</strong>)
+                💡 Exemplo seu: 3kg = R$ 4,00 (VAREJO) / 5kg = R$ 6,50 (VAREJO). Salve esses 2 produtos HOJE → eles viram os mais novos na categoria e são usados imediatamente no cálculo!
               </li>
               <li>
-                Salve. O resultado será sempre <strong>R$ 3,50</strong> e <strong>R$ 5,50</strong> (o campo <strong>sacosPerUnit</strong> tem prioridade máxima).
+                ⚠️ <strong>Se ainda estiver aparecendo produto antigo (datas de julho/ago):</strong> abra o produto VAREJO que tem o preço que você quer → altere 1 centavo do preço lojista, salve. Ele passa a ser o MAIS NOVO e ganha 100%!
               </li>
             </ol>
           </div>

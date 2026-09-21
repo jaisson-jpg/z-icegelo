@@ -115,6 +115,7 @@ export async function GET(req: NextRequest) {
       updatedAt: string | null;
       candidateCount: number;
       warningMulti: boolean;
+      productCategory: string;
     };
 
     const breakdown: StockBreakdown[] = [];
@@ -125,17 +126,19 @@ export async function GET(req: NextRequest) {
 
       type Candidate = {
         product: any;
+        productCategory: string;
         packPrice: number;
         sacosPerUnit: number;
         unitPrice: number;
         source: StockBreakdown["pricingSource"];
         updatedAt: Date;
+        tier: number; // 10 = lojaPrice (QUALQUER CAT), 20 = price atacado, 30 = price normal
       };
       const candidates: Candidate[] = [];
 
       // =================================================================
-      // 🔝 PRIORIDADE MÁXIMA (1): PREÇO LOJISTA (lojaPrice) — QUALQUER CATEGORIA!
-      // (VAREJO ou ATACADO, não importa! Se tem "Preço Lojista Exclusivo" é esse que usa!)
+      // 🔝 TIER 1: QUALQUER produto COM "PREÇO LOJISTA EXCLUSIVO" preenchido!
+      // (VAREJO e ATACADO = MESMO PESO IGUAL! Desempate é DATA MAIS NOVA!)
       // =================================================================
       const QUALQUER_comLojaPrice = cat.products.filter(
         (p) => p.lojaPrice !== null && p.lojaPrice !== undefined && Number(p.lojaPrice) > 0
@@ -146,17 +149,18 @@ export async function GET(req: NextRequest) {
         const ehAtacado = p.category === "ATACADO";
         candidates.push({
           product: p,
+          productCategory: p.category as string,
           packPrice,
           sacosPerUnit: spu,
           unitPrice: packPrice / spu,
           source: ehAtacado ? "LOJA_PRICE_ATACADO" : "LOJA_PRICE",
           updatedAt: p.updatedAt as Date,
+          tier: 10, // MESMO tier para VAREJO e ATACADO!
         });
       }
 
       // =================================================================
-      // PRIORIDADE 2: Preço normal (price) de produto ATACADO ativo
-      // (sem lojaPrice — fallback antigo, se não tiver nada com lojaPrice)
+      // TIER 2: Preço normal (price) de produto ATACADO ativo (SEM lojaPrice)
       // =================================================================
       const atacadoAtivos = cat.products.filter(
         (p) => p.category === "ATACADO" && Number(p.price) > 0 && !candidates.find((c) => c.product.id === p.id)
@@ -166,16 +170,18 @@ export async function GET(req: NextRequest) {
         const packPrice = Number(p.price);
         candidates.push({
           product: p,
+          productCategory: p.category as string,
           packPrice,
           sacosPerUnit: spu,
           unitPrice: packPrice / spu,
           source: "PRICE_ATACADO",
           updatedAt: p.updatedAt as Date,
+          tier: 20,
         });
       }
 
       // =================================================================
-      // PRIORIDADE 3: Preço normal (price) de QUALQUER produto ativo (fallback extremo)
+      // TIER 3: Preço normal (price) de QUALQUER produto ativo (fallback)
       // =================================================================
       const ativos = cat.products.filter(
         (p) => Number(p.price) > 0 && !candidates.find((c) => c.product.id === p.id)
@@ -185,11 +191,13 @@ export async function GET(req: NextRequest) {
         const packPrice = Number(p.price);
         candidates.push({
           product: p,
+          productCategory: p.category as string,
           packPrice,
           sacosPerUnit: spu,
           unitPrice: packPrice / spu,
           source: "PRICE",
           updatedAt: p.updatedAt as Date,
+          tier: 30,
         });
       }
 
@@ -209,20 +217,17 @@ export async function GET(req: NextRequest) {
           updatedAt: null,
           candidateCount: 0,
           warningMulti: false,
+          productCategory: "-",
         });
         continue;
       }
 
       candidates.sort((a, b) => {
-        // PRIORIDADE 1: SEMPRE vem primeiro quem TEM PREÇO LOJISTA!
-        // Ranking: LOJA_PRICE_ATACADO (5) / LOJA_PRICE (4) / PRICE_ATACADO (3) / PRICE (2)
-        const rank = (s: string) =>
-          s === "LOJA_PRICE_ATACADO" ? 5 :
-          s === "LOJA_PRICE" ? 4 :
-          s === "PRICE_ATACADO" ? 3 : 2;
-        const rankDiff = rank(b.source) - rank(a.source);
-        if (rankDiff !== 0) return rankDiff;
-        // PRIORIDADE 2: MAIS RECENTEMENTE EDITADO (updatedAt mais recente PRIMEIRO)
+        // PRIORIDADE 1: TIER (menor numero = maior prioridade)
+        //    10 (lojaPrice QUALQUER CAT) > 20 (price atacado) > 30 (price normal)
+        if (a.tier !== b.tier) return a.tier - b.tier;
+        // PRIORIDADE 2 (DESEMPATE FATAL): MAIS RECENTEMENTE EDITADO PRIMEIRO!
+        // (Produto que VOCÊ salvou por ÚLTIMO é o que sempre ganha!)
         return b.updatedAt.getTime() - a.updatedAt.getTime();
       });
 
@@ -251,6 +256,7 @@ export async function GET(req: NextRequest) {
         updatedAt: best.updatedAt ? best.updatedAt.toISOString() : null,
         candidateCount: candidates.length,
         warningMulti: candidates.length > 1,
+        productCategory: best.productCategory,
       });
 
       stockValue += total;
