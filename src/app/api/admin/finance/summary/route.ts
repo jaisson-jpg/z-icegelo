@@ -133,22 +133,31 @@ export async function GET(req: NextRequest) {
       };
       const candidates: Candidate[] = [];
 
-      const atacadoComLojaPrice = cat.products.filter(
-        (p) => p.category === "ATACADO" && p.lojaPrice !== null && p.lojaPrice !== undefined && Number(p.lojaPrice) > 0
+      // =================================================================
+      // 🔝 PRIORIDADE MÁXIMA (1): PREÇO LOJISTA (lojaPrice) — QUALQUER CATEGORIA!
+      // (VAREJO ou ATACADO, não importa! Se tem "Preço Lojista Exclusivo" é esse que usa!)
+      // =================================================================
+      const QUALQUER_comLojaPrice = cat.products.filter(
+        (p) => p.lojaPrice !== null && p.lojaPrice !== undefined && Number(p.lojaPrice) > 0
       );
-      for (const p of atacadoComLojaPrice) {
+      for (const p of QUALQUER_comLojaPrice) {
         const spu = extractSacosPerUnit({ name: p.name, sacosPerUnit: p.sacosPerUnit });
         const packPrice = Number(p.lojaPrice);
+        const ehAtacado = p.category === "ATACADO";
         candidates.push({
           product: p,
           packPrice,
           sacosPerUnit: spu,
           unitPrice: packPrice / spu,
-          source: "LOJA_PRICE_ATACADO",
+          source: ehAtacado ? "LOJA_PRICE_ATACADO" : "LOJA_PRICE",
           updatedAt: p.updatedAt as Date,
         });
       }
 
+      // =================================================================
+      // PRIORIDADE 2: Preço normal (price) de produto ATACADO ativo
+      // (sem lojaPrice — fallback antigo, se não tiver nada com lojaPrice)
+      // =================================================================
       const atacadoAtivos = cat.products.filter(
         (p) => p.category === "ATACADO" && Number(p.price) > 0 && !candidates.find((c) => c.product.id === p.id)
       );
@@ -165,22 +174,9 @@ export async function GET(req: NextRequest) {
         });
       }
 
-      const comLojaPrice = cat.products.filter(
-        (p) => p.lojaPrice !== null && p.lojaPrice !== undefined && Number(p.lojaPrice) > 0 && !candidates.find((c) => c.product.id === p.id)
-      );
-      for (const p of comLojaPrice) {
-        const spu = extractSacosPerUnit({ name: p.name, sacosPerUnit: p.sacosPerUnit });
-        const packPrice = Number(p.lojaPrice);
-        candidates.push({
-          product: p,
-          packPrice,
-          sacosPerUnit: spu,
-          unitPrice: packPrice / spu,
-          source: "LOJA_PRICE",
-          updatedAt: p.updatedAt as Date,
-        });
-      }
-
+      // =================================================================
+      // PRIORIDADE 3: Preço normal (price) de QUALQUER produto ativo (fallback extremo)
+      // =================================================================
       const ativos = cat.products.filter(
         (p) => Number(p.price) > 0 && !candidates.find((c) => c.product.id === p.id)
       );
@@ -204,7 +200,7 @@ export async function GET(req: NextRequest) {
           quantity: cat.quantity,
           unitPrice: 0,
           totalValue: 0,
-          productName: "(sem produto ativo — associe um produto ATACADO com lojaPrice!)",
+          productName: "(sem preço — cadastre Preço Lojista Exclusivo no produto!)",
           productId: null,
           pricingSource: "NENHUM",
           productPackPrice: 0,
@@ -218,8 +214,12 @@ export async function GET(req: NextRequest) {
       }
 
       candidates.sort((a, b) => {
-        // PRIORIDADE 1: MAIOR qualidade de fonte (LOJA_PRICE_ATACADO > PRICE_ATACADO > LOJA_PRICE > PRICE)
-        const rank = (s: string) => s === "LOJA_PRICE_ATACADO" ? 4 : s === "PRICE_ATACADO" ? 3 : s === "LOJA_PRICE" ? 2 : 1;
+        // PRIORIDADE 1: SEMPRE vem primeiro quem TEM PREÇO LOJISTA!
+        // Ranking: LOJA_PRICE_ATACADO (5) / LOJA_PRICE (4) / PRICE_ATACADO (3) / PRICE (2)
+        const rank = (s: string) =>
+          s === "LOJA_PRICE_ATACADO" ? 5 :
+          s === "LOJA_PRICE" ? 4 :
+          s === "PRICE_ATACADO" ? 3 : 2;
         const rankDiff = rank(b.source) - rank(a.source);
         if (rankDiff !== 0) return rankDiff;
         // PRIORIDADE 2: MAIS RECENTEMENTE EDITADO (updatedAt mais recente PRIMEIRO)

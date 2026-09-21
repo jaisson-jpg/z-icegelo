@@ -196,15 +196,15 @@ export function FinanceManager() {
   const badgeSource = (s: StockBreakdownItem["pricingSource"]) => {
     switch (s) {
       case "LOJA_PRICE_ATACADO":
-        return { label: "✅ Preço Lojista Atacado", bg: "bg-green-100", txt: "text-green-800", border: "border-green-200" };
+        return { label: "✅ PREÇO LOJISTA (ATACADO)", bg: "bg-green-100", txt: "text-green-800", border: "border-green-200" };
       case "PRICE_ATACADO":
-        return { label: "⚠️ Preço Varejo Atacado (lojaPrice não definido)", bg: "bg-yellow-100", txt: "text-yellow-800", border: "border-yellow-200" };
+        return { label: "⚠️ Preço normal atacado (sem lojaPrice)", bg: "bg-yellow-100", txt: "text-yellow-800", border: "border-yellow-200" };
       case "LOJA_PRICE":
-        return { label: "ℹ️ Preço Lojista Varejo", bg: "bg-blue-100", txt: "text-blue-800", border: "border-blue-200" };
+        return { label: "✅ PREÇO LOJISTA EXCLUSIVO (VAREJO)", bg: "bg-emerald-100", txt: "text-emerald-800", border: "border-emerald-200" };
       case "PRICE":
-        return { label: "⚠️ Preço Varejo (sem atacado)", bg: "bg-orange-100", txt: "text-orange-800", border: "border-orange-200" };
+        return { label: "⚠️ Preço normal Varejo (sem Preço Lojista)", bg: "bg-orange-100", txt: "text-orange-800", border: "border-orange-200" };
       default:
-        return { label: "❌ Sem produto associado", bg: "bg-red-100", txt: "text-red-800", border: "border-red-200" };
+        return { label: "❌ Sem preço definido", bg: "bg-red-100", txt: "text-red-800", border: "border-red-200" };
     }
   };
 
@@ -316,9 +316,9 @@ export function FinanceManager() {
               Cálculo do Valor em Estoque (1 Pacote Unitário)
             </h3>
             <p className="text-xs text-gray-500 mt-1">
-              <strong>Prioridade 1:</strong> Produto ATACADO com preço lojista (✅ VERDE)<br/>
-              <strong>Prioridade 2:</strong> Produto MAIS RECENTEMENTE EDITADO (usa sempre o último salvo!)<br/>
-              <strong className="text-amber-600">Clique em "EDITAR" abaixo para ajustar rapidamente o preço ↓</strong>
+              <strong className="text-emerald-700">🔝 PRIORIDADE MÁXIMA:</strong> Produto com <strong>PREÇO LOJISTA EXCLUSIVO</strong> preenchido (não importa se é VAREJO ou ATACADO — esse é o que usa!)<br/>
+              <strong>Depois:</strong> Produto MAIS RECENTEMENTE EDITADO (sempre o último salvo)<br/>
+              <strong className="text-amber-600">Clique em "✏️ EDITAR PRODUTO" abaixo para mudar o preço na hora ↓</strong>
             </p>
           </div>
           <div className="flex flex-col sm:items-end gap-2 text-[11px]">
