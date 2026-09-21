@@ -76,36 +76,31 @@ export async function POST(req: NextRequest) {
     const category = items.some((i) => i.category === "ATACADO") ? "ATACADO" : "VAREJO";
     const orderNumber = generateOrderNumber();
 
-    const orderData: Record<string, any> = {
-      orderNumber,
-      customerName,
-      customerPhone: normalizePhone(customerPhone) || customerPhone,
-      customerEmail,
-      customerCpfCnpj: customerCpfCnpj?.replace(/\D/g, "") || null,
-      address,
-      category,
-      total,
-      deliveryFee,
-      needsInvoice,
-      status: pixReceiptUrl ? "AWAITING_CONFIRMATION" : "PENDING_PIX",
-      pixReceiptUrl,
-      pointsAwarded,
-      items: {
-        create: items.map((i) => ({
-          productId: i.productId,
-          quantity: i.quantity,
-          unitPrice: i.price,
-          subtotal: i.price * i.quantity,
-        })),
-      },
-    };
-    // PRISMA BUG FIX: nao pode passar userId escalar quando tem relation user 1:N
-    // Usar user.connect quando existir sessao
-    if (userId) {
-      orderData.user = { connect: { id: userId } };
-    }
     const order = await prisma.order.create({
-      data: orderData,
+      data: {
+        orderNumber,
+        userId,
+        customerName,
+        customerPhone: normalizePhone(customerPhone) || customerPhone,
+        customerEmail,
+        customerCpfCnpj: customerCpfCnpj?.replace(/\D/g, "") || null,
+        address,
+        category,
+        total,
+        deliveryFee,
+        needsInvoice,
+        status: pixReceiptUrl ? "AWAITING_CONFIRMATION" : "PENDING_PIX",
+        pixReceiptUrl,
+        pointsAwarded,
+        items: {
+          create: items.map((i) => ({
+            productId: i.productId,
+            quantity: i.quantity,
+            unitPrice: i.price,
+            subtotal: i.price * i.quantity,
+          })),
+        },
+      },
     });
 
     return NextResponse.json({

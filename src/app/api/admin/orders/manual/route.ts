@@ -123,8 +123,12 @@ export async function POST(req: NextRequest) {
     }
 
     // 4) Criar o pedido
+    // IMPORTANTE: No Prisma, quando tem relação user 1→N (schema Prisma versão client antigo),
+    // PODEMOS passar userId escalar. O user.connect não funciona com esse client.
+    // E o campo de observações é "adminNotes" (não "note"!)
     const orderCreateData: Record<string, any> = {
       orderNumber,
+      userId: userIdFinal,
       customerName,
       customerPhone: normalizePhone(customerPhone) || customerPhone,
       customerEmail: customerEmail || user?.email || null,
@@ -135,7 +139,7 @@ export async function POST(req: NextRequest) {
       deliveryFee,
       needsInvoice,
       status: initialStatus,
-      note: note || null,
+      adminNotes: note || null,
       pointsAwarded,
       ...(createAndConfirm ? { confirmedAt: new Date() } : {}),
       ...invoiceData,
@@ -148,11 +152,6 @@ export async function POST(req: NextRequest) {
         })),
       },
     };
-    // IMPORTANTE (Bug Fix): No Prisma, quando tem relação user 1→N, NÃO podemos passar userId direto.
-    // Temos que usar user: { connect: { id } }. Se não tiver usuário vinculado, omite user.
-    if (userIdFinal) {
-      orderCreateData.user = { connect: { id: userIdFinal } };
-    }
     const order = await prisma.order.create({
       data: orderCreateData,
       include: {
