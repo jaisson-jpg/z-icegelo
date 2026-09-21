@@ -21,10 +21,14 @@ type StockBreakdownItem = {
   unitPrice: number;
   totalValue: number;
   productName: string;
+  productId: string | null;
   pricingSource: "LOJA_PRICE_ATACADO" | "PRICE_ATACADO" | "LOJA_PRICE" | "PRICE" | "NENHUM";
   productPackPrice: number;
   productSacosPerUnit: number;
   conversionFormula: string;
+  updatedAt: string | null;
+  candidateCount: number;
+  warningMulti: boolean;
 };
 
 type Summary = {
@@ -53,28 +57,35 @@ export function FinanceManager() {
     date: new Date().toISOString().split('T')[0],
   });
 
-  const [summary, setSummary] = useState<Summary>({
+  const [summary, setSummary] = useState<Summary & { generatedAt?: string | null }>({
     totalSales: 0,
     totalInvestments: 0,
     stockValue: 0,
     pendingOrders: 0,
     stockBreakdown: [],
+    generatedAt: null,
   });
+
+  const [refreshNonce, setRefreshNonce] = useState<number>(0);
 
   const fetchData = async () => {
     setLoading(true);
     try {
+      const nonce = `${Date.now()}_${Math.random().toString(36).slice(2)}_${++refreshNonce}`;
       const noCacheInit: RequestInit = {
-        cache: "no-store",
+        cache: "reload",
+        credentials: "include",
         headers: {
-          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0",
           "Pragma": "no-cache",
           "Expires": "0",
+          "X-No-Cache": "1",
+          "X-Refresh-Nonce": nonce,
         },
         // @ts-ignore
-        next: { revalidate: 0 },
+        next: { revalidate: 0, tags: [`finance-refresh-${nonce}`] },
       };
-      const ts = `&_t=${Date.now()}`;
+      const ts = `&_t=${nonce}`;
       const [invRes, summaryRes] = await Promise.all([
         fetch(`/api/admin/investments?from=${dates.from}&to=${dates.to}${ts}`, noCacheInit),
         fetch(`/api/admin/finance/summary?from=${dates.from}&to=${dates.to}${ts}`, noCacheInit),
@@ -89,6 +100,7 @@ export function FinanceManager() {
           stockValue: data.stockValue || 0,
           pendingOrders: data.pendingOrders || 0,
           stockBreakdown: data.stockBreakdown || [],
+          generatedAt: data.generatedAt || null,
         });
       }
     } catch (e) {
@@ -304,23 +316,32 @@ export function FinanceManager() {
               Cálculo do Valor em Estoque (1 Pacote Unitário)
             </h3>
             <p className="text-xs text-gray-500 mt-1">
-              <strong>Passo 1:</strong> Pega o preço do pacote de atacado (ex: "20 pacotes 3kg = R$ 70")<br/>
-              <strong>Passo 2:</strong> Divide pela quantidade de unidades (R$ 70 ÷ 20 = R$ 3,50 por pacote 3kg)<br/>
-              <strong>Passo 3:</strong> Multiplica pelo total em estoque e <strong>soma todas as categorias</strong>.
+              <strong>Prioridade 1:</strong> Produto ATACADO com preço lojista (✅ VERDE)<br/>
+              <strong>Prioridade 2:</strong> Produto MAIS RECENTEMENTE EDITADO (usa sempre o último salvo!)<br/>
+              <strong className="text-amber-600">Clique em "EDITAR" abaixo para ajustar rapidamente o preço ↓</strong>
             </p>
           </div>
-          <div className="flex items-center gap-2 text-[11px] font-bold bg-white px-4 py-2 rounded-2xl border border-blue-100">
-            <Info size={14} className="text-blue-600" />
-            <span className="text-gray-600">
-              Total Geral: <span className="text-blue-700 text-base">{formatCurrency(summary.stockValue)}</span>
-            </span>
+          <div className="flex flex-col sm:items-end gap-2 text-[11px]">
+            <div className="flex items-center gap-2 font-bold bg-white px-4 py-2 rounded-2xl border border-blue-100">
+              <Info size={14} className="text-blue-600" />
+              <span className="text-gray-600">
+                Total Geral: <span className="text-blue-700 text-base">{formatCurrency(summary.stockValue)}</span>
+              </span>
+            </div>
+            {summary.generatedAt && (
+              <div className="font-semibold text-gray-500">
+                ✨ Cálculo gerado em: <span className="text-blue-700 font-black">
+                  {new Date(summary.generatedAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}
+                </span>
+              </div>
+            )}
           </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-gray-50 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
               <tr>
-                <th className="px-4 py-4">Categoria</th>
+                <th className="px-4 py-4">🧊 Categoria / Produto</th>
                 <th className="px-4 py-4 text-right">Estoque (pacotes)</th>
                 <th className="px-4 py-4 text-right">
                   Preço Pacote<br />
@@ -334,14 +355,15 @@ export function FinanceManager() {
                   <span className="text-[9px] font-normal normal-case text-gray-400">(R$ pacote ÷ unid.)</span>
                 </th>
                 <th className="px-4 py-4 text-right">Fórmula Final</th>
-                <th className="px-4 py-4 text-right">Total</th>
+                <th className="px-4 py-4 text-right">Total (R$)</th>
+                <th className="px-4 py-4 text-center">Ações / Data</th>
                 <th className="px-4 py-4">Garantia</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {breakdown.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-16 text-center text-gray-400 italic">
+                  <td colSpan={9} className="px-6 py-16 text-center text-gray-400 italic">
                     Nenhuma categoria com estoque. Adicione produção no menu <strong>Estoque</strong>.
                   </td>
                 </tr>
@@ -349,12 +371,20 @@ export function FinanceManager() {
                 breakdown.map((item) => {
                   const b = badgeSource(item.pricingSource);
                   return (
-                    <tr key={item.categoryId} className="hover:bg-blue-50/30 transition-colors">
+                    <tr
+                      key={item.categoryId}
+                      className={`transition-colors ${item.warningMulti ? 'bg-amber-50/40 hover:bg-amber-100/50' : 'hover:bg-blue-50/30'}`}
+                    >
                       <td className="px-4 py-4">
                         <p className="text-sm font-black text-[var(--zice-dark)]">🧊 {item.categoryName}</p>
-                        <p className="text-[11px] text-gray-400 mt-0.5 font-semibold truncate max-w-[300px]">
+                        <p className="text-[11px] text-gray-700 mt-0.5 font-bold truncate max-w-[300px]">
                           📦 {item.productName}
                         </p>
+                        {item.warningMulti && (
+                          <p className="mt-2 text-[10px] font-black uppercase text-amber-700 bg-amber-100/70 border border-amber-200 px-2 py-1 rounded-lg inline-block">
+                            ⚠️ {item.candidateCount} produtos ATIVOS nesta categoria! Desative os antigos em Admin → Produtos para evitar dúvidas.
+                          </p>
+                        )}
                       </td>
                       <td className="px-4 py-4 text-sm font-black text-right text-[var(--zice-dark)]">
                         {item.quantity.toLocaleString("pt-BR")}
@@ -403,6 +433,29 @@ export function FinanceManager() {
                           <span className="text-red-500">R$ 0,00</span>
                         )}
                       </td>
+                      <td className="px-4 py-4 text-center text-[11px] space-y-1">
+                        {item.productId ? (
+                          <a
+                            href={`/admin/produtos/${item.productId}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-block w-full px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase transition-colors border-2 border-blue-400 shadow-sm hover:shadow-md"
+                          >
+                            ✏️ EDITAR PRODUTO
+                          </a>
+                        ) : (
+                          <span className="text-gray-400 italic text-[10px]">sem produto</span>
+                        )}
+                        {item.updatedAt && (
+                          <p className="mt-1 text-[10px] font-bold text-gray-500">
+                            Atualizado:
+                            <br />
+                            <span className="text-gray-700 font-black">
+                              {new Date(item.updatedAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}
+                            </span>
+                          </p>
+                        )}
+                      </td>
                       <td className="px-4 py-4">
                         <span className={`text-[10px] font-black px-2 py-1 rounded-full border uppercase ${b.bg} ${b.txt} ${b.border}`}>
                           {b.label}
@@ -435,6 +488,7 @@ export function FinanceManager() {
                       {formatCurrency(summary.stockValue)}
                     </span>
                   </td>
+                  <td></td>
                   <td></td>
                 </tr>
               </tfoot>

@@ -3,29 +3,32 @@ import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
-/**
- * Tenta detectar quantos SACOS UNITÁRIOS tem dentro de um produto (pacote atacado).
- * Ordem de prioridade:
- *   1) campo sacosPerUnit (se > 1)
- *   2) regex no nome do produto: "20 pacotes 3kg", "15 sacos 5kg", "Kit c/ 10x3kg", etc
- *   3) fallback: 1 unidade (preço unitário = preço do produto)
- */
+function addNoCache(res: NextResponse) {
+  res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0");
+  res.headers.set("Pragma", "no-cache");
+  res.headers.set("Expires", "0");
+  res.headers.set("Surrogate-Control", "no-store");
+  res.headers.set("X-Accel-Expires", "0");
+  res.headers.set("Vary", "*");
+  res.headers.set("X-No-Cache", "1");
+  return res;
+}
+
 function extractSacosPerUnit(product: { name: string; sacosPerUnit?: number | null }): number {
   if (product.sacosPerUnit && Number(product.sacosPerUnit) > 0) {
     return Number(product.sacosPerUnit);
   }
 
   const name = (product.name || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-
-  // padrões: "20 pacotes", "15 sacos", "kit c/ 10x", "12 un", "5 unid", "6 x"
   const patterns = [
     /(\d+)\s*(?:pacotes|pacote|pcs|pc|unidades|unidade|unid|uni|un|sacos|saco)/,
     /kit\s*c[\/]\s*(\d+)/i,
-    /(\d+)\s*x\s*\d+\s*(?:kg|k)/, // "10x3kg"
+    /(\d+)\s*x\s*\d+\s*(?:kg|k)/,
     /(\d+)\s*un/i,
   ];
-
   for (const regex of patterns) {
     const m = name.match(regex);
     if (m && m[1]) {
@@ -33,13 +36,12 @@ function extractSacosPerUnit(product: { name: string; sacosPerUnit?: number | nu
       if (q >= 1) return q;
     }
   }
-
   return 1;
 }
 
 export async function GET(req: NextRequest) {
   const session = await requireSession(["ADMIN"]);
-  if (!session) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  if (!session) return addNoCache(NextResponse.json({ error: "Não autorizado" }, { status: 401 }));
 
   const { searchParams } = new URL(req.url);
   const from = searchParams.get("from");
@@ -71,6 +73,10 @@ export async function GET(req: NextRequest) {
         include: {
           products: {
             where: { active: true },
+            orderBy: [
+              { updatedAt: "desc" },
+              { createdAt: "desc" },
+            ],
             select: {
               id: true,
               name: true,
@@ -79,6 +85,9 @@ export async function GET(req: NextRequest) {
               category: true,
               active: true,
               sacosPerUnit: true,
+              updatedAt: true,
+              createdAt: true,
+              sortOrder: true,
             },
           },
         },
@@ -95,13 +104,17 @@ export async function GET(req: NextRequest) {
       categoryId: string;
       categoryName: string;
       quantity: number;
-      unitPrice: number;              // preço de 1 SACO UNITÁRIO
-      totalValue: number;             // quantity × unitPrice
-      productName: string;            // produto escolhido
+      unitPrice: number;
+      totalValue: number;
+      productName: string;
+      productId: string | null;
       pricingSource: "LOJA_PRICE_ATACADO" | "PRICE_ATACADO" | "LOJA_PRICE" | "PRICE" | "NENHUM";
-      productPackPrice: number;       // preço do pacote (lojaPrice do produto)
-      productSacosPerUnit: number;    // quantos sacos vem no produto (20, 15...)
-      conversionFormula: string;      // "R$ 70,00 ÷ 20 = R$ 3,50"
+      productPackPrice: number;
+      productSacosPerUnit: number;
+      conversionFormula: string;
+      updatedAt: string | null;
+      candidateCount: number;
+      warningMulti: boolean;
     };
 
     const breakdown: StockBreakdown[] = [];
@@ -110,16 +123,14 @@ export async function GET(req: NextRequest) {
     for (const cat of categories) {
       if (cat.quantity <= 0) continue;
 
-      // ==== 1) PRIORIDADE MÁXIMA: produtos ATACADO ativos COM lojaPrice > 0
-      // (escolhe o MENOR preço POR SACO UNITÁRIO depois de dividir por sacosPerUnit)
       type Candidate = {
         product: any;
         packPrice: number;
         sacosPerUnit: number;
         unitPrice: number;
         source: StockBreakdown["pricingSource"];
+        updatedAt: Date;
       };
-
       const candidates: Candidate[] = [];
 
       const atacadoComLojaPrice = cat.products.filter(
@@ -134,10 +145,10 @@ export async function GET(req: NextRequest) {
           sacosPerUnit: spu,
           unitPrice: packPrice / spu,
           source: "LOJA_PRICE_ATACADO",
+          updatedAt: p.updatedAt as Date,
         });
       }
 
-      // ==== 2) ATACADO usando price (fallback se lojaPrice não definido)
       const atacadoAtivos = cat.products.filter(
         (p) => p.category === "ATACADO" && Number(p.price) > 0 && !candidates.find((c) => c.product.id === p.id)
       );
@@ -150,10 +161,10 @@ export async function GET(req: NextRequest) {
           sacosPerUnit: spu,
           unitPrice: packPrice / spu,
           source: "PRICE_ATACADO",
+          updatedAt: p.updatedAt as Date,
         });
       }
 
-      // ==== 3) Qualquer produto com lojaPrice
       const comLojaPrice = cat.products.filter(
         (p) => p.lojaPrice !== null && p.lojaPrice !== undefined && Number(p.lojaPrice) > 0 && !candidates.find((c) => c.product.id === p.id)
       );
@@ -166,10 +177,10 @@ export async function GET(req: NextRequest) {
           sacosPerUnit: spu,
           unitPrice: packPrice / spu,
           source: "LOJA_PRICE",
+          updatedAt: p.updatedAt as Date,
         });
       }
 
-      // ==== 4) Qualquer produto com price
       const ativos = cat.products.filter(
         (p) => Number(p.price) > 0 && !candidates.find((c) => c.product.id === p.id)
       );
@@ -182,6 +193,7 @@ export async function GET(req: NextRequest) {
           sacosPerUnit: spu,
           unitPrice: packPrice / spu,
           source: "PRICE",
+          updatedAt: p.updatedAt as Date,
         });
       }
 
@@ -193,16 +205,28 @@ export async function GET(req: NextRequest) {
           unitPrice: 0,
           totalValue: 0,
           productName: "(sem produto ativo — associe um produto ATACADO com lojaPrice!)",
+          productId: null,
           pricingSource: "NENHUM",
           productPackPrice: 0,
           productSacosPerUnit: 1,
           conversionFormula: "—",
+          updatedAt: null,
+          candidateCount: 0,
+          warningMulti: false,
         });
         continue;
       }
 
-      // ==== ESCOLHE O CANDIDATO COM MENOR PREÇO UNITÁRIO
-      const best = candidates.reduce((a, b) => (a.unitPrice < b.unitPrice ? a : b));
+      candidates.sort((a, b) => {
+        // PRIORIDADE 1: MAIOR qualidade de fonte (LOJA_PRICE_ATACADO > PRICE_ATACADO > LOJA_PRICE > PRICE)
+        const rank = (s: string) => s === "LOJA_PRICE_ATACADO" ? 4 : s === "PRICE_ATACADO" ? 3 : s === "LOJA_PRICE" ? 2 : 1;
+        const rankDiff = rank(b.source) - rank(a.source);
+        if (rankDiff !== 0) return rankDiff;
+        // PRIORIDADE 2: MAIS RECENTEMENTE EDITADO (updatedAt mais recente PRIMEIRO)
+        return b.updatedAt.getTime() - a.updatedAt.getTime();
+      });
+
+      const best = candidates[0];
       const total = cat.quantity * best.unitPrice;
 
       let formula = "";
@@ -219,10 +243,14 @@ export async function GET(req: NextRequest) {
         unitPrice: best.unitPrice,
         totalValue: total,
         productName: best.product.name,
+        productId: best.product.id,
         pricingSource: best.source,
         productPackPrice: best.packPrice,
         productSacosPerUnit: best.sacosPerUnit,
         conversionFormula: formula,
+        updatedAt: best.updatedAt ? best.updatedAt.toISOString() : null,
+        candidateCount: candidates.length,
+        warningMulti: candidates.length > 1,
       });
 
       stockValue += total;
@@ -234,16 +262,12 @@ export async function GET(req: NextRequest) {
       stockValue,
       stockBreakdown: breakdown,
       pendingOrders: pendingCount,
+      generatedAt: new Date().toISOString(),
     });
-    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-    response.headers.set("Pragma", "no-cache");
-    response.headers.set("Expires", "0");
-    response.headers.set("Surrogate-Control", "no-store");
-    return response;
+    return addNoCache(response);
   } catch (e) {
     console.error(e);
     const err = NextResponse.json({ error: "Erro ao buscar resumo financeiro" }, { status: 500 });
-    err.headers.set("Cache-Control", "no-store");
-    return err;
+    return addNoCache(err);
   }
 }
