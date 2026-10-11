@@ -54,6 +54,7 @@ model User {
   orders       Order[]
   lojista      Lojista?
   pointHistory PointTransaction[]
+  stockMovements StockMovement[]
 }
 
 model Lojista {
@@ -153,6 +154,21 @@ model StockCategory {
   updatedAt   DateTime @updatedAt
 
   products    Product[]
+  movements   StockMovement[]
+}
+
+model StockMovement {
+  id              String       @id @default(cuid())
+  stockCategoryId String
+  stockCategory   StockCategory @relation(fields: [stockCategoryId], references: [id], onDelete: Cascade)
+  quantity        Int // quantidade adicionada (positivo) ou removida (negativo)
+  balanceBefore   Int // saldo anterior
+  balanceAfter    Int // saldo após
+  userId          String?
+  user            User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt       DateTime     @default(now())
+
+  @@index([stockCategoryId, createdAt])
 }
 
 model Order {

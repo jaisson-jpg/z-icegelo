@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Trash2, Plus, Minus, ArrowUpDown } from "lucide-react";
+import { Trash2, Plus, Minus, ArrowUpDown, History } from "lucide-react";
 import { formatCurrency, STOCK_CAPACITY, stockBarPercent } from "@/lib/utils";
 
 type StockCategory = {
@@ -10,6 +10,15 @@ type StockCategory = {
   description: string | null;
   quantity: number;
   products: { id: string; name: string; price: number; stock: number }[];
+};
+
+type StockMovement = {
+  id: string;
+  quantity: number;
+  balanceBefore: number;
+  balanceAfter: number;
+  createdAt: string;
+  user: { name: string } | null;
 };
 
 export default function EstoquePage() {
@@ -24,6 +33,9 @@ export default function EstoquePage() {
   const [adjustAmount, setAdjustAmount] = useState("");
   const [adjusting, setAdjusting] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [historyModal, setHistoryModal] = useState<StockCategory | null>(null);
+  const [historyMovements, setHistoryMovements] = useState<StockMovement[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -45,6 +57,21 @@ export default function EstoquePage() {
   useEffect(() => {
     loadCategories();
   }, []);
+
+  const loadHistory = async (categoryId: string) => {
+    setHistoryLoading(true);
+    try {
+      const res = await fetch(`/api/admin/stock-categories/${categoryId}/movements`);
+      if (res.ok) {
+        const data: StockMovement[] = await res.json();
+        setHistoryMovements(data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -195,6 +222,15 @@ export default function EstoquePage() {
                     )}
                   </div>
                   <div className="flex flex-wrap justify-end gap-2">
+                    <button
+                      onClick={() => {
+                        setHistoryModal(cat);
+                        loadHistory(cat.id);
+                      }}
+                      className="px-3 py-2 text-sm font-bold bg-[var(--zice-ice)] text-[var(--zice-dark)] rounded-xl hover:bg-[var(--zice-light)] transition-colors flex items-center gap-1"
+                    >
+                      <History size={16} /> Histórico
+                    </button>
                     <button
                       onClick={() => {
                         setAdjustModal(cat);
@@ -534,6 +570,80 @@ export default function EstoquePage() {
               <button
                 type="button"
                 onClick={() => { setAdjustModal(null); setAdjustAmount(""); }}
+                className="flex-1 py-3 rounded-xl font-bold text-gray-500 hover:bg-gray-100 transition-colors"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {historyModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={(e) => e.target === e.currentTarget && setHistoryModal(null)}
+        >
+          <div className="bg-white rounded-2xl p-6 shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-black text-[var(--zice-dark)] flex items-center gap-2">
+                <History size={24} className="text-[var(--zice-medium)]" />
+                Histórico: {historyModal.name}
+              </h3>
+              <button
+                onClick={() => setHistoryModal(null)}
+                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+              >
+                &times;
+              </button>
+            </div>
+
+            {historyLoading ? (
+              <p className="text-gray-500 py-8 text-center">Carregando histórico...</p>
+            ) : historyMovements.length === 0 ? (
+              <p className="text-gray-400 py-8 text-center">Nenhuma movimentação registrada.</p>
+            ) : (
+              <div className="overflow-y-auto flex-1 -mx-2 px-2">
+                <div className="space-y-2">
+                  {historyMovements.map((m) => {
+                    const isAdd = m.quantity > 0;
+                    return (
+                      <div
+                        key={m.id}
+                        className={`flex items-center justify-between p-3 rounded-xl border ${
+                          isAdd
+                            ? "bg-green-50 border-green-200"
+                            : "bg-red-50 border-red-200"
+                        }`}
+                      >
+                        <div>
+                          <span className={`text-lg font-black ${isAdd ? "text-green-700" : "text-red-700"}`}>
+                            {isAdd ? `+${m.quantity}` : m.quantity}
+                          </span>
+                          <span className="text-sm text-gray-500 ml-2">pacotes</span>
+                          <div className="text-xs text-gray-400 mt-1">
+                            {new Date(m.createdAt).toLocaleString("pt-BR")}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs text-gray-500">
+                            {m.balanceBefore} → <strong className="text-[var(--zice-dark)]">{m.balanceAfter}</strong>
+                          </div>
+                          {m.user && (
+                            <div className="text-xs text-gray-400 mt-1">por {m.user.name}</div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-4 mt-4 border-t">
+              <button
+                type="button"
+                onClick={() => setHistoryModal(null)}
                 className="flex-1 py-3 rounded-xl font-bold text-gray-500 hover:bg-gray-100 transition-colors"
               >
                 Fechar

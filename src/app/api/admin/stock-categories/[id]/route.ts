@@ -34,11 +34,23 @@ export async function PUT(
         return addNoCache(NextResponse.json({ error: "Categoria não encontrada" }, { status: 404 }));
       }
 
-      const quantity = Math.max(0, current.quantity + Math.trunc(increment));
+      const balanceBefore = current.quantity;
+      const quantity = Math.max(0, balanceBefore + Math.trunc(increment));
       const category = await prisma.stockCategory.update({
         where: { id },
         data: { quantity },
       });
+
+      await prisma.stockMovement.create({
+        data: {
+          stockCategoryId: id,
+          quantity: Math.trunc(increment),
+          balanceBefore,
+          balanceAfter: quantity,
+          userId: session?.id || null,
+        },
+      });
+
       return addNoCache(NextResponse.json(category));
     }
 
