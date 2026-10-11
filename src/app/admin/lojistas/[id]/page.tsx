@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { LojistaForm } from "@/components/admin/LojistaForm";
 import { FreezerForm } from "@/components/admin/FreezerForm";
+import { FreezerList } from "@/components/admin/FreezerList";
 import { WeeklyPurchaseForm } from "@/components/admin/WeeklyPurchaseForm";
 import { LojistaRewardActions } from "@/components/admin/LojistaRewardActions";
 import { ProgressBar } from "@/components/ProgressBar";
@@ -22,6 +23,11 @@ export default async function EditarLojistaPage({
   });
 
   if (!lojista) notFound();
+
+  const todosLojistas = await prisma.lojista.findMany({
+    select: { id: true, businessName: true },
+    orderBy: { businessName: "asc" },
+  });
 
   const meta = lojista.sacosGratisMeta || 100;
   const atual = lojista.sacosComprados;
@@ -83,19 +89,7 @@ export default async function EditarLojistaPage({
       <section className="bg-white rounded-xl border p-6">
         <h2 className="font-bold text-lg mb-4">Freezers alocados</h2>
         <FreezerForm lojistaId={lojista.id} />
-        <div className="mt-4 space-y-2">
-          {lojista.freezers.map((f) => (
-            <div key={f.id} className="flex justify-between items-center p-3 bg-[var(--zice-ice)] rounded-lg text-sm">
-              <span>
-                <strong>{f.code}</strong> — {f.location}
-                {f.brand && ` (${f.brand})`}
-              </span>
-              <span className={f.active ? "text-green-600" : "text-gray-400"}>
-                {f.active ? "Ativo" : "Inativo"}
-              </span>
-            </div>
-          ))}
-        </div>
+        <FreezerList freezers={lojista.freezers} lojistas={todosLojistas} />
       </section>
     </div>
   );
