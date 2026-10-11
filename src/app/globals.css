@@ -133,4 +133,26 @@ body {
     margin: 0 !important;
     max-width: 100% !important;
   }
+  .contract-page {
+    box-shadow: none !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    min-height: 100vh;
+  }
+  .contract-field {
+    border-bottom: 1px solid #666 !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  input.contract-field {
+    border: none !important;
+    border-bottom: 1px solid #666 !important;
+    border-radius: 0 !important;
+    padding: 2px 4px !important;
+  }
+  @page {
+    size: A4;
+    margin: 0;
+  }
 }

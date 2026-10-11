@@ -1,11 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { LojistaForm } from "@/components/admin/LojistaForm";
 import { FreezerForm } from "@/components/admin/FreezerForm";
 import { FreezerList } from "@/components/admin/FreezerList";
 import { WeeklyPurchaseForm } from "@/components/admin/WeeklyPurchaseForm";
 import { LojistaRewardActions } from "@/components/admin/LojistaRewardActions";
 import { ProgressBar } from "@/components/ProgressBar";
+import { FileText } from "lucide-react";
 
 export default async function EditarLojistaPage({
   params,
@@ -34,11 +36,18 @@ export default async function EditarLojistaPage({
 
   return (
     <div className="space-y-10 pb-20">
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-black text-[var(--zice-dark)]">{lojista.businessName}</h1>
           <p className="text-gray-500">Gestão de fidelidade e infraestrutura do lojista</p>
         </div>
+        <Link
+          href={`/admin/lojistas/${lojista.id}/contrato`}
+          className="btn-primary whitespace-nowrap"
+        >
+          <FileText size={18} />
+          Contrato de Comodato
+        </Link>
       </div>
 
       {/* SEÇÃO DE FIDELIDADE - DESTAQUE */}
