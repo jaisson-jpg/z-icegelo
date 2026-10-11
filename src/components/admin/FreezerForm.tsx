@@ -13,26 +13,39 @@ export function FreezerForm({ lojistaId }: { lojistaId: string }) {
     notes: "",
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const res = await fetch(`/api/admin/lojistas/${lojistaId}/freezers`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    setLoading(false);
-    if (res.ok) {
-      setForm({ code: "", brand: "", location: "", address: "", notes: "" });
-      router.refresh();
-    } else {
-      alert("Erro ao alocar freezer");
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/lojistas/${lojistaId}/freezers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setForm({ code: "", brand: "", location: "", address: "", notes: "" });
+        router.refresh();
+      } else {
+        setError(data.error || "Erro ao alocar freezer");
+      }
+    } catch {
+      setError("Erro de conexão ao alocar freezer");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="grid sm:grid-cols-2 gap-3">
+      {error && (
+        <div className="sm:col-span-2 bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm">
+          {error}
+        </div>
+      )}
       <input
         className="input-field"
         placeholder="Código do freezer *"
