@@ -122,8 +122,18 @@ body {
 }
 
 @media print {
-  body {
+  html, body {
     background: white;
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    text-rendering: geometricPrecision;
+    image-rendering: -webkit-optimize-contrast;
+  }
+  body * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
   .print\\:hidden {
     display: none !important;
@@ -137,19 +147,47 @@ body {
     box-shadow: none !important;
     margin: 0 !important;
     max-width: 100% !important;
+    width: 100% !important;
     min-height: 100vh;
+    background: white !important;
   }
   .contract-field {
-    border-bottom: 1px solid #666 !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid #444 !important;
+    border-radius: 0 !important;
     color: #000 !important;
+    font-size: 13px !important;
+    padding: 2px 4px !important;
+    box-shadow: none !important;
+    outline: none !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
   input.contract-field {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    background: transparent !important;
     border: none !important;
-    border-bottom: 1px solid #666 !important;
+    border-bottom: 1px solid #444 !important;
     border-radius: 0 !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    outline: none !important;
     padding: 2px 4px !important;
+  }
+  input.contract-field::-webkit-calendar-picker-indicator {
+    display: none !important;
+  }
+  input[type="checkbox"].contract-field {
+    -webkit-appearance: checkbox !important;
+    appearance: checkbox !important;
+  }
+  input[type="checkbox"] {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
   @page {
     size: A4;
