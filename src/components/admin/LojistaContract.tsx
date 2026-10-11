@@ -75,7 +75,7 @@ export function LojistaContract({ lojista }: { lojista: LojistaContractData }) {
     "contract-field w-full border-b border-gray-400 bg-transparent px-1 py-0.5 text-sm focus:outline-none focus:border-[var(--zice-medium)] print:border-gray-500";
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 print:bg-white">
       {/* Barra de ações (oculta na impressão) */}
       <div className="print:hidden sticky top-0 z-50 bg-[var(--zice-dark)] text-white p-3 flex flex-wrap gap-2 justify-center items-center shadow-lg">
         <Link

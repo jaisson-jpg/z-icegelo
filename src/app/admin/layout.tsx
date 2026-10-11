@@ -29,7 +29,7 @@ export default async function AdminLayout({
   const pathname = headersList.get("x-pathname") || "";
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex print:block print:bg-white">
       <aside className="w-64 ice-gradient text-white shrink-0 hidden md:block print:hidden">
         <div className="p-6 border-b border-white/20">
           <h2 className="font-bold text-lg">Admin Z-ice</h2>
@@ -43,8 +43,8 @@ export default async function AdminLayout({
           <LogoutButton />
         </div>
       </aside>
-        <div className="flex-1 overflow-auto">
-        <div className="md:hidden ice-gradient text-white p-4 flex flex-col gap-4">
+        <div className="flex-1 overflow-auto print:overflow-visible">
+        <div className="md:hidden ice-gradient text-white p-4 flex flex-col gap-4 print:hidden">
           <div className="flex justify-between items-center w-full">
             <span className="font-bold">Admin Z-ice</span>
             <LogoutButton />
@@ -57,7 +57,7 @@ export default async function AdminLayout({
             ))}
           </div>
         </div>
-        <div className="p-6 max-w-6xl">{children}</div>
+        <div className="p-6 max-w-6xl print:p-0 print:max-w-none">{children}</div>
       </div>
     </div>
   );
