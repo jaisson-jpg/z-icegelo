@@ -27,6 +27,11 @@ export default async function AdminLayout({
 
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") || "";
+  const isContractPage = pathname.includes("/contrato");
+
+  if (isContractPage) {
+    return <div className="min-h-screen bg-gray-100 print:bg-white">{children}</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex print:block print:bg-white">

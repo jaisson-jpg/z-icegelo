@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Printer, Download, MessageCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { contractToPdfBlob, downloadBlob, slugifyFilePart } from "@/lib/contract-pdf";
 
 type FreezerData = {
   id: string;
@@ -55,20 +56,80 @@ export function LojistaContract({ lojista }: { lojista: LojistaContractData }) {
     dataAssinatura: today,
   });
 
+  const [busy, setBusy] = useState<"pdf" | "whatsapp" | null>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
+
   const update = (key: keyof typeof form, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
+  const pdfFilename = () => {
+    const who = slugifyFilePart(form.nomeFantasia || lojista.businessName) || "lojista";
+    return `contrato-comodato-${who}.pdf`;
+  };
+
+  const buildPdf = async () => {
+    const el = pageRef.current;
+    if (!el) throw new Error("Contrato não encontrado na tela");
+    return contractToPdfBlob(el);
+  };
+
   const handlePrint = () => window.print();
 
-  const handleWhatsApp = () => {
-    const cleanPhone = form.telefone.replace(/\D/g, "");
-    const text = encodeURIComponent(
-      `Olá ${form.responsavel}! Segue o Contrato de Comodato de Freezer da Z-ICE GELO para sua análise e assinatura. 🧊\n\n` +
-      `Estabelecimento: ${form.nomeFantasia}\n` +
-      `Freezer: ${form.freezerMarca} - Série: ${form.freezerSerie}\n\n` +
-      `Por favor, revise os dados e me confirme. Obrigado!`
-    );
-    window.open(`https://wa.me/55${cleanPhone}?text=${text}`, "_blank");
+  const handleDownloadPdf = async () => {
+    setBusy("pdf");
+    try {
+      const blob = await buildPdf();
+      downloadBlob(blob, pdfFilename());
+    } catch (err) {
+      console.error(err);
+      alert("Não foi possível gerar o PDF. Tente novamente.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const handleWhatsApp = async () => {
+    const digits = form.telefone.replace(/\D/g, "");
+    if (digits.length < 10) {
+      alert("Informe o WhatsApp do comércio no contrato.");
+      return;
+    }
+
+    setBusy("whatsapp");
+    try {
+      const blob = await buildPdf();
+      const file = new File([blob], pdfFilename(), { type: "application/pdf" });
+      const message =
+        `Olá ${form.responsavel}! Segue o Contrato de Comodato de Freezer da Z-ICE GELO para análise e assinatura.\n\n` +
+        `Estabelecimento: ${form.nomeFantasia}\n` +
+        `Freezer: ${form.freezerMarca || "—"} — Série: ${form.freezerSerie || "—"}\n\n` +
+        `Por favor, assine e me devolva o mesmo PDF. Obrigado!`;
+
+      const canShareFile =
+        typeof navigator.canShare === "function" && navigator.canShare({ files: [file] });
+
+      if (canShareFile) {
+        await navigator.share({
+          files: [file],
+          title: "Contrato de Comodato Z-ICE GELO",
+          text: message,
+        });
+        return;
+      }
+
+      downloadBlob(blob, pdfFilename());
+      const phone = digits.startsWith("55") ? digits : `55${digits}`;
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");
+      alert(
+        "O PDF do contrato foi baixado (somente o documento, sem o site). No WhatsApp, anexe esse arquivo PDF. Não envie print da tela."
+      );
+    } catch (err) {
+      if ((err as Error)?.name === "AbortError") return;
+      console.error(err);
+      alert("Não foi possível gerar o PDF para envio.");
+    } finally {
+      setBusy(null);
+    }
   };
 
   const fieldClass =
@@ -85,28 +146,38 @@ export function LojistaContract({ lojista }: { lojista: LojistaContractData }) {
           <ArrowLeft size={16} /> Voltar
         </Link>
         <button
+          type="button"
           onClick={handlePrint}
-          className="inline-flex items-center gap-1 text-sm px-4 py-2 rounded-lg bg-white text-[var(--zice-dark)] font-bold hover:bg-gray-100"
+          className="inline-flex items-center gap-1 text-sm px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 font-bold"
         >
-          <Printer size={16} /> Salvar PDF / Imprimir
+          <Printer size={16} /> Imprimir
         </button>
         <button
+          type="button"
           onClick={handleWhatsApp}
-          disabled={!form.telefone}
+          disabled={busy !== null || !form.telefone}
           className="inline-flex items-center gap-1 text-sm px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 font-bold disabled:opacity-50"
         >
-          <MessageCircle size={16} /> Enviar WhatsApp
+          <MessageCircle size={16} /> {busy === "whatsapp" ? "Gerando PDF..." : "Enviar contrato"}
         </button>
         <button
-          onClick={handlePrint}
-          className="inline-flex items-center gap-1 text-sm px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30"
+          type="button"
+          onClick={handleDownloadPdf}
+          disabled={busy !== null}
+          className="inline-flex items-center gap-1 text-sm px-4 py-2 rounded-lg bg-white text-[var(--zice-dark)] font-bold hover:bg-gray-100 disabled:opacity-50"
         >
-          <Download size={16} /> Baixar PDF
+          <Download size={16} /> {busy === "pdf" ? "Gerando PDF..." : "Baixar PDF"}
         </button>
+        <p className="w-full text-center text-[11px] text-white/80">
+          Edite os campos no contrato, depois baixe o PDF ou envie. O arquivo contém só o documento — sem menu, topo ou rodapé do site.
+        </p>
       </div>
 
       {/* Contrato */}
-      <div className="contract-page max-w-[800px] mx-auto bg-white my-6 shadow-xl print:shadow-none print:my-0 print:max-w-full">
+      <div
+        ref={pageRef}
+        className="contract-page max-w-[800px] mx-auto bg-white my-6 shadow-xl print:shadow-none print:my-0 print:max-w-full"
+      >
         {/* Cabeçalho */}
         <div className="bg-[var(--zice-dark)] text-white p-5 flex items-center justify-between print:bg-[var(--zice-dark)]">
           <div>
@@ -414,19 +485,22 @@ export function LojistaContract({ lojista }: { lojista: LojistaContractData }) {
             </div>
           </section>
 
-          {/* Linhas de assinatura */}
-          <div className="grid grid-cols-2 gap-8 pt-8">
+          {/* Linhas de assinatura — espaço em branco para assinar e devolver */}
+          <p className="text-center text-xs text-gray-500 pt-4">
+            E por estarem de acordo, as partes assinam o presente instrumento.
+          </p>
+          <div className="grid grid-cols-2 gap-8 pt-4">
             <div className="text-center">
-              <div className="border-t border-gray-700 pt-2">
-                <p className="font-bold text-xs">Z-ICE GELO — Comodante</p>
-                <p className="text-[10px] text-gray-500">CNPJ 067.962.086/0001-04</p>
-              </div>
+              <div className="h-20 border-b border-gray-700" />
+              <p className="font-bold text-xs mt-2">Z-ICE GELO — Comodante</p>
+              <p className="text-[10px] text-gray-500">CNPJ 067.962.086/0001-04</p>
+              <p className="text-[10px] text-gray-400 mt-1">Assinatura / rubrica</p>
             </div>
             <div className="text-center">
-              <div className="border-t border-gray-700 pt-2">
-                <p className="font-bold text-xs">{form.responsavel || "Comodatário"}</p>
-                <p className="text-[10px] text-gray-500">CPF: {form.cpfResponsavel || "__________"}</p>
-              </div>
+              <div className="h-20 border-b border-gray-700" />
+              <p className="font-bold text-xs mt-2">{form.responsavel || "Comodatário"}</p>
+              <p className="text-[10px] text-gray-500">CPF: {form.cpfResponsavel || "__________"}</p>
+              <p className="text-[10px] text-gray-400 mt-1">Assinatura / rubrica</p>
             </div>
           </div>
         </div>
