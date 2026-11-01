@@ -57,7 +57,6 @@ export function LojistaContract({ lojista }: { lojista: LojistaContractData }) {
   });
 
   const [busy, setBusy] = useState<"pdf" | "whatsapp" | null>(null);
-  const pageRef = useRef<HTMLDivElement>(null);
 
   const update = (key: keyof typeof form, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -67,11 +66,7 @@ export function LojistaContract({ lojista }: { lojista: LojistaContractData }) {
     return `contrato-comodato-${who}.pdf`;
   };
 
-  const buildPdf = async () => {
-    const el = pageRef.current;
-    if (!el) throw new Error("Contrato não encontrado na tela");
-    return contractToPdfBlob(el);
-  };
+  const buildPdf = async () => contractPdfBlob(form);
 
   const handleDownloadPdf = async () => {
     setBusy("pdf");
