@@ -73,8 +73,6 @@ export function LojistaContract({ lojista }: { lojista: LojistaContractData }) {
     return contractToPdfBlob(el);
   };
 
-  const handlePrint = () => window.print();
-
   const handleDownloadPdf = async () => {
     setBusy("pdf");
     try {
@@ -90,10 +88,6 @@ export function LojistaContract({ lojista }: { lojista: LojistaContractData }) {
 
   const handleWhatsApp = async () => {
     const digits = form.telefone.replace(/\D/g, "");
-    if (digits.length < 10) {
-      alert("Informe o WhatsApp do comércio no contrato.");
-      return;
-    }
 
     setBusy("whatsapp");
     try {
@@ -118,10 +112,11 @@ export function LojistaContract({ lojista }: { lojista: LojistaContractData }) {
       }
 
       downloadBlob(blob, pdfFilename());
-      const phone = digits.startsWith("55") ? digits : `55${digits}`;
-      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");
+      const waTarget =
+        digits.length >= 10 ? (digits.startsWith("55") ? digits : `55${digits}`) : "";
+      window.open(`https://wa.me/${waTarget}?text=${encodeURIComponent(message)}`, "_blank");
       alert(
-        "O PDF do contrato foi baixado (somente o documento, sem o site). No WhatsApp, anexe esse arquivo PDF. Não envie print da tela."
+        "O PDF do contrato foi baixado (somente o contrato, sem nenhum dado do site). No WhatsApp que abrir, anexe esse arquivo PDF. Não envie print/foto da tela."
       );
     } catch (err) {
       if ((err as Error)?.name === "AbortError") return;
@@ -138,7 +133,7 @@ export function LojistaContract({ lojista }: { lojista: LojistaContractData }) {
   return (
     <div className="min-h-screen bg-gray-100 print:bg-white">
       {/* Barra de ações (oculta na impressão) */}
-      <div className="print:hidden sticky top-0 z-50 bg-[var(--zice-dark)] text-white p-3 flex flex-wrap gap-2 justify-center items-center shadow-lg">
+      <div className="capture-ignore print:hidden sticky top-0 z-50 bg-[var(--zice-dark)] text-white p-3 flex flex-wrap gap-2 justify-center items-center shadow-lg">
         <Link
           href={`/admin/lojistas/${lojista.id}`}
           className="inline-flex items-center gap-1 text-sm px-3 py-2 rounded-lg bg-white/20 hover:bg-white/30"
@@ -147,15 +142,8 @@ export function LojistaContract({ lojista }: { lojista: LojistaContractData }) {
         </Link>
         <button
           type="button"
-          onClick={handlePrint}
-          className="inline-flex items-center gap-1 text-sm px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 font-bold"
-        >
-          <Printer size={16} /> Imprimir
-        </button>
-        <button
-          type="button"
           onClick={handleWhatsApp}
-          disabled={busy !== null || !form.telefone}
+          disabled={busy !== null}
           className="inline-flex items-center gap-1 text-sm px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 font-bold disabled:opacity-50"
         >
           <MessageCircle size={16} /> {busy === "whatsapp" ? "Gerando PDF..." : "Enviar contrato"}
@@ -169,7 +157,7 @@ export function LojistaContract({ lojista }: { lojista: LojistaContractData }) {
           <Download size={16} /> {busy === "pdf" ? "Gerando PDF..." : "Baixar PDF"}
         </button>
         <p className="w-full text-center text-[11px] text-white/80">
-          Edite os campos no contrato, depois baixe o PDF ou envie. O arquivo contém só o documento — sem menu, topo ou rodapé do site.
+          Edite os campos do contrato e depois clique em Baixar PDF ou Enviar. O arquivo gerado contém somente o contrato — sem menu, topo ou rodapé do site.
         </p>
       </div>
 
