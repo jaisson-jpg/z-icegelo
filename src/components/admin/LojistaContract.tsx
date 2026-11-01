@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Printer, Download, MessageCircle, ArrowLeft } from "lucide-react";
+import { useState } from "react";
+import { Download, MessageCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { contractToPdfBlob, downloadBlob, slugifyFilePart } from "@/lib/contract-pdf";
+import { contractPdfBlob, downloadBlob, slugifyFilePart } from "@/lib/contract-pdf";
 
 type FreezerData = {
   id: string;
@@ -162,10 +162,7 @@ export function LojistaContract({ lojista }: { lojista: LojistaContractData }) {
       </div>
 
       {/* Contrato */}
-      <div
-        ref={pageRef}
-        className="contract-page max-w-[800px] mx-auto bg-white my-6 shadow-xl print:shadow-none print:my-0 print:max-w-full"
-      >
+      <div className="contract-page max-w-[800px] mx-auto bg-white my-6 shadow-xl print:shadow-none print:my-0 print:max-w-full">
         {/* Cabeçalho */}
         <div className="bg-[var(--zice-dark)] text-white p-5 flex items-center justify-between print:bg-[var(--zice-dark)]">
           <div>
